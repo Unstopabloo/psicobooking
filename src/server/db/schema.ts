@@ -60,7 +60,7 @@ export const availability = createTable(
     hourTo: text("hour_to").notNull(),
   },
   (table) => ({
-    psychologistIndex: index("psychologist_idx").on(
+    psychologistIndex: index("availability_psychologist_idx").on(
       table.psychologistId,
       table.dayOfWeek
     ),
@@ -86,11 +86,11 @@ export const appointments = createTable(
     dateTo: int("date_to", { mode: "timestamp" }),
   },
   (table) => ({
-    psychologistIndex: index("psychologist_idx").on(
+    psychologistIndex: index("appointment_psychologist_idx").on(
       table.psychologistId,
       table.dateFrom
     ),
-    patientIndex: index("patient_idx").on(table.patientId, table.dateFrom),
+    patientIndex: index("appointment_patient_idx").on(table.patientId, table.dateFrom),
   })
 );
 
@@ -109,7 +109,7 @@ export const treatmentSheet = createTable(
     diagnosticGuidance: int("diagnostic_guidance").notNull(),
   },
   (table) => ({
-    patientIndex: index("patient_idx").on(table.patientId),
+    patientIndex: index("tratment_sheet_patient_idx").on(table.patientId),
   })
 );
 
@@ -127,7 +127,7 @@ export const clinicHistory = createTable(
       .default(sql`(unixepoch())`),
   },
   (table) => ({
-    patientIndex: index("patient_idx").on(table.patientId, table.createdAt),
+    patientIndex: index("clinic_history_patient_idx").on(table.patientId, table.createdAt),
   })
 );
 
@@ -152,11 +152,11 @@ export const payments = createTable(
     paymentDate: int("payment_date", { mode: "timestamp" }),
   },
   (table) => ({
-    psychologistIndex: index("psychologist_idx").on(
+    psychologistIndex: index("payment_psychologist_idx").on(
       table.psychologistId,
       table.creationDate
     ),
-    patientIndex: index("patient_idx").on(table.patientId, table.creationDate),
+    patientIndex: index("payments_patient_idx").on(table.patientId, table.creationDate),
   })
 );
 
@@ -204,7 +204,7 @@ export const audios = createTable(
     transcription: text("transcription"),
   },
   (table) => ({
-    patientIndex: index("patient_idx").on(table.patientId),
+    patientIndex: index("audios_patient_idx").on(table.patientId),
   })
 );
 
@@ -221,7 +221,7 @@ export const notes = createTable(
     ),
   },
   (table) => ({
-    patientIndex: index("patient_idx").on(table.patientId, table.createdAt),
+    patientIndex: index("notes_patient_idx").on(table.patientId, table.createdAt),
   })
 );
 
@@ -245,11 +245,11 @@ export const activities = createTable(
     dateTo: int("date_to", { mode: "timestamp" }),
   },
   (table) => ({
-    psychologistIndex: index("psychologist_idx").on(
+    psychologistIndex: index("activity_psychologist_idx").on(
       table.psychologistId,
       table.dateFrom
     ),
-    patientIndex: index("patient_idx").on(table.patientId, table.dateFrom),
+    patientIndex: index("activity_patient_idx").on(table.patientId, table.dateFrom),
   })
 );
 
@@ -288,7 +288,7 @@ export const posts = createTable(
       .default(sql`(unixepoch())`),
   },
   (table) => ({
-    psychologistIndex: index("psychologist_idx").on(
+    psychologistIndex: index("post_psychologist_idx").on(
       table.psychologistId,
       table.publishedAt
     ),
