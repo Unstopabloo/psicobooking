@@ -2,6 +2,10 @@ import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+import { Toaster } from "@/components/ui/sonner"
+
+import { ClerkProvider, SignInButton } from '@clerk/nextjs'
+import { CSPostHogProvider } from "./_analytics/provider";
 
 export const metadata: Metadata = {
   title: "Psicobooking",
@@ -12,9 +16,18 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+
   return (
-    <html lang="es" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <CSPostHogProvider>
+        <html lang="es" className={`${GeistSans.variable}`}>
+          <body>
+            <SignInButton />
+            {children}
+            <Toaster />
+          </body>
+        </html>
+      </CSPostHogProvider>
+    </ClerkProvider>
   );
 }
