@@ -93,4 +93,26 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .animate-ball {
+    animation: ball 15s infinite;
+  }
+
+  .animate-ball2 {
+    animation: ball 14s infinite;
+  }
+
+  @keyframes ball {
+    0% {
+      transform: translate(0, -25px);
+    }
+
+    50% {
+      transform: translate(0, 25px);
+    }
+
+    100% {
+      transform: translate(0, -25px);
+    }
+  }
 }
