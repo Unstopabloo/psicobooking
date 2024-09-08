@@ -22,7 +22,6 @@ export default function RootLayout({
       <CSPostHogProvider>
         <html lang="es" className={`${GeistSans.variable}`}>
           <body>
-            <SignInButton />
             {children}
             <Toaster />
           </body>
