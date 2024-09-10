@@ -31,13 +31,15 @@ export default function HomePage() {
             <h1 className="text-5xl xl:text-6xl leading-tight pb-5">Tu camino hacia la <span className="text-primary font-semibold">paz</span> mental comienza aquí</h1>
             <p className="text-foreground/80 text-pretty max-w-[30rem]">El booking, control y seguimiento de tu salud mental en un solo lugar. Encuentra tu terapeuta ideal, agenda citas y realiza sesiones online con total comodidad y privacidad.</p>
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 py-14">
-              <SignedOut>
-                <SignInButton>
-                  <Button className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
-                    Agendar
-                  </Button>
-                </SignInButton>
-              </SignedOut>
+              <div className="min-w-52 h-10">
+                <SignedOut>
+                  <SignInButton>
+                    <Button className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
+                      Agendar
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </div>
               <SignedIn>
                 <Button asChild className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
                   <Link href="/dashboard">Entrar</Link>

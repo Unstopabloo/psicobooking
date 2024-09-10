@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { AnimatePresence, motion, useAnimation } from "framer-motion"
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 
 const FeatureCard = ({ text, isCentered, icon }: { text: string; isCentered: boolean; icon: React.ReactNode }) => (
   <motion.div
@@ -149,8 +150,8 @@ const VerticalCarousel = ({ direction = "up" }: { direction?: "up" | "down" }) =
 export default function SignInPage() {
   return (
     <SignIn.Root>
-      <main className='container mx-auto grid grid-cols-2 p-4 h-screen animate-fade-up'>
-        <section className='grid-cols-1'>
+      <main className='container mx-auto grid grid-cols-1 lg:grid-cols-2 p-4 h-screen animate-fade-up'>
+        <section className='grid-cols-1 flex justify-center'>
           <SignIn.Step name="start">
             <header>
               <Image src="/logo-full.png" alt="logo psicobooking" width={200} height={300} />
@@ -159,8 +160,8 @@ export default function SignInPage() {
                 <small className='text-base text-foreground/85'>Haz el seguimiento de tus pacientes</small>
               </div>
             </header>
-            <div className='flex flex-col gap-14 items-start w-[600px]'>
-              <div className='flex items-center justify-between w-full gap-10'>
+            <div className='flex flex-col gap-14 items-center md:items-start w-full sm:w-[450px] md:w-[400px] xl:w-[600px]'>
+              <div className='flex items-center justify-between w-full gap-3 lg:gap-8'>
                 <Clerk.Connection name="google" asChild>
                   <Button variant="outline" size="icon" className='flex-1 py-5'><Google fontSize={22} /></Button>
                 </Clerk.Connection>
@@ -199,7 +200,7 @@ export default function SignInPage() {
                   </Button>
                 </SignIn.Action>
               </div>
-
+              <small>¿No tienes cuenta? <strong className='text-primary underline underline-offset-2'><Link href="/sign-up">Registrate</Link></strong></small>
             </div>
           </SignIn.Step>
 
@@ -264,7 +265,7 @@ export default function SignInPage() {
             </SignIn.Strategy>
           </SignIn.Step>
         </section>
-        <section className='relative flex gap-10 items-center justify-center w-full h-full min-h-full overflow-hidden rounded-[30px] bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500'>
+        <section className='relative hidden lg:flex gap-10 items-center justify-center w-full h-full min-h-full overflow-hidden rounded-[30px] bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500'>
           <Image src="/signflow.webp" alt="signflow" fill style={{ objectFit: 'cover' }} />
           <VerticalCarousel />
         </section>
