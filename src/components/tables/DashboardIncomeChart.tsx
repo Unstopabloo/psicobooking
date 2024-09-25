@@ -44,7 +44,7 @@ const chartConfig = {
 export function DashboardIncomeTable() {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-col text-center p-4">
         <CardTitle>Ingresos - pacientes</CardTitle>
         <CardDescription>
           Se muestran los ingresos y pacientes en los últimos 3 meses.

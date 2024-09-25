@@ -5,7 +5,7 @@ import { DesktopNav } from "@/components/layout/Navs";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 
 import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
-import { ModeToggle } from "@/components/theme-switcher/Switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 
@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
 
           <div className="flex flex-col items-center gap-8 p-2">
-            <ModeToggle />
+            <ThemeSwitcher />
             <SignedIn>
               <UserButton />
             </SignedIn>

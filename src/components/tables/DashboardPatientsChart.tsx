@@ -62,7 +62,7 @@ export function DashboardPatientsChart() {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
+      <CardHeader className="flex flex-col text-center p-4 items-center pb-0">
         <CardTitle>Detalle de pacientes</CardTitle>
         <CardDescription className="text-center">Una muestra de pacientes de los últimos 3 meses.</CardDescription>
       </CardHeader>

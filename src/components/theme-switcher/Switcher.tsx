@@ -1,28 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+import { Monitor, Sun, Moon } from "lucide-react"
 
-import { SunIcon, MoonIcon } from "@/components/icons"
+type Theme = "system" | "light" | "dark"
 
-export function ModeToggle() {
-  const { setTheme } = useTheme()
-  const [isLight, setIsLight] = useState(true)
+export function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme()
 
-  const changeTheme = () => {
-    setIsLight(!isLight)
-    setTheme(isLight ? "light" : "dark")
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
   }
 
+  const themes: Theme[] = ["system", "light", "dark"]
+
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="p-2"
-      onClick={changeTheme}
-    >
-      {isLight ? <SunIcon /> : <MoonIcon />}
-    </Button>
+    <div className="flex flex-col bg-card rounded-full p-1 gap-2">
+      {themes.map((t) => (
+        <button
+          key={t}
+          className={`p-1 rounded-full transition-colors duration-200 ${theme === t ? "bg-primary/80" : "hover:bg-gray-700/50"
+            }`}
+          onClick={() => setTheme(t)}
+          aria-label={`Cambiar a tema ${t}`}
+        >
+          {t === "system" && (
+            <Monitor className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
+          )}
+          {t === "light" && (
+            <Sun className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
+          )}
+          {t === "dark" && (
+            <Moon className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
+          )}
+        </button>
+      ))}
+    </div>
   )
 }

@@ -1,11 +1,10 @@
 "use client"
 
 import { useState } from 'react'
-import { getInitials } from '@/lib/get-initials'
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar } from "@/components/Avatar"
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +34,7 @@ export function MeetingCard({ name, status, avatarUrl, documentCount, timestamp 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Card className="w-full max-w-sm cursor-pointer bg-card">
+        <Card className="w-full max-w-sm cursor-pointer border hover:shadow-md hover:shadow-primary/50 transition-shadow duration-200">
           <CardContent className="p-4">
             <div className="flex flex-col items-center justify-between gap-6">
               <header className="w-full flex items-start justify-between gap-4">
@@ -43,10 +42,7 @@ export function MeetingCard({ name, status, avatarUrl, documentCount, timestamp 
                   <h3 className="font-medium text-base">{name}</h3>
                   <p className="text-sm text-muted-foreground">{status}</p>
                 </div>
-                <Avatar className="size-8">
-                  <AvatarImage src={avatarUrl} alt={name} />
-                  <AvatarFallback className='text-xs'>{getInitials(name)}</AvatarFallback>
-                </Avatar>
+                <Avatar name={name} avatarUrl={avatarUrl} />
               </header>
               <div className="w-full flex items-center justify-between gap-4">
                 <TooltipProvider>
