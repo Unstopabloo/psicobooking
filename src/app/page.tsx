@@ -14,11 +14,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MenuIcon } from "@/components/icons";
 
+import psicofriends from "../../public/psicofriends.webp";
+
 export default function HomePage() {
   return (
     <div className="flex flex-col relative min-h-screen overflow-x-hidden">
-      <header className="w-full fixed top-0 left-0 z-50">
-        <div aria-label="contenedor de header" className="container mx-auto flex items-center justify-between py-6 px-4 lg:px-20 xl:px-52">
+      <header className="w-full fixed top-0 left-0 z-50 bg-gradient-to-b from-card to-card/0 filter backdrop-blur-md">
+        <div aria-label="contenedor de header" className="container mx-auto flex items-center justify-between py-2 md:py-6 px-4 lg:px-20 xl:px-52">
           <div className="flex items-center">
             <Image src="/isotipo.webp" priority alt="logo" width={70} height={70} />
             <strong className="hidden lg:block font-medium text-lg">PsicoBooking</strong>
@@ -40,10 +42,8 @@ export default function HomePage() {
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="block lg:hidden ">
-              <Button variant="ghost" asChild>
-                <MenuIcon width={24} height={24} />
-              </Button>
+            <DropdownMenuTrigger className="block lg:hidden">
+              <MenuIcon />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>
@@ -71,7 +71,7 @@ export default function HomePage() {
       </header>
       <main>
         <section
-          className="relative min-h-screen w-screen pt-32 md:pt-48"
+          className="relative min-h-[90dvh] w-screen pt-32 md:pt-48"
         >
           <div className="absolute inset-0 -z-30 opacity-55">
             <svg width="100%" height="100%" viewBox="0 0 1440 643" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
@@ -173,7 +173,34 @@ export default function HomePage() {
 
           </div>
         </section>
+
+        <section className="container mx-auto px-4 lg:px-20 xl:px-52">
+          <div className="flex flex-col items-center gap-10 bg-card rounded-3xl pt-14">
+            <header className="flex flex-col items-center gap-3 text-center px-4 sm:px-10 lg:px-24">
+              <h2 className="font-normal text-balance text-2xl">Encuentra tu profesional ideal</h2>
+              <p className="text-foreground/85 text-pretty lg:px-28 xl:px-32">No postergues tu bienestar, programa una cita y permite que te ayudemos a encontrar el equilibrio emocional que necesitas</p>
+            </header>
+            <div className="w-full sm:px-10 lg:px-24">
+              <div className="relative overflow-hidden w-full h-[32rem] rounded-3xl">
+                <div className="absolute inset-0 z-10 bg-[url(../../public/noisebooking.webp)] opacity-15 bg-cover bg-center"></div>
+                <Image
+                  src={psicofriends}
+                  alt="Imagen de amigos sonriendo en el parque"
+                  quality={100}
+                  placeholder="blur"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer className="container mx-auto px-4 lg:px-20 xl:px-52 py-20">
+
+      </footer>
     </div>
   );
 }
