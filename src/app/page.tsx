@@ -1,20 +1,170 @@
+import type { Metadata } from 'next'
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
+import * as Icon from "@/components/landingIcons";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MenuIcon } from "@/components/icons";
 
 import psicofriends from "../../public/psicofriends.webp";
+import React from "react";
+
+export const metadata: Metadata = {
+  title: "Psicobooking",
+  description: "La plataforma de psicología médica para personas que buscan ayuda y psicologos que busscan organizar citas",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  referrer: "origin-when-cross-origin",
+  keywords: ['Psicologia', 'Atencion de pacientes', 'Psicología médica', 'Organización de citas', 'Citas', 'Psicología', 'Atención médica'],
+  authors: [
+    {
+      name: 'Lusiana Varela',
+      url: 'https://www.linkedin.com/in/lusiana-varela-b286a820b/'
+    },
+    {
+      name: 'Jaime Chavez',
+      url: 'https://www.linkedin.com/in/jaime-alfonso-chavez-elejalde-5b5551202/'
+    }
+  ],
+  openGraph: {
+    title: "Psicobooking",
+    description: "La plataforma de psicología médica para personas que buscan ayuda y psicologos que busscan organizar citas",
+    images: [
+      {
+        url: "https://psicobooking.vercel.app/og-image.png",
+        width: 1050,
+        height: 630,
+        alt: "Hero de Landing de Psicobooking"
+      },
+    ],
+    url: "https://psicobooking.vercel.app/",
+    locale: "es",
+    siteName: "Psicobooking",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Psicobooking",
+    description: "La plataforma de psicología médica para personas que buscan ayuda y psicologos que busscan organizar citas",
+    creator: "@PsicoBooking",
+    images: [
+      {
+        url: "https://psicobooking.vercel.app/og-image.png",
+        width: 1050,
+        height: 630,
+        alt: "Hero de Landing de Psicobooking"
+      },
+    ],
+  }
+};
+
+type Spaciality = {
+  id: number,
+  name: string,
+  icon: React.ReactNode
+}
+
+const SPECIALITIES: Spaciality[] = [
+  {
+    id: 1,
+    name: "Adicciones",
+    icon: <Icon.AdiccionesIcon />
+  },
+  {
+    id: 2,
+    name: "Ansiedad y/o estrés",
+    icon: <Icon.AnsiedadIcon />
+  },
+  {
+    id: 3,
+    name: "Atención",
+    icon: <Icon.AtencionIcon />
+  },
+  {
+    id: 4,
+    name: "Autoestima",
+    icon: <Icon.AutoestimaIcon />
+  },
+  {
+    id: 5,
+    name: "Crianza",
+    icon: <Icon.CrianzaIcon />
+  },
+  {
+    id: 6,
+    name: "Depresión",
+    icon: <Icon.DepresionIcon />
+  },
+  {
+    id: 7,
+    name: "Cronicas",
+    icon: <Icon.CronicasIcon />
+  },
+  {
+    id: 8,
+    name: "Impuslividad y/o Ira",
+    icon: <Icon.AngryIcon />
+  },
+  {
+    id: 9,
+    name: "Orientación vocacional",
+    icon: <Icon.VocacionalIcon />
+  },
+  {
+    id: 10,
+    name: "Problemas alimenticios",
+    icon: <Icon.AlimenticiosIcon />
+  },
+  {
+    id: 11,
+    name: "Problemas de sueño",
+    icon: <Icon.SueñoIcon />
+  },
+  {
+    id: 12,
+    name: "Relaciones",
+    icon: <Icon.RelacionesIcon />
+  },
+  {
+    id: 13,
+    name: "Riesgo suicida",
+    icon: <Icon.SuicidaIcon />
+  },
+  {
+    id: 14,
+    name: "Sexualidad",
+    icon: <Icon.SexualidadIcon />
+  },
+  {
+    id: 15,
+    name: "Terapia de parejas",
+    icon: <Icon.ParejasIcon />
+  },
+  {
+    id: 16,
+    name: "TOC",
+    icon: <Icon.TOCIcon />
+  },
+  {
+    id: 17,
+    name: "Traumas",
+    icon: <Icon.TraumasIcon />
+  },
+  {
+    id: 18,
+    name: "Trabajo con niños",
+    icon: <Icon.NiñosIcon />
+  }
+]
 
 export default function HomePage() {
   return (
@@ -194,6 +344,26 @@ export default function HomePage() {
                 />
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 lg:px-20 xl:px-52 my-36">
+          <header className="flex flex-col items-center gap-4 text-center">
+            <h2 className="font-normal text-balance text-2xl">Nuestras especialidades</h2>
+            <p className="text-foreground/85 text-pretty lg:px-28 xl:px-32">¿Sientes que has estado cargando con demasiado? Hay ayuda disponible. Con el apoyo adecuado, puedes encontrar nuevas formas de enfrentar los desafíos y redescubrir tu fuerza interior.</p>
+          </header>
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 py-20 gap-14 text-center">
+            {
+              SPECIALITIES.map(item => (
+                <div key={item.id} className="flex flex-col items-center justify-start gap-2 text-center">
+                  <figure className="flex items-center justify-center size-14 sm:size-20 p-2 shadow-sm border bg-card border-primary/70 rounded-full">
+                    {item.icon}
+                  </figure>
+                  <div className="h-px w-[70%] md:w-[50%] opacity-70 mb-2 bg-border"></div>
+                  <p className="text-balance text-sm text-foreground/85 text-center">{item.name}</p>
+                </div>
+              ))
+            }
           </div>
         </section>
       </main>
