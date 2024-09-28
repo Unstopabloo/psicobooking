@@ -17,7 +17,7 @@ import {
 import { MenuIcon } from "@/components/icons";
 
 import psicofriends from "../../public/psicofriends.webp";
-import React from "react";
+import React, { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Psicobooking",
@@ -309,7 +309,7 @@ export default function HomePage() {
               <SignedOut>
                 <SignInButton>
                   <Button className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
-                    Agendar
+                    Agenda tu cita
                   </Button>
                 </SignInButton>
               </SignedOut>

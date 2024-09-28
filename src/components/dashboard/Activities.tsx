@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 
 export function Activities() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6">
       <Link href="/dashboard">
         <Card className="p-3 border hover:shadow-md hover:shadow-primary/50 transition-shadow duration-200">
           <CardHeader className="p-2">
