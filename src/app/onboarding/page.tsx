@@ -17,11 +17,13 @@ export default function OnboardingComponent() {
   const router = useRouter()
 
   const handleSubmit = async (formData: FormData) => {
+    console.log('formData', formData)
     const res = await onBoarding(formData)
     if (res?.data?.message) {
       // Reloads the user's data from Clerk's API
       await user?.reload()
       router.push('/dashboard')
+      toast.success("Registro completado!")
     }
     if (res?.data?.error) {
       toast.error("Hubo un error al completar el proceso de registro. Por favor, inténtalo de nuevo más tarde.")
@@ -38,21 +40,21 @@ export default function OnboardingComponent() {
       <form action={handleSubmit} className='flex flex-col gap-10'>
         <div className='flex flex-col gap-4'>
           <strong className='font-medium'>¿Eres un profesional de la salud mental?</strong>
-          <RadioGroup name='role' className='flex flex-col md:flex-row items-center gap-4' defaultValue="psicologo">
+          <RadioGroup name='role' className='flex flex-col md:flex-row items-center gap-4' defaultValue="psychologist">
             <div className="flex items-center justify-between gap-3 max-w-md border rounded-lg py-4 ps-4 pe-4 md:pe-12">
               <div className='min-w-5'>
-                <RadioGroupItem value="psicologo" id="psicologo" />
+                <RadioGroupItem value="psychologist" id="psychologist" />
               </div>
-              <Label htmlFor="psicologo" className='text-pretty font-normal'>
+              <Label htmlFor="psychologist" className='text-pretty font-normal'>
                 <strong className='font-medium'>Si,</strong>
                 <span className='text-foreground/85'> quiero registrarme como un profesional de la salud mental</span>
               </Label>
             </div>
             <div className="flex items-center justify-center gap-3 max-w-lg border rounded-lg py-4 ps-4 pe-4 md:pe-10">
               <div className='min-w-5'>
-                <RadioGroupItem value="paciente" id="paciente" />
+                <RadioGroupItem value="patient" id="patient" />
               </div>
-              <Label htmlFor="paciente" className='text-pretty font-normal'>
+              <Label htmlFor="patient" className='text-pretty font-normal'>
                 <strong className='font-medium'>No,</strong>
                 <span className='text-foreground/85'> quiero registrarme como un usuario de la aplicación</span>
               </Label>
