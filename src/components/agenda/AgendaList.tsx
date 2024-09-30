@@ -15,7 +15,7 @@ export function AgendaList() {
         <Button onClick={() => checkUserExists('clerk_id')} variant="outline" className="flex items-center gap-4">Agendar nueva cita <PlusSignIcon width={16} height={16} /></Button>
       </div>
 
-      <div className="flex flex-col gap-2 w-full h-full overflow-y-auto">
+      <div className="flex flex-col gap-2 w-full h-full overflow-y-auto pb-20">
         <AgendaItem />
         <AgendaItem />
         <AgendaItem />

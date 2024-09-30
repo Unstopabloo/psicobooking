@@ -3,6 +3,8 @@ import { DashboardIcon } from "@/components/icons";
 import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@/components/ui/tooltip";
 import { AgendaList } from "@/components/agenda/AgendaList";
 import { Metadata } from "next";
+import { Container } from "../_layout-components/container";
+import H1 from "@/components/H1";
 
 export const metadata: Metadata = {
   title: "Agenda | Psicobooking",
@@ -23,9 +25,9 @@ export const metadata: Metadata = {
 
 export default async function AgendaPage() {
   return (
-    <div className="container mx-auto px-60">
+    <Container>
       <header className="flex items-center justify-between">
-        <h1 className="font-semibold">Mi agenda</h1>
+        <H1>Mi agenda</H1>
         <TooltipProvider>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
@@ -41,6 +43,6 @@ export default async function AgendaPage() {
       </header>
 
       <AgendaList />
-    </div>
+    </Container>
   )
 }
