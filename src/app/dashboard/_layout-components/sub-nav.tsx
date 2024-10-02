@@ -29,6 +29,24 @@ const ROUTES = [
         href: "/dashboard/agenda/consultorios"
       }
     ]
+  },
+  {
+    name: "Pacientes",
+    href: "/dashboard/pacientes",
+    paths: [
+      {
+        name: "Pacientes",
+        href: "/dashboard/pacientes"
+      },
+      // {
+      //   name: "Ficha Clinica",
+      //   href: "/dashboard/pacientes/ficha-clinica"
+      // },
+      // {
+      //   name: "Historia Clinica",
+      //   href: "/dashboard/pacientes/historia-clinica"
+      // }
+    ]
   }
 ]
 
@@ -39,8 +57,6 @@ export function SubNav() {
   const isActive = (path: string) => pathname === path
 
   useEffect(() => {
-    console.log('pathname', pathname)
-
     if (ROUTES.some(route => isActive(route.href))) {
       setRoute(ROUTES.filter(route => isActive(route.href)))
     }

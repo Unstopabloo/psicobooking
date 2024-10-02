@@ -3,8 +3,8 @@ import { Activities } from "@/components/dashboard/Activities";
 import { AgendaTable } from "@/components/dashboard/AgendaTable";
 import { Chats } from "@/components/dashboard/Chats";
 import { Meetings } from "@/components/dashboard/Meetings";
-import { DashboardIncomeTable } from "@/components/tables/DashboardIncomeChart";
-import { DashboardPatientsChart } from "@/components/tables/DashboardPatientsChart";
+import { DashboardIncomeTable } from "@/components/charts/DashboardIncomeChart";
+import { DashboardPatientsChart } from "@/components/charts/DashboardPatientsChart";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

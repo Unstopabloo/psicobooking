@@ -4,8 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner"
 
-import { ClerkProvider, SignInButton } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
 import { CSPostHogProvider } from "./_analytics/provider";
+import Providers from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "Psicobooking",
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <CSPostHogProvider>
-        <html lang="es" className={`${GeistSans.variable}`}>
-          <body>
-            {children}
-            <Toaster />
-          </body>
-        </html>
+        <Providers>
+          <html lang="es" className={`${GeistSans.variable}`}>
+            <body>
+              {children}
+              <Toaster />
+            </body>
+          </html>
+        </Providers>
       </CSPostHogProvider>
     </ClerkProvider>
   );
