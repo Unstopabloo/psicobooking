@@ -9,7 +9,6 @@ import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
-import ScreenSizeIndicator from "./_layout-components/breakpoints";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,7 +49,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </main>
         </div>
       </div>
-      <ScreenSizeIndicator />
     </ThemeProvider>
   )
 }

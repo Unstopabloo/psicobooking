@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { ClerkProvider } from '@clerk/nextjs'
 import { CSPostHogProvider } from "./_analytics/provider";
 import Providers from "@/components/providers";
+import ScreenSizeIndicator from "./dashboard/_layout-components/breakpoints";
 
 export const metadata: Metadata = {
   title: "Psicobooking",
@@ -26,6 +27,7 @@ export default function RootLayout({
             <body>
               {children}
               <Toaster />
+              <ScreenSizeIndicator />
             </body>
           </html>
         </Providers>
