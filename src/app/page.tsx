@@ -9,12 +9,15 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import * as Icon from "@/components/landingIcons";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MenuIcon, SentIcon, Tick01Icon } from "@/components/icons";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { SentIcon, Tick01Icon } from "@/components/icons";
 
 import psicofriends from "../../public/psicofriends.webp";
 import React from "react";
@@ -72,6 +75,17 @@ type Spaciality = {
   id: number,
   name: string,
   icon: React.ReactNode
+}
+
+type Advice = {
+  id: number,
+  title: string,
+  description: string
+}
+
+type Tip = {
+  id: number,
+  description: string
 }
 
 const SPECIALITIES: Spaciality[] = [
@@ -167,6 +181,78 @@ const SPECIALITIES: Spaciality[] = [
   }
 ]
 
+const ADVICES: Advice[] = [
+  {
+    id: 1,
+    title: "Pausa antes de decidir",
+    description: "En una crisis, puede parecer que terminar con tu vida es una solución a problemas interminables. Sin embargo, el estrés extremo puede nublar tu mente, afectando tu capacidad para ver soluciones."
+  },
+  {
+    id: 2,
+    title: "Habla con alguien",
+    description: "Ya sea un amigo, un familiar o un especialista, hablar puede ayudar. El apoyo clínico profesional también es una buena opción. Hay personas dispuestas a escucharte y apoyarte."
+  },
+  {
+    id: 3,
+    title: "Mantente seguro/a",
+    description: "Evita situaciones o entornos que puedan ser dañinos o llevarte a autolesionarte."
+  },
+  {
+    id: 4,
+    title: "Busca compañía",
+    description: "Si te sientes solo, considera ir a un lugar público como un café o un parque, o simplemente llama a alguien por teléfono."
+  },
+  {
+    id: 5,
+    title: "Evita las drogas",
+    description: "Estas pueden agravar la situación y aumentar la probabilidad de actuar de manera impulsiva."
+  }
+]
+
+const TIPS: Tip[] = [
+  {
+    id: 1,
+    description: "Siempre hay soluciones, el sentirme abrumado hoy no significa que mi problema no tenga solución."
+  },
+  {
+    id: 2,
+    description: "No estoy solo, tengo personas que me aman y profesionales a quienes acudir."
+  }
+  ,
+  {
+    id: 3,
+    description: "Necesito mantener la calma e intentar pensar con claridad."
+  },
+  {
+    id: 4,
+    description: "Puedo encontrar nuevas motivaciones y razones para seguir adelante."
+  },
+  {
+    id: 5,
+    description: "He superado desafíos antes y, con apoyo y determinación, puedo superar esto."
+  },
+  {
+    id: 6,
+    description: "Tomar una decisión así podría causar culpa en quienes me importan."
+  },
+  {
+    id: 7,
+    description: "Tengo la capacidad de encontrar soluciones a mis problemas."
+  },
+  {
+    id: 8,
+    description: "Creo que las cosas mejorarán con el tiempo y el futuro será más prometedor."
+  },
+  {
+    id: 9,
+    description: "Una elección así podría herir a quienes me importan."
+  },
+  {
+    id: 10,
+    description: "Reconozco que hay muchas personas que me quieren y desean lo mejor para mí."
+  }
+]
+
 export default function HomePage() {
   return (
     <div className="flex flex-col relative min-h-screen overflow-x-hidden">
@@ -176,13 +262,58 @@ export default function HomePage() {
             <Image src="/isotipo.webp" priority alt="logo" width={70} height={70} />
             <strong className="hidden lg:block font-medium text-lg">PsicoBooking</strong>
           </div>
-          <div className="hidden lg:flex items-center gap-6">
-            <Button variant="link" asChild className="text-foreground text-sm">
-              <Link href="/sign-in">¿Necesitas ayuda?</Link>
-            </Button>
+          <div className="flex items-center gap-4 md:gap-10">
+            <Dialog>
+              <DialogTrigger className="group relative text-foreground text-sm hover:text-primary duration-200 font-medium">
+                <div className='group-hover:w-full group-hover:opacity-100 duration-300 opacity-50 h-px w-0 bg-primary absolute -bottom-1 left-0'></div>
+                ¿Necesitas ayuda?
+              </DialogTrigger>
+              <DialogContent className='max-w-3xl bg-card'>
+                <DialogHeader>
+                  <div className="flex items-center pb-6">
+                    <Image src="/isotipo.webp" priority alt="logo" width={40} height={40} />
+                    <strong className="hidden lg:block font-medium text-base">PsicoBooking</strong>
+                  </div>
+                  <DialogTitle className='text-balance text-lg text-primary font-semibold'>
+                    Siempre hay apoyo, busca ayuda cuando la necesites
+                  </DialogTitle>
+                  <DialogDescription className='text-foreground/85 font-light'>
+                    En momentos de crisis, buscar apoyo es fundamental. Conéctate con un psicólogo de confianza o habla con tus seres queridos. Si no puedes, siempre hay líneas de ayuda disponibles para ti.
+                  </DialogDescription>
+                </DialogHeader>
+                <article className='py-8'>
+                  <h3 className='text-primary font-medium pb-4'>Puedes manejar una crisis, con estos consejos:</h3>
+                  <ul className='flex flex-col gap-4'>
+                    {
+                      ADVICES.map(item => (
+                        <li key={item.id} className='flex flex-col items-start gap-2 bg-background rounded-xl p-4'>
+                          <strong className='w-full font-medium border-b border-border pb-2 mb-1'>{item.title}</strong>
+                          <p className='font-light text-foreground/85'>{item.description}</p>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </article>
+                <article className='py-8'>
+                  <h3 className='text-primary font-medium pb-4'>Crea un lugar seguro en tí, prueba con afirmaciones positivas:</h3>
+                  <ul className='flex flex-col gap-4'>
+                    {
+                      TIPS.map(item => (
+                        <li key={item.id} className='gap-2 bg-background rounded-xl p-4'>
+                          <p className='font-light text-foreground/85'>{item.description}</p>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </article>
+                <DialogFooter>
+                  <strong className='text-center w-full text-balance text-primary font-medium'>Recuerda, cada paso cuenta. No tengas miedo de pedir ayuda, tu bienestar es lo más importante.</strong>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <SignedOut>
               <SignUpButton>
-                <Button className="px-4 py-1 rounded-xl tracking-wider text-sm opacity-90">
+                <Button className="px-1 sm:px-4 py-1 rounded-xl tracking-normal sm:tracking-wider text-sm opacity-90">
                   Comenzar
                 </Button>
               </SignUpButton>
@@ -191,38 +322,11 @@ export default function HomePage() {
               <UserButton />
             </SignedIn>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="block lg:hidden">
-              <MenuIcon />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>
-                <Button variant="link" asChild className="text-foreground text-sm">
-                  <Link href="/sign-in">¿Necesitas ayuda?</Link>
-                </Button>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <SignedOut>
-                  <SignUpButton>
-                    <Button className="px-4 py-1 rounded-xl tracking-wider text-sm opacity-90">
-                      Comenzar
-                    </Button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-
         </div>
       </header>
       <main>
         <section
-          className="relative min-h-[90dvh] w-screen pt-32 md:pt-48"
+          className="relative pb-20 min-h-[90dvh] w-screen pt-32 md:pt-48"
         >
           <div className="absolute inset-0 -z-30 opacity-55">
             <svg width="100%" height="100%" viewBox="0 0 1440 643" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
@@ -424,8 +528,8 @@ export default function HomePage() {
 
             <div className='carousel-track flex items-start gap-20 pb-6 md:pb-14'>
               {
-                [...SPECIALITIES, ...SPECIALITIES].map(item => (
-                  <div key={item.id} className="flex flex-col items-center justify-start gap-2 text-center">
+                [...SPECIALITIES, ...SPECIALITIES].map((item, index) => (
+                  <div key={index} className="flex flex-col items-center justify-start gap-2 text-center">
                     <figure className="flex items-center justify-center size-16 sm:size-20 p-2 shadow-sm border bg-card border-primary/70 rounded-full">
                       {item.icon}
                     </figure>
@@ -437,8 +541,8 @@ export default function HomePage() {
             </div>
             <div className='carousel-track2 flex items-start gap-20'>
               {
-                [...SPECIALITIES, ...SPECIALITIES].map(item => (
-                  <div key={item.id} className="flex flex-col items-center justify-start gap-2 text-center">
+                [...SPECIALITIES, ...SPECIALITIES].map((item, index) => (
+                  <div key={index} className="flex flex-col items-center justify-start gap-2 text-center">
                     <figure className="flex items-center justify-center size-16 sm:size-20 p-2 shadow-sm border bg-card border-primary/70 rounded-full">
                       {item.icon}
                     </figure>
