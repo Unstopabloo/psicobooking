@@ -14,10 +14,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MenuIcon, Tick01Icon } from "@/components/icons";
+import { MenuIcon, SentIcon, Tick01Icon } from "@/components/icons";
 
 import psicofriends from "../../public/psicofriends.webp";
 import React from "react";
+import { TestimonialSlider } from '@/components/TestimonialSlider';
 
 export const metadata: Metadata = {
   title: "Psicobooking",
@@ -576,6 +577,102 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
+          <header className='flex flex-col items-center text-center gap-3'>
+            <h2 className="font-normal text-balance text-2xl">Reseñas</h2>
+            <p className='text-foreground/80'>¿Qué dicen de nosotros?</p>
+          </header>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-14'>
+            <PsychologistCard />
+            <PsychologistCard />
+            <TestimonialSlider />
+          </div>
+        </section>
+
+        <section>
+          <div className="relative container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
+            <div className="absolute inset-0 -z-30 opacity-55">
+              <svg width="100%" height="100%" viewBox="0 0 1440 643" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                <g opacity="0.13" clipPath="url(#clip0_22_999)">
+                  <path d="M1440 643L1080 482.25H1440V643Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 643V562.625H900L1080 643Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 643L720 562.625H900V643Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 482.25V562.625L720 482.25H900Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 482.25L900 562.625V482.25H1080Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 482.25H984L900 442.063V482.25Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M990 442.062V401.875H900L990 442.062Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M990 442.062V401.875H1080L990 442.062Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 401.875V482.25H720L900 401.875Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 401.875L720 321.5V401.875H900Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 321.5V401.875H1080L900 321.5Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1440 482.25V321.5L1080 482.25H1440Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 562.625V643L720 562.625H540Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 643H360V562.625L540 643Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 562.625H360V482.25L540 562.625Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M439 482.25H259V401.875L439 482.25Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 562.625H540V482.25L720 562.625Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M360 643V482.25H0L360 643Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M360 482.25V401.875L180 482.25H360Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M180 482.25V401.875L0 482.25H180Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M0 401.875V321.5H180L0 401.875Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M360 321.5L180 401.875V321.5H360Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 482.25V401.875L540 482.25H720Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 401.875L360 482.25V401.875H540Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 321.5V401.875H360L540 321.5Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 321.5L720 401.875V321.5H540Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 241.125L540 321.5H720V241.125Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 321.5V241.125H360L540 321.5Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M360 160.75V241.125H540L360 160.75Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 160.75V241.125L540 160.75H720Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M0 160.75V321.5L360 160.75H0Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M0 4.29153e-06H360V160.75L0 4.29153e-06Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 80.375H720L540 160.75V80.375Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M360 80.375H540L360 160.75V80.375Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M540 80.375V2.14577e-06L360 80.375H540Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 80.375V2.14577e-06H540L720 80.375Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1260 241.125L1440 321.5H1260V241.125Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 241.125H1260L1080 321.5V241.125Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 241.125V160.75L1260 241.125H1080Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1440 241.125V160.75L1260 241.125H1440Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 241.125V321.5L900 241.125H1080Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M720 321.5L900 241.125H720V321.5Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 241.125H720V160.75L900 241.125Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 160.75H900L1080 241.125V160.75Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 160.75H900L1080 80.375V160.75Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 80.375V160.75L720 80.375H900Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M900 80.375L720 2.14577e-06V80.375H900Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1080 2.14577e-06L900 80.375V2.14577e-06H1080Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                  <path d="M1440 160.75V4.29153e-06H1080L1440 160.75Z" stroke="#BCA8EA" strokeLinejoin="round" />
+                </g>
+                <defs>
+                  <clipPath id="clip0_22_999">
+                    <rect width="1440" height="643" fill="white" transform="matrix(1 0 0 -1 0 643)" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </div>
+
+            <header className='flex flex-col items-center justify-center text-center gap-3'>
+              <h2 className='text-3xl [&>strong]:text-primary'>Recuerda que tienes un espacio en<br /><strong>PsicoBooking</strong></h2>
+              <p className='text-foreground/80'>La ayuda que esperabas la encuentras en PsicoBooking, <br />toma la cita con tu profesional preferido.</p>
+            </header>
+            <div className='flex justify-center my-14'>
+              <SignedOut>
+                <SignInButton>
+                  <Button className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
+                    Agenda tu cita
+                  </Button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <Button asChild className="px-28 md:px-16 py-[21px] rounded-xl text-lg tracking-wider">
+                  <Link href="/dashboard">Entrar</Link>
+                </Button>
+              </SignedIn>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className='bg-card py-10'>
@@ -621,4 +718,21 @@ export default function HomePage() {
       </footer>
     </div>
   );
+}
+
+export const PsychologistCard = () => {
+  return (
+    <article className='relative flex items-end p-4 col-span-1 rounded-3xl overflow-hidden min-h-72'>
+      <img src="./psychologist-example.webp" alt="Psicologo de ejemplo" className='absolute inset-0 object-cover w-full h-full' />
+      <div className='flex items-center justify-between p-2 rounded-xl filter bg-primary/40 backdrop-blur-md w-full'>
+        <header className='flex flex-col items-start justify-center'>
+          <h3 className='text-white'>Andrea Coronel</h3>
+          <small className='text-white/70 text-start'>Psicóloga</small>
+        </header>
+        <Button size="icon" className='bg-white hover:bg-white/80 flex items-center justify-center gap-2 rounded-lg'>
+          <SentIcon width={16} height={16} color='black' />
+        </Button>
+      </div>
+    </article>
+  )
 }
