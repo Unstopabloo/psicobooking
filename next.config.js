@@ -5,6 +5,10 @@
 
 /** @type {import("next").NextConfig} */
 const coreConfig = {
+  compiler: {
+    removeConsole: true,
+  },
+
   typescript: {
     ignoreBuildErrors: true,
   },

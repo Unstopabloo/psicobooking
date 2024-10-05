@@ -1,10 +1,8 @@
-import H1 from "@/components/H1"
 import { Metadata } from "next"
 import { Container } from "../_layout-components/container"
-import { DataTable } from "@/components/table/data-table"
-import { columns } from "@/components/table/columns"
-import { getPatientsWithAppointments } from "@/server/users"
-import { toast } from "sonner"
+import { TableLoad } from "./_component/table-load"
+import { Suspense } from "react"
+import { TableLoader } from "@/components/table/table-loader"
 
 export const metadata: Metadata = {
   title: "Pacientes | Psicobooking",
@@ -24,15 +22,12 @@ export const metadata: Metadata = {
 }
 
 export default async function PacientesPage() {
-  const { patientsWithAppointments: data, error } = await getPatientsWithAppointments()
-  if (error) {
-    console.error(error)
-    toast.error("Hubo un error al recuperar los pacientes.")
-  }
 
   return (
     <Container className="px-0 lg:px-0 xl:px-10 2xl:px-24">
-      <DataTable columns={columns} data={data} />
+      <Suspense fallback={<TableLoader />}>
+        <TableLoad />
+      </Suspense>
     </Container>
   )
 }
