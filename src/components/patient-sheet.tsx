@@ -9,6 +9,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export function PatientSheet({
   patientId,
@@ -27,7 +28,9 @@ export function PatientSheet({
   }, [open, refetch]);
 
   if (!open) return null;
+  if (error) return toast.error("No se pudo cargar la información del paciente. Por favor, intente de nuevo.")
 
+  console.log('data', data?.user)
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent>
@@ -36,15 +39,6 @@ export function PatientSheet({
             {isLoading ? <Skeleton className="h-6 w-[200px]" /> : data?.user?.firstName + " " + data?.user?.lastName}
           </SheetTitle>
           <SheetDescription>
-            {isLoading ? (
-              <Skeleton className="h-4 w-[300px]" />
-            ) : (
-              error ? (
-                <span className="text-red-500">Error: {error.message}</span>
-              ) : (
-                `Información del paciente ID: ${patientId}`
-              )
-            )}
           </SheetDescription>
         </SheetHeader>
         {isLoading ? (
@@ -71,9 +65,9 @@ export function PatientSheet({
             <div>
               <strong>Género:</strong> {data.user.gender === 'female' ? 'Mujer' : 'Hombre'}
             </div>
-            <div>
-              <strong>Fecha de nacimiento:</strong> {data.user.birthDay ? format(new Date(data.user.birthDay), 'dd/MM/yyyy') : 'No disponible'}
-            </div>
+            {/* <div>
+              <strong>Fecha de nacimiento: {data?.user?.birthDay}</strong>
+            </div> */}
             <div>
               <strong>Ocupación:</strong> {data.user.occupation || 'No disponible'}
             </div>

@@ -3,8 +3,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { User } from "../users";
 import { db } from ".";
-import { users } from "./schema";
-import { eq } from "drizzle-orm";
+import { appointments, users } from "./schema";
+import { eq, sql } from "drizzle-orm";
 
 export async function getUserById(id: number): Promise<{ user: User | undefined, error?: Error }> {
   console.log('get user')
@@ -16,8 +16,28 @@ export async function getUserById(id: number): Promise<{ user: User | undefined,
   }
 
   try {
-    const result = await db
-      .select()
+    const result: any = await db
+      .select({
+        id: users.id,
+        clerk_id: users.clerk_id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        role: users.role,
+        avatar: sql<string>`COALESCE(${users.avatar}, '')`,
+        specialty: sql<string>`COALESCE(${users.specialty}, '')`,
+        phone: users.phone,
+        nationality: users.nationality,
+        gender: users.gender,
+        birthDay: sql<number>`COALESCE(CAST((julianday('now') - julianday(${users.birthDay})) / 365.25 AS INTEGER), 0)`,
+        occupation: users.occupation,
+        country: users.country,
+        state: users.state,
+        city: users.city,
+        street: users.street,
+        numHouse: users.numHouse,
+        createdAt: users.createdAt
+      })
       .from(users)
       .where(eq(users.id, id))
       .limit(1);

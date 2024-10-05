@@ -110,9 +110,6 @@ export const columns: ColumnDef<Paciente>[] = [
               <DropdownMenuItem onClick={() => setOpen(true)}>
                 Ver paciente
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <PatientSheet patientId={patient.id} open={open} setOpen={setOpen} />

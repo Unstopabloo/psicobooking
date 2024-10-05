@@ -10,5 +10,6 @@ export function usePatient(patientId: number) {
     queryFn: () => getUserById(patientId),
     enabled: false,
     staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
   });
 }

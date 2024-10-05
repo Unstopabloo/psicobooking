@@ -47,14 +47,15 @@ function applyCsp(request: NextRequest) {
   // format the CSP header
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'strict-dynamic' 'nonce-${nonce}' https: http: ${process.env.NODE_ENV === 'production' ? '' : "'unsafe-eval'"
-    } *.posthog.com;
-    connect-src 'self' https://definite-lemming-97.clerk.accounts.dev *.posthog.com;
-    img-src 'self' data: blob: https: http: https://img.clerk.com *.posthog.com;
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.posthog.com https://*.sentry.io https://*.clerk.accounts.dev https://definite-lemming-97.clerk.accounts.dev https://challenges.cloudflare.com https: http: 'unsafe-eval';
+    connect-src 'self' https://definite-lemming-97.clerk.accounts.dev https://*.sentry.io *.posthog.com;
+    img-src 'self' data: blob: https: http: https://img.clerk.com https://*.posthog.com;
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline';
-    frame-src 'self' https://challenges.cloudflare.com *.posthog.com;
+    frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com;
     form-action 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
   `
   // Replace newline characters and spaces
   const contentSecurityPolicyHeaderValue = cspHeader.replace(/\s{2,}/g, ' ').trim()
@@ -71,6 +72,7 @@ function applyCsp(request: NextRequest) {
   })
 
   response.headers.set('Content-Security-Policy', contentSecurityPolicyHeaderValue)
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   return response
 }
