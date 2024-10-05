@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
-import { Monitor, Sun, Moon } from "lucide-react"
+import { Monitor } from "lucide-react"
+import { SunIcon as Sun, MoonIcon as Moon } from "../icons";
 
 type Theme = "system" | "light" | "dark"
 
@@ -18,26 +19,23 @@ export function ThemeSwitcher() {
     return null
   }
 
-  const themes: Theme[] = ["system", "light", "dark"]
+  const themes: Theme[] = ["light", "dark"]
 
   return (
-    <div className="flex flex-col bg-card rounded-full p-1 gap-2">
+    <div className="flex flex-col bg-card rounded-full p-1">
       {themes.map((t) => (
         <button
           key={t}
-          className={`p-1 rounded-full transition-colors duration-200 ${theme === t ? "bg-primary/80" : "hover:bg-gray-700/50"
+          className={`p-2 rounded-full transition-colors duration-200 ${theme === t ? "bg-slate-300 dark:bg-slate-700" : "hover:bg-slate-200/70 dark:hover:bg-slate-700/50"
             }`}
           onClick={() => setTheme(t)}
           aria-label={`Cambiar a tema ${t}`}
         >
-          {t === "system" && (
-            <Monitor className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
-          )}
           {t === "light" && (
-            <Sun className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
+            <Sun width={16} height={16} className={`${theme === t ? "text-foreground/70" : "text-slate-50/80"}`} />
           )}
           {t === "dark" && (
-            <Moon className={`w-4 h-4 ${theme === t ? "text-white" : "text-foreground/70"}`} />
+            <Moon width={16} height={16} className={`${theme === t ? "text-white" : "text-foreground/70"}`} />
           )}
         </button>
       ))}

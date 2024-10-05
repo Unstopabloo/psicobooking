@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
+import { SubNav } from "./_layout-components/sub-nav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -39,10 +40,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Button className="flex items-center gap-3">Asistente <small>⌘ K</small></Button>
             a
           </header>
-          <div className="flex items-center py-3 px-12 bg-card">
+          <div className="flex items-center justify-between px-12 bg-card">
             <BreadCrumb />
+            <SubNav />
           </div>
-          <main className="py-6 px-12 overflow-auto">
+          <main className="relative py-6 px-12 overflow-auto">
             {children}
           </main>
         </div>

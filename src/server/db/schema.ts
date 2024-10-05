@@ -7,10 +7,11 @@ export const users = createTable(
   "user",
   {
     id: int("id").primaryKey({ autoIncrement: true }),
+    clerk_id: text("clerk_id").notNull(),
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     email: text("email").notNull(),
-    role: text("role", { enum: ["patient", "psychologist", "admin"] }).notNull(),
+    role: text("role", { enum: ["patient", "psychologist", "admin"] }),
     avatar: text("avatar"),
     specialty: text("specialty"),
     phone: int("phone"),
@@ -29,7 +30,7 @@ export const users = createTable(
   },
   (table) => ({
     emailIndex: uniqueIndex("email_idx").on(table.email),
-    roleIndex: index("role_idx").on(table.role),
+    roleIndex: index("role_idx").on(table.role)
   })
 );
 

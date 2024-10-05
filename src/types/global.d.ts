@@ -1,7 +1,7 @@
 export { }
 
 
-export type Roles = 'admin' | 'psicologo' | 'paciente'
+export type Roles = "admin" | "psychologist" | "patient"
 
 declare global {
   interface CustomJwtSessionClaims {

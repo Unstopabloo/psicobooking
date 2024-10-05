@@ -40,7 +40,7 @@ export function MeetingCard({ name, status, avatarUrl, documentCount, timestamp 
               <header className="w-full flex items-start justify-between gap-4">
                 <div className='flex flex-col'>
                   <h3 className="font-medium text-base">{name}</h3>
-                  <p className="text-sm text-muted-foreground">{status}</p>
+                  <p className="text-sm text-muted-foreground text-start">{status}</p>
                 </div>
                 <Avatar name={name} avatarUrl={avatarUrl} />
               </header>
