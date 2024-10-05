@@ -3,6 +3,12 @@ import type { Metadata } from 'next'
 import Image from "next/image";
 import Link from "next/link";
 
+import psicofriends from "../../public/psicofriends.webp";
+import psychologistExample from "../../public/psychologist-example.webp";
+import onlinepb from "../../public/onlinepb.webp";
+import quality from "../../public/quality.webp";
+import girl from "../../public/girl.webp";
+
 import { Button } from "@/components/ui/button"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
@@ -19,7 +25,6 @@ import {
 } from "@/components/ui/dialog"
 import { SentIcon, Tick01Icon } from "@/components/icons";
 
-import psicofriends from "../../public/psicofriends.webp";
 import React from "react";
 import { TestimonialSlider } from '@/components/TestimonialSlider';
 
@@ -585,7 +590,7 @@ export default function HomePage() {
               </header>
               <div className='relative w-full aspect-square rounded-xl overflow-hidden mt-4'>
                 <div className="absolute inset-0 z-10 bg-[url(../../public/noisebooking.webp)] opacity-15 bg-cover bg-center"></div>
-                <img loading='lazy' src="./quality.webp" alt="Imagen de dos personas abrazadas" className='group-hover:scale-125 duration-700 object-cover w-full' />
+                <Image loading='lazy' src={quality} alt="Imagen de dos personas abrazadas" className='group-hover:scale-125 duration-700 object-cover w-full' />
               </div>
             </article>
             <div className='col-span-1 row-span-1 grid grid-cols-1 grid-rows-3 gap-4'>
@@ -599,9 +604,12 @@ export default function HomePage() {
                 <div className='relative p-2 flex flex-col gap-1 items-start justify-end w-full h-full overflow-hidden rounded-xl'>
                   <div className="absolute inset-0 z-10 bg-[url(../../public/noisebooking.webp)] opacity-15 bg-cover bg-center"></div>
                   <div className='absolute inset-0 z-20 bg-gradient-to-t from-black/60 via-black/30 to-transparent'></div>
-                  <img
-                    src="./girl.webp"
+                  <Image
+                    src={girl}
                     alt="Chica con chaqueta roja sonriendo mientras mira su celular"
+                    placeholder='blur'
+                    fill
+                    style={{ objectFit: 'cover' }}
                     className='absolute group-hover:scale-125 duration-700 inset-0 z-0 w-full h-full object-cover rounded-xl'
                   />
                   <h3 className='text-white text-2xl font-medium z-20'>Servicios eficientes</h3>
@@ -677,7 +685,14 @@ export default function HomePage() {
             </div>
             <div className='relative col-span-1 lg:col-span-2 rounded-[60px] md:rounded-[100px] overflow-hidden min-h-96'>
               <div className="absolute inset-0 z-10 bg-[url(../../public/noisebooking.webp)] opacity-15 bg-cover bg-center"></div>
-              <img src="./onlinepb.webp" alt="PsicoBooking en línea" className='absolute inset-0 object-cover w-full h-full' />
+              <Image
+                src={onlinepb}
+                placeholder='blur'
+                fill
+                style={{ objectFit: 'cover' }}
+                alt="PsicoBooking en línea"
+                className='absolute inset-0 object-cover w-full h-full'
+              />
             </div>
           </div>
         </section>
@@ -827,13 +842,20 @@ export default function HomePage() {
 export const PsychologistCard = () => {
   return (
     <article className='relative flex items-end p-4 col-span-1 rounded-3xl overflow-hidden min-h-72'>
-      <img src="./psychologist-example.webp" alt="Psicologo de ejemplo" className='absolute inset-0 object-cover w-full h-full' />
+      <Image
+        src={psychologistExample}
+        placeholder='blur'
+        fill
+        style={{ objectFit: 'cover' }}
+        alt="Psicologo de ejemplo"
+        className='absolute inset-0 object-cover w-full h-full'
+      />
       <div className='flex items-center justify-between p-2 rounded-xl filter bg-primary/40 backdrop-blur-md w-full'>
         <header className='flex flex-col items-start justify-center'>
           <h3 className='text-white'>Andrea Coronel</h3>
           <small className='text-white/70 text-start'>Psicóloga</small>
         </header>
-        <Button size="icon" className='bg-white hover:bg-white/80 flex items-center justify-center gap-2 rounded-lg'>
+        <Button aria-label='Enviar mensaje' size="icon" className='bg-white hover:bg-white/80 flex items-center justify-center gap-2 rounded-lg'>
           <SentIcon width={16} height={16} color='black' />
         </Button>
       </div>
