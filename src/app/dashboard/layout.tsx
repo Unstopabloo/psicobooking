@@ -11,9 +11,15 @@ import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const nonce = headers().get('x-nonce')!
-  console.log("nonce", nonce)
+  const nonce = headers().get('x-nonce') || ''
+  console.log('Server-side nonce:', nonce)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log("nonce", nonce)
+  }
 
   return (
     <ThemeProvider
@@ -23,7 +29,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       enableSystem
       disableTransitionOnChange
     >
-      {/* <div>{nonce}</div> */}
       <div className="flex min-h-screen">
         <aside className="flex flex-col items-center justify-between gap-12 py-8 px-4 border-r border-border">
           <div className="flex flex-col items-center gap-12">

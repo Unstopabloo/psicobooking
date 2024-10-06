@@ -1,33 +1,42 @@
 "server-only"
 
-import { db } from "./db";
-import { users, appointments } from "./db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { turso } from "./db";
 import { auth } from "@clerk/nextjs/server";
-import { Paciente } from "@/components/table/columns";
-import { format, parseISO } from "date-fns";
-
-export type User = typeof users.$inferInsert
-type Role = typeof users.$inferSelect["role"]
+import { UserBase, Appointment } from "@/types/entities";
+import { appointmentDTO } from "@/lib/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
-  const resultdb = await db.select({ clerk_id: users.clerk_id }).from(users).where(eq(users.clerk_id, id))
-  if (resultdb.length > 0) {
+  const { rows } = await turso.execute({
+    sql: `SELECT clerk_id FROM psicobooking_user WHERE id = ?`,
+    args: [id]
+  })
+
+  if (rows[0]?.clerk_id) {
     return true
   }
 
   return false
 }
 
-export async function createUser(data: User) {
+export async function createUser(data: UserBase) {
   try {
-    const user = await db.insert(users).values({
-      clerk_id: data.clerk_id,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      avatar: data.avatar
-    }).returning({ insertedId: users.id })
+    const { rows } = await turso.execute({
+      sql: `INSERT INTO psicobooking_user (clerk_id, first_name, last_name, email, avatar, role) VALUES (:clerk_id, :first_name, :last_name, :email, :avatar, :role) RETURNING id`,
+      args: {
+        clerk_id: data.clerk_id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        avatar: data.avatar ?? null,
+        role: data.role
+      }
+    })
+
+    if (rows[0]?.length === 0) {
+      return { error: new Error('Error creating user') }
+    }
+
+    const user = rows[0]?.id as number
 
     return { user }
   } catch (error) {
@@ -36,7 +45,7 @@ export async function createUser(data: User) {
   }
 }
 
-export async function updateRole(role: Role) {
+export async function updateRole(role: string) {
   console.log('updateRole')
   const { userId } = auth()
 
@@ -46,7 +55,19 @@ export async function updateRole(role: Role) {
   }
 
   try {
-    const res_id = await db.update(users).set({ role }).where(eq(users.clerk_id, userId)).returning({ updatedId: users.id })
+    // const res_id = await db.update(users).set({ role }).where(eq(users.clerk_id, userId)).returning({ updatedId: users.id })
+    const { rows } = await turso.execute({
+      sql: `UPDATE psicobooking_user SET role = ? WHERE clerk_id = ? RETURNING id`,
+      args: [role, userId]
+    })
+
+    console.log('rows', rows)
+
+    if (rows[0]?.length === 0) {
+      return { error: new Error('Error updating role') }
+    }
+
+    const res_id = rows[0]?.id
     console.log('res_id', res_id)
     return { res_id }
   } catch (error) {
@@ -57,8 +78,8 @@ export async function updateRole(role: Role) {
 
 
 // =================== Pacientes ===================
-export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Paciente[] | undefined, error?: Error }> {
-  console.log('updateRole')
+export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Appointment[] | undefined, error?: Error }> {
+  console.log('getPatientsWithAppointments')
   const { userId } = auth()
 
   if (!userId) {
@@ -67,63 +88,47 @@ export async function getPatientsWithAppointments(): Promise<{ patientsWithAppoi
   }
 
   try {
-    const res = await db.select({ id: users.id }).from(users).where(eq(users.clerk_id, userId))
+    const { rows: res } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
 
     if (!res[0]) {
       console.log('No user found')
       return { patientsWithAppointments: undefined, error: new Error('No user found') }
     }
 
-    const patientsWithAppointments = await db
-      .select({
-        id: users.id,
-        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-        email: users.email,
-        telefono: sql<string>`COALESCE(CAST(${users.phone} AS TEXT), '')`,
-        nacionalidad: sql<string>`COALESCE(${users.nationality}, '')`,
-        genero: sql<string>`COALESCE(${users.gender}, '')`,
-        edad: sql<number>`COALESCE(CAST((julianday('now') - julianday(${users.birthDay})) / 365.25 AS INTEGER), 0)`,
-        tipoDeSesion: appointments.sessionType,
-        consentimientoInformado: sql<"Firmado" | "Pendiente">`CASE WHEN ${appointments.informedConsent} = 1 THEN 'Firmado' ELSE 'Pendiente' END`,
-        appointmentDate: sql<string>`strftime('%Y-%m-%dT%H:%M:%SZ', ${appointments.dateFrom})`,
-        appointmentState: appointments.state
-      })
-      .from(users)
-      .innerJoin(appointments, eq(users.id, appointments.patientId))
-      .where(
-        and(
-          eq(users.role, 'patient'),
-          eq(appointments.psychologistId, res[0].id)
-        )
-      )
-      .orderBy(appointments.dateFrom);
+    const { rows: patientsWithAppointments } = await turso.execute({
+      sql: `SELECT
+              u.id,
+              u.first_name || ' ' || u.last_name AS name,
+              u.email,
+              COALESCE(CAST(u.phone AS TEXT), '') AS telefono,
+              COALESCE(u.nationality, '') AS nacionalidad,
+              COALESCE(u.gender, '') AS genero,
+              COALESCE(CAST((julianday('now') - julianday(u.birth_day)) / 365.25 AS INTEGER), 0) AS edad,
+              a.session_type AS tipoDeSesion,
+              CASE WHEN a.informed_consent = true THEN 'Firmado' ELSE 'Pendiente' END AS consentimientoInformado,
+              strftime('%Y-%m-%dT%H:%M:%SZ', a.date_from) AS appointmentDate,
+              a.state AS appointmentState
+            FROM
+              psicobooking_user u
+            INNER JOIN
+              psicobooking_appointment a ON u.id = a.patient_id
+            WHERE
+              u.role = 'patient'
+              AND a.psychologist_id = ?
+            ORDER BY
+              a.date_from
+          `,
+      args: [res[0].id!]
+    })
+    console.log('patientsWithAppointments', patientsWithAppointments)
 
-    // Use a type guard to ensure the fetched data matches the Paciente type
-    const isPaciente = (patient: unknown): patient is Paciente => {
-      return (
-        typeof patient === 'object' &&
-        patient !== null &&
-        'id' in patient &&
-        'name' in patient &&
-        'email' in patient &&
-        'telefono' in patient &&
-        'nacionalidad' in patient &&
-        'genero' in patient &&
-        'edad' in patient &&
-        'tipoDeSesion' in patient &&
-        'consentimientoInformado' in patient &&
-        'appointmentDate' in patient &&
-        'appointmentState' in patient
-      );
-    };
+    const result = appointmentDTO(patientsWithAppointments)
 
-    const validatedPatients = patientsWithAppointments.map(patient => ({
-      ...patient,
-      appointmentDate: parseISO(patient.appointmentDate),
-      appointmentDateFormatted: format(parseISO(patient.appointmentDate), 'dd/MM/yyyy HH:mm')
-    })).filter(isPaciente);
+    return { patientsWithAppointments: result, error: undefined }
 
-    return { patientsWithAppointments: validatedPatients }
   } catch (error) {
     console.error(error)
     return { patientsWithAppointments: undefined, error: error instanceof Error ? error : new Error('Unknown error') }

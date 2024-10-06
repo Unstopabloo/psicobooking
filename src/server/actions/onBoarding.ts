@@ -17,7 +17,7 @@ export const onBoarding = authAction
             role: parsedInput.role,
           }
         }),
-        updateRole(parsedInput.role ?? null)
+        updateRole(parsedInput.role!)
       ]);
 
       if (roleUpdateResult.error) {

@@ -71,6 +71,7 @@ function applyCsp(request: NextRequest) {
     },
   })
 
+  response.headers.set('x-nonce', nonce)
   response.headers.set('Content-Security-Policy', contentSecurityPolicyHeaderValue)
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 

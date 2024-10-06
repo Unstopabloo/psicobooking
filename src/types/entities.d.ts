@@ -1,13 +1,19 @@
-type Gender = "male" | "female" | "other";
+import { Roles } from "./global";
 
-export interface User {
-  id: number;
+type Gender = "male" | "female" | "other";
+type Row = Record<string, unknown>
+
+export interface UserBase {
   clerk_id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: Role;
   avatar?: string;
+  role: Roles;
+}
+
+export interface User extends UserBase {
+  id: number;
   specialty?: string;
   phone?: number;
   nationality?: string;
@@ -20,4 +26,18 @@ export interface User {
   street?: string;
   numHouse?: string;
   createdAt?: number;
+}
+
+export interface Appointment {
+  id: number;
+  name: string;
+  email: string;
+  telefono: string;
+  nacionalidad: string;
+  genero: string;
+  edad: number;
+  tipoDeSesion: string;
+  consentimientoInformado: "Firmado" | "Pendiente";
+  appointmentDate: Date;
+  appointmentState: "scheduled" | "completed" | "cancelled";
 }

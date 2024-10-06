@@ -27,6 +27,9 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { DataTablePagination } from "./data-table-pagination"
 import H1 from "../H1"
+import { toast } from "sonner"
+import { Button } from "../ui/button"
+import { addExamplePatients } from "@/server/actions/users"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -35,7 +38,7 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  data
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -123,7 +126,9 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-between w-full">
-
+        <form action={addExamplePatients}>
+          <Button type="submit">agregar citas</Button>
+        </form>
         <DataTablePagination table={table} />
       </div>
     </div>

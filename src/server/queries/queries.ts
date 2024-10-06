@@ -2,10 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getUserById } from "../db/users";
-import { User } from "../users";
 
 export function usePatient(patientId: number) {
-  return useQuery<{ user: User | undefined, error?: Error }, Error>({
+  return useQuery({
     queryKey: ['patient', patientId],
     queryFn: () => getUserById(patientId),
     enabled: false,

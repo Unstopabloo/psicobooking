@@ -73,10 +73,11 @@ export async function POST(req: Request) {
     // Crear nuevo usuario en base de datos
     const { user, error } = await createUser({
       clerk_id,
-      firstName: first_name,
-      lastName: last_name,
+      first_name: first_name,
+      last_name: last_name,
       email,
-      avatar: image_url
+      avatar: image_url ?? null,
+      role: 'psychologist'
     })
 
     if (error) {
