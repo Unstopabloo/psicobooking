@@ -3,6 +3,17 @@ import { Roles } from "./global";
 type Gender = "male" | "female" | "other";
 type Row = Record<string, unknown>
 
+interface Sessions {
+  completed: number;
+  scheduled: number;
+  cancelled: number;
+}
+
+export interface ContactBase {
+  id: number;
+  name: string;
+}
+
 export interface UserBase {
   clerk_id: string;
   first_name: string;
@@ -39,5 +50,27 @@ export interface Appointment {
   tipoDeSesion: string;
   consentimientoInformado: "Firmado" | "Pendiente";
   appointmentDate: Date;
-  appointmentState: "scheduled" | "completed" | "cancelled";
+}
+
+export interface PatientTicket {
+  id: number;
+  name: string;
+  age: number;
+  avatar: string | null;
+  nationality: string | null;
+  consentimientoInformado: 1 | 0;
+  numberOfTicket: number;
+  email: string;
+  phone: string;
+  sessionType: "online" | "presencial";
+  state: string;
+  price: number?;
+  contacts: ContactBase[];
+  sessions: Sessions;
+}
+
+export interface ContactInfo extends ContactBase {
+  user_id: number;
+  number: string;
+  email: string;
 }
