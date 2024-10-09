@@ -1,25 +1,28 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 import React from "react"
+
+import psychologistExample from "../../public/psychologist-example.webp";
 
 const testimonials = [
   {
     index: 0,
     name: 'Andrea Coronel',
-    avatarUrl: '/psychologist-example.webp',
+    avatarUrl: psychologistExample,
     body: 'Psicobooking me ha ayudado a poder conectar con más personas que necesitan apoyo profesional gracias a su web y a las redes sociales, a conocer consultantes de diferentes partes del mundo y a tener la oportunidad de mostrar mi esencia en el video, generando confianza y motivación en mis consultantes. Además nos brindamos apoyo y soporte junto a todo el equipo, lo cual es indispensable para nuestra labor❤️'
   },
   {
     index: 1,
     name: 'Mateo Hernandez',
-    avatarUrl: '/psychologist-example.webp',
+    avatarUrl: psychologistExample,
     body: 'Esta plataforma me ha ayudado a conectar con más personas que necesitan apoyo profesional, gracias a su web y a las redes sociales, a conocer consultantes de diferentes partes del mundo y a tener la oportunidad de mostrar mi esencia en el video, generando confianza y motivación en mis consultantes. Además nos brindamos apoyo y soporte '
   },
   {
     index: 2,
     name: 'Juan Martínez',
-    avatarUrl: '/psychologist-example.webp',
+    avatarUrl: psychologistExample,
     body: 'Esta plataforma me ha ayudado a conectar con más personas que necesitan apoyo profesional, gracias a su web y a las redes sociales, a conocer consultantes de diferentes partes del mundo y a tener la oportunidad de mostrar mi esencia en el video, generando confianza y motivación en mis consultantes. Además nos brindamos '
   }
 ]
@@ -60,7 +63,14 @@ export function TestimonialSlider() {
       <div className="flex flex-col items-start justify-end gap-2 pt-4 min-h-40">
         <p className="text-foreground/80 text-sm max-h-44 overflow-hidden">{testimonials[currentIndex]?.body}</p>
         <div className="flex items-center jsutify-start gap-3 pt-1">
-          <img src={testimonials[currentIndex]?.avatarUrl} alt="Avatar de ejemplo" className="h-10 w-10 rounded-xl" />
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl">
+            <Image
+              src={testimonials[currentIndex]?.avatarUrl ?? ''}
+              alt="Avatar de ejemplo"
+              style={{ objectFit: 'cover' }}
+              fill
+            />
+          </div>
           <strong className="text-sm">{testimonials[currentIndex]?.name}</strong>
         </div>
       </div>

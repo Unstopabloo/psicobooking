@@ -6,9 +6,8 @@
 /** @type {import("next").NextConfig} */
 const coreConfig = {
   compiler: {
-    removeConsole: true,
+    removeConsole: env.NODE_ENV === 'production' ? true : false,
   },
-
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -39,6 +38,7 @@ const coreConfig = {
 
 // Injected content via Sentry wizard below
 import { withSentryConfig } from "@sentry/nextjs";
+import { env } from "process";
 
 const config = withSentryConfig(coreConfig, {
   // For all available options, see:

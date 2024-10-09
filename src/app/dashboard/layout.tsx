@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 
 import { DesktopNav } from "@/components/layout/Navs";
 import { SignedIn, UserButton } from "@clerk/nextjs";
@@ -10,9 +11,19 @@ import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const nonce = headers().get('x-nonce') || ''
+  console.log('Server-side nonce:', nonce)
+  if (process.env.NODE_ENV !== 'production') {
+    console.log("nonce", nonce)
+  }
+
   return (
     <ThemeProvider
+      nonce={nonce}
       attribute="class"
       defaultTheme="system"
       enableSystem
@@ -22,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <aside className="flex flex-col items-center justify-between gap-12 py-8 px-4 border-r border-border">
           <div className="flex flex-col items-center gap-12">
             <Link href="/dashboard">
-              <Image src="/isotipo.webp" alt="logo psicobooking" width={70} height={70} />
+              <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
             </Link>
 
             <DesktopNav />

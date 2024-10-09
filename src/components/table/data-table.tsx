@@ -19,14 +19,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
-  TableFooter
+  TableCaption
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 
 import { cn } from "@/lib/utils"
 import { DataTablePagination } from "./data-table-pagination"
 import H1 from "../H1"
+import { PatientSheet } from "../patient-sheet"
+import { Appointment } from "@/types/entities"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -35,8 +36,10 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  data
 }: DataTableProps<TData, TValue>) {
+  const [openTicket, setOpenTicket] = React.useState(false)
+  const [patientId, setPatientId] = React.useState(0)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = React.useState<any>([])
@@ -99,8 +102,12 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={cn(`${row.index % 2 === 0 && "bg-card/40"}`, 'hover:text-foreground')}
+                  className={cn(`cursor-pointer ${row.index % 2 === 0 && "bg-card/40"}`, 'hover:text-foreground')}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => {
+                    setOpenTicket(true)
+                    setPatientId((row.original as Appointment).id)
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -123,9 +130,9 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-between w-full">
-
         <DataTablePagination table={table} />
       </div>
+      <PatientSheet patientId={patientId} open={openTicket} setOpen={setOpenTicket} />
     </div>
   )
 }

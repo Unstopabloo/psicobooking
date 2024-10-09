@@ -5,7 +5,7 @@ import {
   AvatarImage
 } from "./ui/avatar";
 
-export function Avatar({ name, avatarUrl }: { name: string, avatarUrl: string }) {
+export function Avatar({ name, avatarUrl }: { name: string | undefined, avatarUrl: string | undefined }) {
   return (
     <AvatarComponent className="size-8">
       <AvatarImage src={avatarUrl} alt={name} />

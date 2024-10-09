@@ -11,27 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import React from "react";
 import { PatientSheet } from "../patient-sheet";
 import { DataTableColumnHeader } from "./data-table-column-header";
+import { Appointment } from "@/types/entities";
+import { Badge } from "../ui/badge";
+import { getCountryPhoneCode } from "@/lib/get-country-code";
 
-
-export type Paciente = {
-  id: number;
-  name: string;
-  email: string;
-  telefono: string;
-  nacionalidad: string;
-  genero: string;
-  edad: number;
-  tipoDeSesion: string;
-  consentimientoInformado: "Firmado" | "Pendiente";
-  appointmentDate: Date;
-  appointmentState: "scheduled" | "completed" | "cancelled";
-};
-
-export const columns: ColumnDef<Paciente>[] = [
+export const columns: ColumnDef<Appointment>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre" />,
@@ -45,7 +33,12 @@ export const columns: ColumnDef<Paciente>[] = [
   },
   {
     accessorKey: "telefono",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Telefono" />
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Telefono" />,
+    cell: ({ row }) => {
+      const phone = row.getValue('telefono') as string
+      const codigo = getCountryPhoneCode(row.getValue('nacionalidad'))!
+      return <div className="truncate w-20 lg:w-36">{codigo}{phone}</div>
+    }
   },
   {
     accessorKey: "nacionalidad",
@@ -73,51 +66,24 @@ export const columns: ColumnDef<Paciente>[] = [
   },
   {
     accessorKey: "consentimientoInformado",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="C. Informado" />
+    header: ({ column }) => <DataTableColumnHeader column={column} title="C. Informado" />,
+    cell: ({ row }) => {
+      const consentimientoInformado = row.getValue('consentimientoInformado')
+
+      return consentimientoInformado === 'Firmado' ? (
+        <Badge variant="outline" className="bg-green-200 text-green-600 border border-green-600 text-xs">
+          Firmado
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-xs bg-red-200 text-red-500 border border-red-500">
+          Pendiente
+        </Badge>
+      )
+    }
   },
   {
     accessorKey: "appointmentDate",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha de cita" />,
     cell: ({ row }) => format(new Date(row.getValue('appointmentDate')), 'dd/MMM/yy')
-  },
-  {
-    accessorKey: "appointmentState",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
-    cell: ({ row }) => {
-      const appointmentState = row.getValue('appointmentState')
-      if (appointmentState === 'cancelled') {
-        return 'Cancelada'
-      }
-      return appointmentState === 'scheduled' ? 'Pendiente' : 'Completada'
-    }
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const patient = row.original
-      const [open, setOpen] = React.useState(false)
-
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Abrir menú</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setOpen(true)}>
-                Ver paciente
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <PatientSheet patientId={patient.id} open={open} setOpen={setOpen} />
-        </>
-      )
-    },
   }
 ]

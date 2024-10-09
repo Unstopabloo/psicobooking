@@ -3,7 +3,7 @@
 import { authAction } from "@/lib/safe-action"
 import { onBoardingSchema } from "./action-schemas";
 import { clerkClient } from "@clerk/nextjs/server";
-import { updateRole } from "../users";
+import { updateRole } from "../db/users";
 
 export const onBoarding = authAction
   .schema(onBoardingSchema)
@@ -17,7 +17,7 @@ export const onBoarding = authAction
             role: parsedInput.role,
           }
         }),
-        updateRole(parsedInput.role ?? null)
+        updateRole(parsedInput.role!)
       ]);
 
       if (roleUpdateResult.error) {
