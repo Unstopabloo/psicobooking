@@ -130,13 +130,13 @@ export function PatientSheet({
           )}
         </SheetHeader>
         {isLoading ? (
-          <div className="space-y-4 mt-6">
+          <div className="space-y-4 mt-6 pb-10">
             <Skeleton className="h-4 w-[300px]" />
             <Skeleton className="h-4 w-[250px]" />
             <Skeleton className="h-4 w-[250px]" />
             <Skeleton className="h-4 w-[250px]" />
             <Skeleton className="h-4 w-[250px]" />
-            <div className="my-14 space-y-5">
+            <div className="py-14 space-y-5">
               <Skeleton className="h-4 w-[250px]" />
               <div className="flex items-center gap-2">
                 <Skeleton className="h-5 w-[150px]" />
