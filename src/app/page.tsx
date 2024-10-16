@@ -272,7 +272,7 @@ export default function HomePage() {
             <Dialog>
               <DialogTrigger className="group relative text-foreground text-sm hover:text-primary duration-200 font-medium">
                 <div className='group-hover:w-full group-hover:opacity-100 duration-300 opacity-50 h-px w-0 bg-primary absolute -bottom-1 left-0'></div>
-                ¿Necesitas ayuda?
+                Afrontar crisis
               </DialogTrigger>
               <DialogContent className='max-w-3xl bg-card'>
                 <DialogHeader>

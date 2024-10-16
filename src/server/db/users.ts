@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment } from "@/types/entities";
-import { appointmentDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket } from "@/types/entities";
+import { appointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -79,7 +79,6 @@ export async function updateRole(role: string) {
 
 // =================== Pacientes ===================
 export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Appointment[] | undefined, error?: Error }> {
-  console.log('getPatientsWithAppointments')
   const { userId } = auth()
 
   if (!userId) {
@@ -122,14 +121,67 @@ export async function getPatientsWithAppointments(): Promise<{ patientsWithAppoi
           `,
       args: [res[0].id!]
     })
-    console.log('patientsWithAppointments', patientsWithAppointments)
 
     const result = appointmentDTO(patientsWithAppointments)
-
     return { patientsWithAppointments: result, error: undefined }
-
   } catch (error) {
     console.error(error)
     return { patientsWithAppointments: undefined, error: error instanceof Error ? error : new Error('Unknown error') }
+  }
+}
+
+export async function getSinglePatientTicket(user_id: number): Promise<{ singlePatientTicket: SinglePatientTicket | undefined, error?: Error }> {
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('Unauthorized')
+    return { singlePatientTicket: undefined, error: new Error('Unauthorized') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT
+          psicobooking_user.id as id,
+          psicobooking_user.first_name,
+          psicobooking_user.last_name,
+          psicobooking_user.birth_day,
+          psicobooking_user.email,
+          psicobooking_user.phone,
+          psicobooking_user.gender,
+          psicobooking_user.nationality,
+          psicobooking_user.occupation,
+          psicobooking_user.country,
+          psicobooking_user.state,
+          psicobooking_user.city,
+          psicobooking_user.street,
+          psicobooking_user.num_house,
+          psicobooking_treatment_sheet.actual_state,
+          psicobooking_treatment_sheet.date_from,
+          psicobooking_treatment_sheet.date_to,
+          psicobooking_treatment_sheet.motive_end,
+          psicobooking_treatment_sheet.motive_reason,
+          psicobooking_treatment_sheet.diagnostic_guidance
+        FROM psicobooking_user
+        LEFT JOIN psicobooking_treatment_sheet
+          ON psicobooking_treatment_sheet.patient_id = psicobooking_user.id
+        LEFT JOIN psicobooking_appointment
+          ON psicobooking_appointment.patient_id = psicobooking_user.id
+        WHERE psicobooking_user.id = ?
+      `,
+      args: [user_id]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No user found')
+      return { singlePatientTicket: undefined, error: new Error('No user found') }
+    }
+
+    const singlePatientTicket = rows[0]
+
+    return { singlePatientTicket: singlePatientTicketDTO(singlePatientTicket), error: undefined }
+  } catch (error) {
+    console.error(error)
+    return { singlePatientTicket: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

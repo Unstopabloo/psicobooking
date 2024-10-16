@@ -74,3 +74,28 @@ export interface ContactInfo extends ContactBase {
   number: string;
   email: string;
 }
+
+export interface SinglePatientTicket {
+  // from user
+  id: number;
+  first_name: string;
+  last_name: string;
+  birth_day: string | null;
+  email: string;
+  gender: string | null;
+  nationality: string | null;
+  phone: string | null;
+  ocupation: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  street: string | null;
+  num_house: string | null;
+  // from treatment_sheet
+  actual_state: string | null;
+  date_from: string | null;
+  date_to: string | null;
+  motive_end: string | null;
+  motive_reason: string | null;
+  diagnostic_guidance: string | null;
+}
