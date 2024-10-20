@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket } from "@/types/entities";
-import { appointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient } from "@/types/entities";
+import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -180,5 +180,95 @@ export async function getSinglePatientTicket(user_id: number): Promise<{ singleP
   } catch (error) {
     console.error(error)
     return { singlePatientTicket: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getDashboardAppointments(): Promise<{ appointments: DashboardAppointment[] | undefined, error?: Error }> {
+  console.log('getDashboardAppointments')
+  const { userId } = auth()
+
+  if (!userId) {
+    return { appointments: undefined, error: new Error('Unauthorized') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          a.id,
+          a.patient_id,
+          a.psychologist_id,
+          p.first_name || ' ' || p.last_name AS name,
+          p.avatar AS avatar,
+          a.informed_consent,
+          a.session_type,
+          a.date_from
+        FROM 
+          psicobooking_appointment a
+        LEFT JOIN 
+          psicobooking_user p ON p.id = a.patient_id
+        LEFT JOIN 
+          psicobooking_user psy ON psy.id = a.psychologist_id
+        WHERE 
+          psy.clerk_id = ?
+          AND a.state = 'scheduled'
+        LIMIT 4;
+      `,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { appointments: undefined, error: new Error('No appointments found') }
+    }
+
+    const result = dashboardAppointmentDTO(rows)
+    return { appointments: result, error: undefined }
+  } catch (error) {
+    console.error(error)
+    return { appointments: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getDashboardPatients(): Promise<{ patients: DashboardPatient[] | undefined, error?: Error }> {
+  console.log('getDashboardPatients')
+  const { userId } = auth()
+
+  if (!userId) {
+    return { patients: undefined, error: new Error('Unauthorized') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT
+          u.id,
+          u.first_name || ' ' || u.last_name AS name,
+          u.email,
+          COALESCE(u.nationality, '') AS nacionalidad,
+          COALESCE(u.gender, '') AS genero,
+          COALESCE(CAST(u.phone AS TEXT), '') AS telefono
+        FROM
+          psicobooking_user u
+        LEFT JOIN
+          psicobooking_user psy ON psy.id = a.psychologist_id
+        INNER JOIN
+          psicobooking_appointment a ON u.id = a.patient_id
+        WHERE
+          u.role = 'patient'
+          AND psy.clerk_id = ?
+        LIMIT 4;
+      `,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { patients: undefined, error: new Error('No patients found') }
+    }
+
+    const result = dashboardPatientDTO(rows)
+    return { patients: result, error: undefined }
+  } catch (error) {
+    console.error(error)
+    return { patients: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

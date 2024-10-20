@@ -9,61 +9,62 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "../ui/button";
+import { getDashboardPatients } from "@/server/db/users";
+import { createWhatsAppLink } from "@/lib/whatsapp";
+import { getCountryPhoneCode } from "@/lib/get-country-code";
+import Link from "next/link";
+import { Skeleton } from "../ui/skeleton";
 
 export async function AgendaTable() {
+  const { patients, error } = await getDashboardPatients()
+
   return (
     <Table>
       <TableCaption>Tus proximas citas.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>Nombre</TableHead>
-          <TableHead>Tipo de sesión</TableHead>
-          <TableHead>Consentimiento</TableHead>
+          <TableHead>Correo</TableHead>
+          <TableHead>Nacionalidad</TableHead>
           <TableHead className="text-right">Whatsapp</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell className="font-medium">Pablo Oyarce Ramirez</TableCell>
-          <TableCell>Presencial</TableCell>
-          <TableCell>Firmado</TableCell>
-          <TableCell className="flex justify-end items-center pe-4">
-            <Button size="icon" variant="ghost" className="p-1">
-              <WhatsApp />
-            </Button>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Pablo Oyarce Ramirez</TableCell>
-          <TableCell>Presencial</TableCell>
-          <TableCell>Firmado</TableCell>
-          <TableCell className="flex justify-end items-center pe-4">
-            <Button size="icon" variant="ghost" className="p-1">
-              <WhatsApp />
-            </Button>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Pablo Oyarce Ramirez</TableCell>
-          <TableCell>Presencial</TableCell>
-          <TableCell>Firmado</TableCell>
-          <TableCell className="flex justify-end items-center pe-4">
-            <Button size="icon" variant="ghost" className="p-1">
-              <WhatsApp />
-            </Button>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Pablo Oyarce Ramirez</TableCell>
-          <TableCell>Presencial</TableCell>
-          <TableCell>Firmado</TableCell>
-          <TableCell className="flex justify-end items-center pe-4">
-            <Button size="icon" variant="ghost" className="p-1">
-              <WhatsApp />
-            </Button>
-          </TableCell>
-        </TableRow>
+        {
+          patients?.map(patient => (
+            <TableRow key={patient.id}>
+              <TableCell className="font-medium">{patient.name}</TableCell>
+              <TableCell>{patient.email}</TableCell>
+              <TableCell>{patient.nacionalidad}</TableCell>
+              <TableCell className="flex justify-end items-center pe-4">
+                <Button asChild size="icon" variant="ghost" className="p-1">
+                  <Link href={createWhatsAppLink(getCountryPhoneCode(patient.nacionalidad) + patient.telefono)}>
+                    <WhatsApp />
+                  </Link>
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        }
+        {
+          error && <TableRow>
+            <TableCell colSpan={4} className="text-center">
+              <p className="text-red-500">Hubo un error al cargar los pacientes</p>
+            </TableCell>
+          </TableRow>
+        }
       </TableBody>
     </Table>
+  )
+}
+
+export function AgendaTableLoading() {
+  return (
+    <div className="flex flex-col w-full gap-2">
+      <Skeleton className="w-full h-14" />
+      <Skeleton className="w-full h-14" />
+      <Skeleton className="w-full h-14" />
+      <Skeleton className="w-full h-14" />
+    </div>
   )
 }

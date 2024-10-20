@@ -107,3 +107,23 @@ export interface ClinicalHistory {
   content: string;
   created_at: string;
 }
+
+export interface DashboardAppointment {
+  id: number;
+  patient_id: number;
+  psychologist_id: number;
+  name: string;
+  avatar: string | null;
+  informed_consent: number;
+  session_type: string;
+  date_from: string;
+}
+
+export interface DashboardPatient {
+  id: number;
+  name: string;
+  email: string;
+  nacionalidad: string;
+  genero: string;
+  telefono: string;
+}

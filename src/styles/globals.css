@@ -212,7 +212,24 @@
   .specialty-item:hover .specialty-circle {
     transform: scale(1.5);
   }
+
+  .section-title {
+    position: relative;
+  }
+
+  .section-title::after {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 55%;
+    height: 1px;
+    border-radius: 9999px;
+    background-color: hsl(var(--primary));
+  }
 }
+
 
 .tippy-content {
   padding: 0 !important;
