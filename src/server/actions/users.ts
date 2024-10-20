@@ -230,7 +230,6 @@ export async function getPatientTicket(id: number): Promise<{ patientTicket: Pat
         user_id: id
       }
     })
-    console.log('rows', rows)
     const user = rows[0]
 
     if (user?.length === 0 || !user) {

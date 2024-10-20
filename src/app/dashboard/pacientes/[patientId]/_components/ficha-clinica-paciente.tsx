@@ -21,7 +21,10 @@ export async function FichaClinicaComponent({ patientId }: { patientId: string }
   return (
     <>
       <header className="w-full flex items-center justify-between gap-10 pb-10">
-        <H1>Ficha Clinica de {singlePatientTicket.first_name}</H1>
+        <div className="flex flex-col items-start">
+          <H1>Ficha Clinica de {singlePatientTicket.first_name}</H1>
+          <p className="text-sm text-muted-foreground">Datos completos del paciente, podrás modificar y completar información importante</p>
+        </div>
         <Button asChild variant="link">
           <Link href={`/dashboard/pacientes/${patientId}/historial-clinico`}>Ver historial clinico</Link>
         </Button>

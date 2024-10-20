@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-14 animate-fade-up animate-ease-out animate-duration-500">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-1 md:gap-x-14 animate-fade-up animate-ease-out animate-duration-500">
       <Section
         href="agenda"
         seeMoreText="Ver todas las citas"

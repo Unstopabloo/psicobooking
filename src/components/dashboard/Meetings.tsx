@@ -6,7 +6,7 @@ export async function Meetings() {
   const { appointments, error } = await getDashboardAppointments()
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 text-center lg:text-start items-center">
+    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 text-center lg:text-start items-center">
       {appointments?.map(appointment => (
         <MeetingCard
           key={appointment.id}
