@@ -228,9 +228,12 @@ export function TreatmentSheetForm({ patient }: { patient: SinglePatientTicket }
             />
           </div>
         </section>
-        <div className="w-full flex justify-end pt-10">
+        <div className="w-full flex items-center justify-between gap-2 pt-10">
+          <Button className="w-7/12 border-primary text-primary hover:text-primary" variant="outline">
+            Derivar paciente
+          </Button>
           <Button
-            className="w-2/4"
+            className="w-5/12"
             disabled={form.formState.isSubmitting}
             type="submit"
           >

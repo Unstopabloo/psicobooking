@@ -16,10 +16,6 @@ export const revalidate = 0
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const nonce = headers().get('x-nonce') || ''
-  console.log('Server-side nonce:', nonce)
-  if (process.env.NODE_ENV !== 'production') {
-    console.log("nonce", nonce)
-  }
 
   return (
     <ThemeProvider

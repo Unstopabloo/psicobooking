@@ -2,16 +2,15 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { ContactInfo, PatientTicket } from "@/types/entities";
-import { contactDTO, PatientTicketDTO } from "../dtos";
+import { ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
-import { PatientSchema, TreatmentSchema } from "@/types/schemas";
+import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 
 export const updatePatient = authAction
   .schema(PatientSchema)
   .action(async ({ parsedInput }) => {
     try {
-      console.log('parsedeInput', parsedInput)
       const { rows, rowsAffected } = await turso.execute({
         sql: `UPDATE psicobooking_user SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, gender = :gender, birth_day = :birth_day, occupation = :occupation, country = :country, state = :state, city = :city, street = :street, num_house = :num_house WHERE email = :email RETURNING *`,
         args: {
@@ -44,6 +43,64 @@ export const updatePatient = authAction
     }
   })
 
+
+export const createClinicalHistory = authAction
+  .schema(ClinicalHistorySchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const { id, patient_id, title, content } = parsedInput
+      const contentString = JSON.stringify(content)
+
+      if (!patient_id || !title || !contentString) {
+        return { data: undefined, error: new Error('No hay suficiente informacion para crear la historia clinica') }
+      }
+
+      // si existe, actualiza
+      if (id) {
+        console.log('actualiza')
+        const { rowsAffected, lastInsertRowid } = await turso.execute({
+          sql: `UPDATE psicobooking_clinic_history SET patient_id = :patient_id, title = :title, content = :content WHERE id = :id`,
+          args: {
+            id: id!,
+            patient_id: patient_id!,
+            title: title!,
+            content: contentString,
+          }
+        });
+
+        if (rowsAffected > 0) {
+          console.log('se actualizo la ficha', lastInsertRowid)
+          return { data: lastInsertRowid }
+        }
+
+        return { data: undefined, error: new Error('No se pudo actualizar la historia clinica') }
+      }
+
+      console.log('no existe, crea')
+      // si no existe, crea
+      const { lastInsertRowid: newClinicHistory } = await turso.execute({
+        sql: `INSERT INTO psicobooking_clinic_history (patient_id, title, content, created_at) VALUES (:patient_id, :title, :content, :created_at)`,
+        args: {
+          patient_id: patient_id!,
+          title: title!,
+          content: contentString,
+          created_at: new Date().toISOString()
+        }
+      });
+
+      if (!newClinicHistory) {
+        console.log('No se pudo crear la historia clinica')
+        return { data: undefined, error: new Error('No se pudo crear la historia clinica') }
+      }
+
+      console.log('Se creo la ficha', newClinicHistory)
+      return { data: newClinicHistory }
+    } catch (error) {
+      console.error(error)
+      return { data: undefined, error: error instanceof Error ? error : new Error('Ha ocurrido un error inesperado') }
+    }
+  })
+
 export const updateTreatmentSheet = authAction
   .schema(TreatmentSchema)
   .action(async ({ parsedInput }) => {
@@ -68,11 +125,13 @@ export const updateTreatmentSheet = authAction
         }
       });
 
+      // si existe la ficha, actualiza
       if (rowsAffected > 0) {
         console.log('se actualizo la ficha', lastInsertRowid)
         return { data: lastInsertRowid }
       }
 
+      // si no existe, crea
       const { lastInsertRowid: newFicha } = await turso.execute({
         sql: `INSERT INTO psicobooking_treatment_sheet 
               (patient_id, actual_state, motive_end, motive_reason, diagnostic_guidance, date_from, date_to)
@@ -210,5 +269,55 @@ export async function getContactInfo(id: number): Promise<{ contactInfo: Contact
   } catch (error) {
     console.error(error)
     return { contactInfo: undefined, error: error instanceof Error ? error : new Error('Unknown error') }
+  }
+}
+
+export async function getClinicalHistories(patientId: number): Promise<{ clinicalHistory: ClinicalHistory[] | undefined, error?: Error }> {
+  console.log('get clinical histories')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No user found')
+    return { clinicalHistory: undefined, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT * FROM psicobooking_clinic_history WHERE patient_id = ?`,
+      args: [patientId]
+    })
+
+    console.log('rows', rows)
+    return { clinicalHistory: clinicalHistoryDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { clinicalHistory: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getClinicalHistory(id: number): Promise<{ clinicalHistory: ClinicalHistory | undefined, error?: Error }> {
+  console.log('get clinical history')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No user found')
+    return { clinicalHistory: undefined, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT * FROM psicobooking_clinic_history WHERE id = ?`,
+      args: [id]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { clinicalHistory: undefined, error: new Error('Historia clinica no encontrada') }
+    }
+
+    console.log('rows', rows)
+    return { clinicalHistory: singleClinicalHistoryDTO(rows[0]) }
+  } catch (error) {
+    console.error(error)
+    return { clinicalHistory: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

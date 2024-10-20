@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
-import { Monitor } from "lucide-react"
 import { SunIcon as Sun, MoonIcon as Moon } from "../icons";
 
 type Theme = "system" | "light" | "dark"

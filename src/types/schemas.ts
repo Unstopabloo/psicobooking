@@ -43,3 +43,10 @@ export const TreatmentSchema = z.object({
   date_to: z.date().optional(),
   session_type: z.string().optional()
 })
+
+export const ClinicalHistorySchema = z.object({
+  id: z.number().optional(),
+  patient_id: z.number().optional(),
+  title: z.string().optional(),
+  content: z.string().optional()
+})

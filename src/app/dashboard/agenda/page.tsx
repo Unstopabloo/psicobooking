@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default async function AgendaPage() {
   return (
-    <Container>
+    <Container className="px-2 lg:px-32 xl:px-32 2xl:px-80">
       <header className="flex items-center justify-between">
         <H1>Mi agenda</H1>
         <TooltipProvider>

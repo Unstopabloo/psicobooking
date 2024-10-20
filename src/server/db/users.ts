@@ -61,14 +61,11 @@ export async function updateRole(role: string) {
       args: [role, userId]
     })
 
-    console.log('rows', rows)
-
     if (rows[0]?.length === 0) {
       return { error: new Error('Error updating role') }
     }
 
     const res_id = rows[0]?.id
-    console.log('res_id', res_id)
     return { res_id }
   } catch (error) {
     console.error(error)

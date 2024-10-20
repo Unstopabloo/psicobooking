@@ -213,3 +213,17 @@
     transform: scale(1.5);
   }
 }
+
+.tippy-content {
+  padding: 0 !important;
+  border: 1px solid var(--border) !important;
+  width: auto !important;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: rgb(123, 123, 130);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

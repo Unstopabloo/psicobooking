@@ -23,7 +23,7 @@ export async function FichaClinicaComponent({ patientId }: { patientId: string }
       <header className="w-full flex items-center justify-between gap-10 pb-10">
         <H1>Ficha Clinica de {singlePatientTicket.first_name}</H1>
         <Button asChild variant="link">
-          <Link href="/">Ver historial clinico</Link>
+          <Link href={`/dashboard/pacientes/${patientId}/historial-clinico`}>Ver historial clinico</Link>
         </Button>
       </header>
       <div aria-label="Contenedor formularios" className="grid grid-cols-1 lg:grid-cols-2 gap-6">

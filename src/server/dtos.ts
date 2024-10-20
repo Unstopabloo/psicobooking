@@ -1,4 +1,4 @@
-import { Appointment, ContactBase, ContactInfo, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, ClinicalHistory, ContactBase, ContactInfo, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -68,5 +68,25 @@ export const singlePatientTicketDTO = (singlePatientTicket: Row): SinglePatientT
     motive_end: singlePatientTicket.motive_end as string,
     motive_reason: singlePatientTicket.motive_reason as string,
     diagnostic_guidance: singlePatientTicket.diagnostic_guidance as string
+  }
+}
+
+export const clinicalHistoryDTO = (clinicalHistory: Row[]): ClinicalHistory[] => {
+  return clinicalHistory.map(history => ({
+    id: history.id as number,
+    patient_id: history.patient_id as number,
+    title: history.title as string,
+    content: history.content as string,
+    created_at: history.created_at as string
+  }))
+}
+
+export const singleClinicalHistoryDTO = (clinicalHistory: Row): ClinicalHistory => {
+  return {
+    id: clinicalHistory.id as number,
+    patient_id: clinicalHistory.patient_id as number,
+    title: clinicalHistory.title as string,
+    content: clinicalHistory.content as string,
+    created_at: clinicalHistory.created_at as string
   }
 }

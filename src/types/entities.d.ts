@@ -99,3 +99,11 @@ export interface SinglePatientTicket {
   motive_reason: string | null;
   diagnostic_guidance: string | null;
 }
+
+export interface ClinicalHistory {
+  id: number;
+  patient_id: number;
+  title: string;
+  content: string;
+  created_at: string;
+}

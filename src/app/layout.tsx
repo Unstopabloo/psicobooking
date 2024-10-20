@@ -26,7 +26,7 @@ export default function RootLayout({
           <html lang="es" className={`${GeistSans.variable}`}>
             <body>
               {children}
-              <Toaster />
+              <Toaster richColors />
               <ScreenSizeIndicator />
             </body>
           </html>
