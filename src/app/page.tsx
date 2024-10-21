@@ -8,6 +8,7 @@ import psychologistExample from "../../public/psychologist-example.webp";
 import onlinepb from "../../public/onlinepb.webp";
 import quality from "../../public/quality.webp";
 import girl from "../../public/girl.webp";
+import isotipo from "../../public/isotipo.webp";
 
 import { Button } from "@/components/ui/button"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
@@ -264,19 +265,19 @@ export default function HomePage() {
       <header className="w-full fixed top-0 left-0 z-50 bg-gradient-to-b from-card to-card/0 filter backdrop-blur-md">
         <div aria-label="contenedor de header" className="container mx-auto flex items-center justify-between py-2 md:py-6 px-4 lg:px-6 xl:px-28 2xl:px-52">
           <div className="flex items-center">
-            <Image src="/isotipo.webp" priority alt="logo" width={70} height={70} />
+            <Image src={isotipo} priority alt="logo" width={70} height={70} />
             <strong className="hidden lg:block font-medium text-lg">PsicoBooking</strong>
           </div>
           <div className="flex items-center gap-4 md:gap-10">
             <Dialog>
               <DialogTrigger className="group relative text-foreground text-sm hover:text-primary duration-200 font-medium">
                 <div className='group-hover:w-full group-hover:opacity-100 duration-300 opacity-50 h-px w-0 bg-primary absolute -bottom-1 left-0'></div>
-                ¿Necesitas ayuda?
+                Afrontar crisis
               </DialogTrigger>
               <DialogContent className='max-w-3xl bg-card'>
                 <DialogHeader>
                   <div className="flex items-center pb-6">
-                    <Image src="/isotipo.webp" priority alt="logo" width={40} height={40} />
+                    <Image src={isotipo} priority alt="logo" width={40} height={40} />
                     <strong className="hidden lg:block font-medium text-base">PsicoBooking</strong>
                   </div>
                   <DialogTitle className='text-balance text-lg text-primary font-semibold'>
@@ -798,7 +799,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 lg:px-20 xl:px-52 flex flex-col lg:flex-row items-center justify-between">
           <div className='flex items-center gap-6'>
             <div className="flex items-center">
-              <Image className='mb-1' src="/isotipo.webp" priority alt="logo" width={40} height={40} />
+              <Image className='mb-1' src={isotipo} priority alt="logo" width={40} height={40} />
               <strong className="font-normal text-base">PsicoBooking</strong>
               ™
             </div>

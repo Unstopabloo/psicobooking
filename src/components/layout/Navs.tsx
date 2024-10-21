@@ -100,7 +100,7 @@ export function DesktopNav() {
   )
 }
 
-function NavLink({ href, description, children }: { href: string; description: string; children: React.ReactNode }) {
+export function NavLink({ href, description, children }: { href: string; description: string; children: React.ReactNode }) {
   const pathname = usePathname()
 
   return (

@@ -9,7 +9,6 @@ export const onBoarding = authAction
   .schema(onBoardingSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
     try {
-      console.log('parsedeInput', parsedInput)
       const [clerkUpdateUser, roleUpdateResult] = await Promise.all([
         clerkClient().users.updateUser(userId, {
           publicMetadata: {

@@ -37,15 +37,7 @@ const ROUTES = [
       {
         name: "Pacientes",
         href: "/dashboard/pacientes"
-      },
-      // {
-      //   name: "Ficha Clinica",
-      //   href: "/dashboard/pacientes/ficha-clinica"
-      // },
-      // {
-      //   name: "Historia Clinica",
-      //   href: "/dashboard/pacientes/historia-clinica"
-      // }
+      }
     ]
   }
 ]
@@ -62,6 +54,22 @@ export function SubNav() {
     }
   }, [pathname])
 
+  if (pathname.includes('/dashboard/pacientes/')) {
+    return (
+      <nav className="flex items-center justify-end" aria-label="navegacion secundaria">
+        <ul className="flex items-center justify-end">
+          <Link
+            key={Math.random()}
+            href='/dashboard/pacientes'
+            className={cn(`rounded-none h-full py-2 px-4 text-sm flex items-center justify-center`, isActive('/dashboard/pacientes') && 'cursor-default events-none bg-background')}
+          >
+            Pacientes
+          </Link>
+        </ul>
+      </nav>
+    )
+  }
+
   return (
     <nav className="flex items-center justify-end" aria-label="navegacion secundaria">
       {route.map(route => (
@@ -77,7 +85,8 @@ export function SubNav() {
             >
               {path.name}
             </Link>
-          ))}
+          )
+          )}
         </ul>
       ))}
     </nav>

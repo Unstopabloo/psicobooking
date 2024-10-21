@@ -4,14 +4,14 @@ export function getCountryPhoneCode(country: string): string | null {
   const normalizedInput = country.toLowerCase().trim();
 
   // Búsqueda directa
-  if (normalizedInput in countryPhoneCodes) {
-    return countryPhoneCodes[normalizedInput]!.code;
+  if (countryPhoneCodes.find((country) => country.name.trim().toLowerCase() === normalizedInput)) {
+    return countryPhoneCodes.find((country) => country.name.trim().toLowerCase() === normalizedInput)!.code;
   }
 
   // Búsqueda por alias
-  for (const [countryName, data] of Object.entries(countryPhoneCodes)) {
-    if (data.aliases.includes(normalizedInput)) {
-      return data.code;
+  for (const country of countryPhoneCodes) {
+    if (country.aliases.includes(normalizedInput)) {
+      return country.code;
     }
   }
 

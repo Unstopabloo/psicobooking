@@ -1,11 +1,12 @@
 import { SeeMore } from "@/components/buttons/SeeMore";
 import { Activities } from "@/components/dashboard/Activities";
-import { AgendaTable } from "@/components/dashboard/AgendaTable";
+import { AgendaTable, AgendaTableLoading } from "@/components/dashboard/AgendaTable";
 import { Chats } from "@/components/dashboard/Chats";
-import { Meetings } from "@/components/dashboard/Meetings";
+import { Meetings, MeetingsLoading } from "@/components/dashboard/Meetings";
 import { DashboardIncomeTable } from "@/components/charts/DashboardIncomeChart";
 import { DashboardPatientsChart } from "@/components/charts/DashboardPatientsChart";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Dashboard | Psicobooking",
@@ -26,21 +27,25 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-14 animate-fade-up animate-ease-out animate-duration-500">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-1 md:gap-x-14 animate-fade-up animate-ease-out animate-duration-500">
       <Section
-        href="pacientes"
-        seeMoreText="Ver todas"
+        href="agenda"
+        seeMoreText="Ver todas las citas"
         title="Proximas citas"
         is_h1
       >
-        <Meetings />
+        <Suspense fallback={<MeetingsLoading />}>
+          <Meetings />
+        </Suspense>
       </Section>
       <Section
-        href="agenda"
-        seeMoreText="Mi agenda"
-        title="Agenda rapida"
+        href="pacientes"
+        seeMoreText="Todos mis pacientes"
+        title="Mis pacientes"
       >
-        <AgendaTable />
+        <Suspense fallback={<AgendaTableLoading />}>
+          <AgendaTable />
+        </Suspense>
       </Section>
       <Section
         href="finanzas"
@@ -68,7 +73,7 @@ async function Section({ href, seeMoreText, title, children, is_h1 }: { href: st
   return (
     <section>
       <header className="flex items-center justify-between pb-5">
-        {is_h1 ? <h1 className="font-semibold">{title}</h1> : <h2 className="font-semibold">{title}</h2>}
+        {is_h1 ? <h1 className="section-title font-semibold">{title}</h1> : <h2 className="section-title font-semibold">{title}</h2>}
         <SeeMore href={`/dashboard/${href}`} text={seeMoreText} />
       </header>
       {children}

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover"
 
 export function DatePicker({
-  className,
+  className
 }: React.HTMLAttributes<HTMLDivElement>) {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(),

@@ -21,12 +21,28 @@ import { AnimatePresence, motion, useAnimation } from "framer-motion"
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-const FeatureCard = ({ text, isCentered, icon }: { text: string; isCentered: boolean; icon: React.ReactNode }) => (
+const FeatureCard = ({ text, isCentered }: { text: string; isCentered: boolean }) => (
   <motion.div
     className={`rounded-xl text-primary p-4 w-72 h-80 flex flex-col items-center justify-between text-center shadow-lg transition-colors duration-300 ${isCentered ? 'bg-white' : 'bg-white/30 backdrop-blur-md'
       }`}
   >
-    {icon}
+    <div className='self-end [&>svg]:stroke-primary'>
+      {
+        text === 'Mantén tus notas y recordatorios organizados en un solo lugar seguro' ? (
+          <StickyNote01Icon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Conecta con una comunidad de profesionales de la salud mental' ? (
+          <UserListIcon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Gestiona tus sesiones de terapia de manera organizada' ? (
+          <Calendar03Icon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Mantén el seguimiento de tus pacientes con facilidad' ? (
+          <DollarSquareIcon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Crea actividades personalizadas para un seguimiento más efectivo' ? (
+          <Setting07Icon className='self-end text-primary' width={32} height={32} />
+        ) : (
+          <Calendar03Icon className='self-end text-primary' width={32} height={32} />
+        )
+      }
+    </div>
     <p className="text-lg font-medium text-start">{text}</p>
   </motion.div>
 )
@@ -35,43 +51,33 @@ const VerticalCarousel = ({ direction = "up" }: { direction?: "up" | "down" }) =
   const features = [
     {
       text: "Mantén tus notas y recordatorios organizados en un solo lugar seguro",
-      icon: <StickyNote01Icon className='self-end' color='primary' />
     },
     {
       text: "Conecta con una comunidad de profesionales de la salud mental",
-      icon: <UserListIcon className='self-end' color='primary' />
     },
     {
       text: "Gestiona tus sesiones de terapia de manera organizada",
-      icon: <Calendar03Icon className='self-end' color='primary' />
     },
     {
       text: "Mantén el seguimiento de tus pacientes con facilidad",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Crea actividades personalizadas para un seguimiento más efectivo",
-      icon: <Setting07Icon className='self-end' color='primary' />
     },
     {
       text: "Recibe pagos de pacientes de manera sencilla y segura",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Conecta con una comunidad de profesionales de la salud mental",
-      icon: <UserListIcon className='self-end' color='primary' />
     },
     {
       text: "Gestiona tus sesiones de terapia de manera organizada",
-      icon: <Calendar03Icon className='self-end' color='primary' />
     },
     {
       text: "Mantén el seguimiento de tus pacientes con facilidad",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Crea actividades personalizadas para un seguimiento más efectivo",
-      icon: <Setting07Icon className='self-end' color='primary' />
     },
   ]
 
@@ -137,7 +143,6 @@ const VerticalCarousel = ({ direction = "up" }: { direction?: "up" | "down" }) =
           <div key={index} className="mb-10 feature-card">
             <FeatureCard
               text={feature.text}
-              icon={feature.icon}
               isCentered={index % features.length === centeredIndex}
             />
           </div>
