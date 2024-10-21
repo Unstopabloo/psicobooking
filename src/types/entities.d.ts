@@ -127,3 +127,13 @@ export interface DashboardPatient {
   genero: string;
   telefono: string;
 }
+
+export interface AppointmentCard {
+  id: number;
+  psychologist_id: number;
+  patient_id: number;
+  avatar: string | null;
+  name: string | null;
+  date_from: string | null;
+  date_to: string | null;
+}

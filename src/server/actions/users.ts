@@ -2,10 +2,11 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
-import { clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO } from "../dtos";
+import { AppointmentCard, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { appointmentCardDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
+import { revalidatePath } from "next/cache";
 
 export const updatePatient = authAction
   .schema(PatientSchema)
@@ -286,7 +287,6 @@ export async function getClinicalHistories(patientId: number): Promise<{ clinica
       args: [patientId]
     })
 
-    console.log('rows', rows)
     return { clinicalHistory: clinicalHistoryDTO(rows) }
   } catch (error) {
     console.error(error)
@@ -313,10 +313,67 @@ export async function getClinicalHistory(id: number): Promise<{ clinicalHistory:
       return { clinicalHistory: undefined, error: new Error('Historia clinica no encontrada') }
     }
 
-    console.log('rows', rows)
     return { clinicalHistory: singleClinicalHistoryDTO(rows[0]) }
   } catch (error) {
     console.error(error)
     return { clinicalHistory: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAppointmentsByDate(date_from?: string, date_to?: string): Promise<string> {
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No user found')
+    const response = JSON.stringify({ appointments: undefined, error: 'No estas autorizado' })
+    return response
+  }
+
+  try {
+    let sql = `
+      SELECT
+        app.id,
+        app.psychologist_id,
+        app.patient_id,
+        pa.avatar,
+        pa.first_name || ' ' || pa.last_name AS name,
+        app.date_from,
+        app.date_to
+      FROM
+        psicobooking_appointment app
+      LEFT JOIN 
+        psicobooking_user pa ON pa.id = app.patient_id
+      LEFT JOIN 
+        psicobooking_user psy ON psy.id = app.psychologist_id
+      WHERE
+        psy.clerk_id = :user_id
+    `
+
+    const args: Record<string, string> = { user_id: userId }
+
+    if (date_from && date_to) {
+      sql += ` AND date(substr(app.date_from, 1, 10)) >= date(:date_from) AND date(substr(app.date_to, 1, 10)) <= date(:date_to)`
+      args.date_from = date_from
+      args.date_to = date_to
+    }
+
+    sql += ` ORDER BY app.date_from`
+
+    const { rows } = await turso.execute({ sql, args })
+
+    if (rows.length === 0) {
+      const response = JSON.stringify({ appointments: undefined, error: 'No hay citas para esta fecha' })
+      console.log('response', response)
+      return response
+    }
+
+    revalidatePath('/agenda')
+    const response = JSON.stringify({ appointments: appointmentCardDTO(rows) })
+    console.log('response', response)
+    return response
+  } catch (error) {
+    console.error(error)
+    const response = JSON.stringify({ appointments: [], error: error instanceof Error ? error : new Error('Error inesperado') })
+    return response
   }
 }

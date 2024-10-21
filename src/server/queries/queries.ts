@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query";
-import { getClinicalHistory, getContactInfo, getPatientTicket } from "../actions/users";
+import { getAppointmentsByDate, getClinicalHistory, getContactInfo, getPatientTicket } from "../actions/users";
 
 export function usePatient(patientId: number) {
   return useQuery({

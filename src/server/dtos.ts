@@ -1,4 +1,4 @@
-import { Appointment, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCard, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -112,5 +112,17 @@ export const dashboardPatientDTO = (dashboardPatients: Row[]): DashboardPatient[
     nacionalidad: patient.nacionalidad as string,
     genero: patient.genero as string,
     telefono: patient.telefono as string
+  }))
+}
+
+export const appointmentCardDTO = (appointmentCard: Row[]): AppointmentCard[] => {
+  return appointmentCard.map(app => ({
+    id: app.id as number,
+    psychologist_id: app.psychologist_id as number,
+    patient_id: app.patient_id as number,
+    avatar: app.avatar as string | null,
+    name: app.name as string | null,
+    date_from: app.date_from as string | null,
+    date_to: app.date_to as string | null
   }))
 }

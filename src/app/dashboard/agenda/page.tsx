@@ -27,7 +27,10 @@ export default async function AgendaPage() {
   return (
     <Container className="px-2 lg:px-32 xl:px-32 2xl:px-80">
       <header className="flex items-center justify-between">
-        <H1>Mi agenda</H1>
+        <div className="flex flex-col items-start">
+          <H1>Mi agenda</H1>
+          <p className="text-sm text-muted-foreground">Explora tu agenda de citas y gestiona tus citas con facilidad.</p>
+        </div>
         <TooltipProvider>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>

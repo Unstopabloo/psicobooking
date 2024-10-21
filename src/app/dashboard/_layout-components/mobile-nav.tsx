@@ -11,7 +11,7 @@ export function MobileNav() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="w-full block sm:hidden fixed bottom-20 right-0">
+    <div className="w-full block sm:hidden fixed bottom-10 right-0">
       <div className="flex flex-col items-center gap-4 justify-end w-full ps-4 pe-8">
         <Button
           onClick={() => setOpen(!open)}
