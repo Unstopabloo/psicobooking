@@ -363,13 +363,11 @@ export async function getAppointmentsByDate(date_from?: string, date_to?: string
 
     if (rows.length === 0) {
       const response = JSON.stringify({ appointments: undefined, error: 'No hay citas para esta fecha' })
-      console.log('response', response)
       return response
     }
 
     revalidatePath('/agenda')
     const response = JSON.stringify({ appointments: appointmentCardDTO(rows) })
-    console.log('response', response)
     return response
   } catch (error) {
     console.error(error)
