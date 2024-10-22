@@ -126,3 +126,10 @@ export const appointmentCardDTO = (appointmentCard: Row[]): AppointmentCard[] =>
     date_to: app.date_to as string | null
   }))
 }
+
+export const upcomingAppointmentDTO = (upcomingAppointment: Row[]): { date: string, quant: number }[] => {
+  return upcomingAppointment.map(app => ({
+    date: app.date as string,
+    quant: app.quant as number
+  }))
+}

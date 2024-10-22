@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
 import { AppointmentCard, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
-import { appointmentCardDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO } from "../dtos";
+import { appointmentCardDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
@@ -373,5 +373,102 @@ export async function getAppointmentsByDate(date_from?: string, date_to?: string
     console.error(error)
     const response = JSON.stringify({ appointments: [], error: error instanceof Error ? error : new Error('Error inesperado') })
     return response
+  }
+}
+
+export async function getUpcommingAppointments(date_from: string): Promise<{ appointments: AppointmentCard[] | undefined, error?: Error }> {
+  console.log('get upcomming appointments')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { appointments: undefined, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT
+          app.id,
+          app.psychologist_id,
+          app.patient_id,
+          pa.avatar,
+          pa.first_name || ' ' || pa.last_name AS name,
+          app.date_from,
+          app.date_to
+        FROM
+          psicobooking_appointment app
+        LEFT JOIN 
+          psicobooking_user pa ON pa.id = app.patient_id
+        LEFT JOIN 
+          psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE
+          psy.clerk_id = :user_id
+        AND
+          app.date_from >= :date_from
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { appointments: undefined, error: new Error('No hay citas para esta fecha') }
+    }
+
+    return { appointments: appointmentCardDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { appointments: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getUpcomingAppointmentData(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
+  console.log('get upcoming appointment data')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { data: undefined, error: new Error('No estas autorizado') }
+  }
+
+  if (!date_from) {
+    return { data: undefined, error: new Error('No se proporcionó la fecha de inicio') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+      SELECT
+        DATE(app.date_from) AS date,
+        COUNT(*) AS quant
+      FROM
+        psicobooking_appointment app
+      LEFT JOIN
+        psicobooking_user user ON user.id = app.psychologist_id
+      WHERE
+        user.clerk_id = :user_id
+      AND
+        app.date_from >= DATE(:date_from)
+      GROUP BY
+        DATE(app.date_from)
+      ORDER BY
+        DATE(app.date_from);
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { data: undefined }
+    }
+
+    return { data: upcomingAppointmentDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

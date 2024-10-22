@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query";
-import { getAppointmentsByDate, getClinicalHistory, getContactInfo, getPatientTicket } from "../actions/users";
+import { getAppointmentsByDate, getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentData } from "../actions/users";
 
 export function usePatient(patientId: number) {
   return useQuery({
@@ -29,6 +29,15 @@ export function useClinicalHistory(id: number | null) {
     queryFn: () => id ? getClinicalHistory(id) : null,
     enabled: id !== null,
     refetchOnMount: false,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useUpcomingAppointmentData(date_from: string) {
+  return useQuery({
+    queryKey: ['upcoming-appointment', date_from],
+    queryFn: () => getUpcomingAppointmentData(date_from),
+    refetchOnMount: true,
     staleTime: 5 * 60 * 1000,
   });
 }

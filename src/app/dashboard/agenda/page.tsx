@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { Container } from "../_layout-components/container";
 import H1 from "@/components/H1";
 import { Scheduler } from "@/components/agenda/scheduler";
+import { CalendarSearch } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: "Agenda | Psicobooking",
@@ -35,11 +36,7 @@ export default async function AgendaPage() {
         <TooltipProvider>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
-              <Scheduler>
-                <Button variant="ghost" size="icon" className="p-1 opacity-75 cursor-not-allowed">
-                  <DashboardIcon />
-                </Button>
-              </Scheduler>
+              <Scheduler />
             </TooltipTrigger>
             <TooltipContent>
               <p>Cambiar visualización</p>

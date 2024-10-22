@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarSearch, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isSameMonth, isToday, parseISO, isBefore } from 'date-fns'
@@ -14,28 +14,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
+import { useUpcomingAppointmentData } from '@/server/queries/queries'
 
 const DAYS = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM']
 const MONTHS = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
 
-// Sample event data
-const EVENTS = {
-  '2024-10-30': [{ title: 'Reunion con el equipo' }],
-  '2024-10-22': [{ title: 'Cita con el dentista' }],
-  '2024-10-21': [{ title: 'Fiesta de cumpleaños' }],
-}
-
-export function Scheduler({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export function Scheduler() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
+
+  const { data: APPOINTMENTS } = useUpcomingAppointmentData(format(currentDate, 'yyyy-MM-dd'))
 
   const prevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1))
@@ -51,16 +43,20 @@ export function Scheduler({
     setIsOpen(true)
   }
 
-  const hasEvents = (day: number) => {
+  const hasAPPOINTMENTS = (day: number) => {
     const dateString = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd')
-    return dateString in EVENTS && EVENTS[dateString as keyof typeof EVENTS].length > 0
+    return APPOINTMENTS?.data?.some(event => event.date === dateString) || false
   }
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex justify-center items-start pt-10 max-w-2xl">
-        <div className="p-4 rounded-lg w-[850px]">
+      <DialogTrigger asChild>
+        <Button aria-label="Modificar disponibilidad" variant="ghost" size="icon" className="p-1 opacity-70">
+          <CalendarSearch size={20} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex justify-center items-start max-w-md sm:max-w-2xl px-3 pt-10 sm:p-8">
+        <div className="p-1 sm:p-4 rounded-lg w-[850px]">
           <DialogHeader className="flex flex-row justify-between items-center mb-4">
             <DialogTitle className="font-semibold">{MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}</DialogTitle>
             <div className="flex space-x-2">
@@ -93,16 +89,31 @@ export function Scheduler({
                   key={day}
                   variant="outline"
                   className={cn(
-                    `relative text-center py-8`,
+                    `relative text-center py-6 sm:py-8`,
                     isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed',
                     isCurrentDay && 'border-primary'
                   )}
                   onClick={() => !isPastDay && handleDateClick(day)}
                   disabled={isPastDay}
                 >
-                  {hasEvents(day) && (
-                    <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
-                  )}
+                  {
+                    hasAPPOINTMENTS(day) &&
+                      APPOINTMENTS?.data &&
+                      APPOINTMENTS.data.find(event => event.date === format(
+                        new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
+                        'yyyy-MM-dd'
+                      ))!.quant > 1 ? (
+                      <span className="absolute top-1 right-1 text-xs font-light text-primary">{APPOINTMENTS.data.find(event => event.date === format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd'))!.quant}</span>
+                    ) :
+                      hasAPPOINTMENTS(day) &&
+                        APPOINTMENTS?.data &&
+                        APPOINTMENTS.data.find(event => event.date === format(
+                          new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
+                          'yyyy-MM-dd'
+                        ))!.quant == 1 ? (
+                        <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
+                      ) : null
+                  }
                   {day}
                 </Button>
               )
@@ -120,9 +131,9 @@ export function Scheduler({
               {selectedDate && (
                 <>
                   <h3 className="font-bold mb-2">Eventos:</h3>
-                  {EVENTS[format(selectedDate, 'yyyy-MM-dd') as keyof typeof EVENTS] ? (
-                    EVENTS[format(selectedDate, 'yyyy-MM-dd') as keyof typeof EVENTS].map((event, index) => (
-                      <p key={index}>{event.title}</p>
+                  {APPOINTMENTS?.data && APPOINTMENTS.data.filter(event => event.date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? (
+                    APPOINTMENTS.data.filter(event => event.date === format(selectedDate, 'yyyy-MM-dd')).map((event, index) => (
+                      <p key={index}>{event.quant}</p>
                     ))
                   ) : (
                     <p>No hay eventos para este día.</p>
