@@ -405,7 +405,7 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
         WHERE
           psy.clerk_id = :user_id
         AND
-          app.date_from >= :date_from
+          DATE(app.date_from) = DATE(:date_from)
       `,
       args: {
         user_id: userId,
@@ -414,7 +414,7 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
     })
 
     if (rows.length === 0 || !rows) {
-      return { appointments: undefined, error: new Error('No hay citas para esta fecha') }
+      return { appointments: undefined }
     }
 
     return { appointments: appointmentCardDTO(rows) }
@@ -424,7 +424,7 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
   }
 }
 
-export async function getUpcomingAppointmentData(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
+export async function getUpcomingAppointmentsData(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
   console.log('get upcoming appointment data')
   const { userId } = auth()
 

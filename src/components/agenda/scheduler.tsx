@@ -15,9 +15,8 @@ import {
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
 import { useUpcomingAppointmentData } from '@/server/queries/queries'
-
-const DAYS = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM']
-const MONTHS = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+import { DAYS, MONTHS } from '@/lib/consts'
+import { SchedulerAppointmentsSheet } from './schedulerAppointmentsSheet'
 
 export function Scheduler() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -46,6 +45,11 @@ export function Scheduler() {
   const hasAPPOINTMENTS = (day: number) => {
     const dateString = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd')
     return APPOINTMENTS?.data?.some(event => event.date === dateString) || false
+  }
+
+  const getAppointmentCount = (day: number) => {
+    const dateString = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd')
+    return APPOINTMENTS?.data?.find(event => event.date === dateString)?.quant || 0
   }
 
   return (
@@ -83,6 +87,7 @@ export function Scheduler() {
               const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
               const isPastDay = isBefore(dateToCheck, currentDay) && !isToday(dateToCheck)
               const isCurrentDay = isToday(dateToCheck)
+              const appointmentCount = getAppointmentCount(day)
 
               return (
                 <Button
@@ -90,59 +95,31 @@ export function Scheduler() {
                   variant="outline"
                   className={cn(
                     `relative text-center py-6 sm:py-8`,
-                    isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed',
+                    isPastDay && 'bg-card/70 opacity-50 cursor-not-allowed',
                     isCurrentDay && 'border-primary'
                   )}
                   onClick={() => !isPastDay && handleDateClick(day)}
                   disabled={isPastDay}
                 >
-                  {
-                    hasAPPOINTMENTS(day) &&
-                      APPOINTMENTS?.data &&
-                      APPOINTMENTS.data.find(event => event.date === format(
-                        new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
-                        'yyyy-MM-dd'
-                      ))!.quant > 1 ? (
-                      <span className="absolute top-1 right-1 text-xs font-light text-primary">{APPOINTMENTS.data.find(event => event.date === format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd'))!.quant}</span>
-                    ) :
-                      hasAPPOINTMENTS(day) &&
-                        APPOINTMENTS?.data &&
-                        APPOINTMENTS.data.find(event => event.date === format(
-                          new Date(currentDate.getFullYear(), currentDate.getMonth(), day),
-                          'yyyy-MM-dd'
-                        ))!.quant == 1 ? (
-                        <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
-                      ) : null
-                  }
+                  {appointmentCount > 0 && (
+                    appointmentCount > 1 ? (
+                      <span className="absolute top-1 right-1 text-xs font-light text-primary">{appointmentCount}</span>
+                    ) : (
+                      <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
+                    )
+                  )}
                   {day}
                 </Button>
               )
             })}
           </div>
         </div>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>
-                {selectedDate && format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-              </SheetTitle>
-            </SheetHeader>
-            <div className="mt-4">
-              {selectedDate && (
-                <>
-                  <h3 className="font-bold mb-2">Eventos:</h3>
-                  {APPOINTMENTS?.data && APPOINTMENTS.data.filter(event => event.date === format(selectedDate, 'yyyy-MM-dd')).length > 0 ? (
-                    APPOINTMENTS.data.filter(event => event.date === format(selectedDate, 'yyyy-MM-dd')).map((event, index) => (
-                      <p key={index}>{event.quant}</p>
-                    ))
-                  ) : (
-                    <p>No hay eventos para este día.</p>
-                  )}
-                </>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        <SchedulerAppointmentsSheet
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          selectedDate={selectedDate}
+          currentDate={currentDate}
+        />
       </DialogContent>
     </Dialog>
   )
