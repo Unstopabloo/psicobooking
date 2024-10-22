@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
-const isPublicRoute = createRouteMatcher(['/', '/sign-in', '/sign-up', '/api/wh/sync'])
+const isPublicRoute = createRouteMatcher(['/', '/sign-in', '/sign-up', '/api/wh/sync', '/ingest/e/', '/monitoring'])
 
 export default clerkMiddleware((auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = auth()
@@ -16,7 +16,10 @@ export default clerkMiddleware((auth, req: NextRequest) => {
   }
 
   // If the user isn't signed in and the route is private, redirect to sign-in
-  if (!userId && !isPublicRoute(req)) return redirectToSignIn({ returnBackUrl: req.url })
+  if (!userId && !isPublicRoute(req)) {
+    console.log('redirectinggggg.....')
+    return redirectToSignIn({ returnBackUrl: req.url })
+  }
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboading route to complete onboarding
@@ -36,7 +39,7 @@ export const config = {
     // Apply to all routes except Next.js static files and images
     '/((?!_next/static|_next/image|favicon.ico).*)',
     // Always run for API routes
-    '/(api|trpc)(.*)',
+    '/(api|trpc)(.*)'
   ],
 };
 

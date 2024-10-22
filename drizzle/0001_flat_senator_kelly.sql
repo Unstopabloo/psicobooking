@@ -1,1 +1,0 @@
-ALTER TABLE `psicobooking_user` ADD `clerk_id` text NOT NULL;

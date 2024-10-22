@@ -1,3 +1,13 @@
+import { cn } from "@/lib/utils"
+
+export function Spinner({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(`w-6 h-6 border-2 border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin duration-1000`, className)}
+    ></div>
+  )
+}
+
 export function Loader() {
   return (
     <div className="flex-col gap-4 w-full flex items-center justify-center">

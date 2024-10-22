@@ -18,15 +18,34 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AnimatePresence, motion, useAnimation } from "framer-motion"
 
+import logofull from "../../../../public/logo-full.png";
+import signinflow from "../../../../public/signflow.webp";
+
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
-const FeatureCard = ({ text, isCentered, icon }: { text: string; isCentered: boolean; icon: React.ReactNode }) => (
+const FeatureCard = ({ text, isCentered }: { text: string; isCentered: boolean }) => (
   <motion.div
     className={`rounded-xl text-primary p-4 w-72 h-80 flex flex-col items-center justify-between text-center shadow-lg transition-colors duration-300 ${isCentered ? 'bg-white' : 'bg-white/30 backdrop-blur-md'
       }`}
   >
-    {icon}
+    <div className='self-end [&>svg]:stroke-primary'>
+      {
+        text === 'Mantén tus notas y recordatorios organizados en un solo lugar seguro' ? (
+          <StickyNote01Icon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Conecta con una comunidad de profesionales de la salud mental' ? (
+          <UserListIcon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Gestiona tus sesiones de terapia de manera organizada' ? (
+          <Calendar03Icon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Mantén el seguimiento de tus pacientes con facilidad' ? (
+          <DollarSquareIcon className='self-end text-primary' width={32} height={32} />
+        ) : text === 'Crea actividades personalizadas para un seguimiento más efectivo' ? (
+          <Setting07Icon className='self-end text-primary' width={32} height={32} />
+        ) : (
+          <Calendar03Icon className='self-end text-primary' width={32} height={32} />
+        )
+      }
+    </div>
     <p className="text-lg font-medium text-start">{text}</p>
   </motion.div>
 )
@@ -35,43 +54,33 @@ const VerticalCarousel = ({ direction = "up" }: { direction?: "up" | "down" }) =
   const features = [
     {
       text: "Mantén tus notas y recordatorios organizados en un solo lugar seguro",
-      icon: <StickyNote01Icon className='self-end' color='primary' />
     },
     {
       text: "Conecta con una comunidad de profesionales de la salud mental",
-      icon: <UserListIcon className='self-end' color='primary' />
     },
     {
       text: "Gestiona tus sesiones de terapia de manera organizada",
-      icon: <Calendar03Icon className='self-end' color='primary' />
     },
     {
       text: "Mantén el seguimiento de tus pacientes con facilidad",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Crea actividades personalizadas para un seguimiento más efectivo",
-      icon: <Setting07Icon className='self-end' color='primary' />
     },
     {
       text: "Recibe pagos de pacientes de manera sencilla y segura",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Conecta con una comunidad de profesionales de la salud mental",
-      icon: <UserListIcon className='self-end' color='primary' />
     },
     {
       text: "Gestiona tus sesiones de terapia de manera organizada",
-      icon: <Calendar03Icon className='self-end' color='primary' />
     },
     {
       text: "Mantén el seguimiento de tus pacientes con facilidad",
-      icon: <DollarSquareIcon className='self-end' color='primary' />
     },
     {
       text: "Crea actividades personalizadas para un seguimiento más efectivo",
-      icon: <Setting07Icon className='self-end' color='primary' />
     },
   ]
 
@@ -137,7 +146,6 @@ const VerticalCarousel = ({ direction = "up" }: { direction?: "up" | "down" }) =
           <div key={index} className="mb-10 feature-card">
             <FeatureCard
               text={feature.text}
-              icon={feature.icon}
               isCentered={index % features.length === centeredIndex}
             />
           </div>
@@ -154,7 +162,7 @@ export default function SignInPage() {
         <section className='grid-cols-1 flex justify-center'>
           <SignIn.Step name="start">
             <header>
-              <Image src="/logo-full.png" alt="logo psicobooking" width={200} height={300} />
+              <Image src={logofull} alt="logo psicobooking" width={200} height={300} />
               <div className='flex flex-col items-start py-20'>
                 <h1 className='text-4xl text-foreground/90 font-bold py-3 max-w-[450px]'>Ingresa para mantener tus sesiones al dia.</h1>
                 <small className='text-base text-foreground/85'>Haz el seguimiento de tus pacientes</small>
@@ -207,7 +215,7 @@ export default function SignInPage() {
           <SignIn.Step name="verifications">
             <SignIn.Strategy name="email_code">
               <header>
-                <Image src="/logo-full.png" alt="logo psicobooking" width={200} height={300} />
+                <Image src={logofull} alt="logo psicobooking" width={200} height={300} />
                 <div className='flex flex-col items-start py-20'>
                   <h1 className='text-2xl text-foreground/90 font-bold py-3 max-w-[450px]'>Enviamos un código a tu email</h1>
                   <p className='text-foreground/90'>Por favor, verifica <SignIn.SafeIdentifier />.</p>
@@ -266,7 +274,7 @@ export default function SignInPage() {
           </SignIn.Step>
         </section>
         <section className='relative hidden lg:flex gap-10 items-center justify-center w-full h-full min-h-full overflow-hidden rounded-[30px] bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500'>
-          <Image src="/signflow.webp" alt="signflow" fill style={{ objectFit: 'cover' }} />
+          <Image src={signinflow} alt="signflow" fill style={{ objectFit: 'cover' }} />
           <VerticalCarousel />
         </section>
       </main>

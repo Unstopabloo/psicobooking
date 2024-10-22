@@ -5,6 +5,7 @@ import { AgendaList } from "@/components/agenda/AgendaList";
 import { Metadata } from "next";
 import { Container } from "../_layout-components/container";
 import H1 from "@/components/H1";
+import { Scheduler } from "@/components/agenda/scheduler";
 
 export const metadata: Metadata = {
   title: "Agenda | Psicobooking",
@@ -25,15 +26,20 @@ export const metadata: Metadata = {
 
 export default async function AgendaPage() {
   return (
-    <Container>
+    <Container className="px-2 lg:px-32 xl:px-32 2xl:px-80">
       <header className="flex items-center justify-between">
-        <H1>Mi agenda</H1>
+        <div className="flex flex-col items-start">
+          <H1>Mi agenda</H1>
+          <p className="text-sm text-muted-foreground">Explora tu agenda de citas y gestiona tus citas con facilidad.</p>
+        </div>
         <TooltipProvider>
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="p-1 opacity-75 cursor-not-allowed">
-                <DashboardIcon />
-              </Button>
+              <Scheduler>
+                <Button variant="ghost" size="icon" className="p-1 opacity-75 cursor-not-allowed">
+                  <DashboardIcon />
+                </Button>
+              </Scheduler>
             </TooltipTrigger>
             <TooltipContent>
               <p>Cambiar visualización</p>

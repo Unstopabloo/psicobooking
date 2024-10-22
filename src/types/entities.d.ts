@@ -74,3 +74,66 @@ export interface ContactInfo extends ContactBase {
   number: string;
   email: string;
 }
+
+export interface SinglePatientTicket {
+  // from user
+  id: number;
+  first_name: string;
+  last_name: string;
+  birth_day: string | null;
+  email: string;
+  gender: string | null;
+  nationality: string | null;
+  phone: string | null;
+  ocupation: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  street: string | null;
+  num_house: string | null;
+  // from treatment_sheet
+  actual_state: string | null;
+  date_from: string | null;
+  date_to: string | null;
+  motive_end: string | null;
+  motive_reason: string | null;
+  diagnostic_guidance: string | null;
+}
+
+export interface ClinicalHistory {
+  id: number;
+  patient_id: number;
+  title: string;
+  content: string;
+  created_at: string;
+}
+
+export interface DashboardAppointment {
+  id: number;
+  patient_id: number;
+  psychologist_id: number;
+  name: string;
+  avatar: string | null;
+  informed_consent: number;
+  session_type: string;
+  date_from: string;
+}
+
+export interface DashboardPatient {
+  id: number;
+  name: string;
+  email: string;
+  nacionalidad: string;
+  genero: string;
+  telefono: string;
+}
+
+export interface AppointmentCard {
+  id: number;
+  psychologist_id: number;
+  patient_id: number;
+  avatar: string | null;
+  name: string | null;
+  date_from: string | null;
+  date_to: string | null;
+}

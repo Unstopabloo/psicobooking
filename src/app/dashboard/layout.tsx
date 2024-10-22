@@ -10,16 +10,13 @@ import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
+import { MobileNav } from "./_layout-components/mobile-nav";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const nonce = headers().get('x-nonce') || ''
-  console.log('Server-side nonce:', nonce)
-  if (process.env.NODE_ENV !== 'production') {
-    console.log("nonce", nonce)
-  }
 
   return (
     <ThemeProvider
@@ -30,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       disableTransitionOnChange
     >
       <div className="flex min-h-screen">
-        <aside className="flex flex-col items-center justify-between gap-12 py-8 px-4 border-r border-border">
+        <aside className="hidden sm:flex sm:flex-col sm:items-center sm:justify-between sm:gap-12 sm:py-8 sm:px-4 sm:border-r sm:border-border">
           <div className="flex flex-col items-center gap-12">
             <Link href="/dashboard">
               <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
@@ -47,16 +44,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </aside>
         <div className="flex flex-col flex-1 overflow-hidden h-screen">
-          <header className="flex items-center justify-between w-full border-b border-border py-4 px-12">
-            <Button className="flex items-center gap-3">Asistente <small>⌘ K</small></Button>
-            a
+          <header className="flex items-center justify-between w-full border-b border-border py-4 px-4 sm:px-12">
+            <Link className="block sm:hidden" href="/dashboard">
+              <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
+            </Link>
+            <Button className="hidden sm:flex items-center gap-3">Asistente <small>⌘ K</small></Button>
+            <div className="flex items-center sm:hidden gap-3">
+              <Button className="flex items-center gap-3"><small>⌘ K</small></Button>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
           </header>
           <div className="flex items-center justify-between px-12 bg-card">
             <BreadCrumb />
             <SubNav />
           </div>
-          <main className="relative py-6 px-12 overflow-auto">
+          <main className="relative py-6 px-4 sm:px-12 overflow-auto">
             {children}
+            <MobileNav />
           </main>
         </div>
       </div>

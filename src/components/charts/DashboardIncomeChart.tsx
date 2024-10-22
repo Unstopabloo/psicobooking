@@ -21,21 +21,21 @@ import {
 export const description = "A stacked area chart"
 
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
+  { month: "January", pacientes: 186, ingresos: 80 },
+  { month: "February", pacientes: 305, ingresos: 200 },
+  { month: "March", pacientes: 237, ingresos: 120 },
+  { month: "April", pacientes: 73, ingresos: 190 },
+  { month: "May", pacientes: 209, ingresos: 130 },
+  { month: "June", pacientes: 214, ingresos: 140 },
 ]
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  pacientes: {
+    label: "pacientes",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Mobile",
+  ingresos: {
+    label: "ingresos",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
@@ -73,19 +73,19 @@ export function DashboardIncomeTable() {
               content={<ChartTooltipContent indicator="dot" />}
             />
             <Area
-              dataKey="mobile"
+              dataKey="ingresos"
               type="natural"
-              fill="var(--color-mobile)"
+              fill="var(--color-ingresos)"
               fillOpacity={0.4}
-              stroke="var(--color-mobile)"
+              stroke="var(--color-ingresos)"
               stackId="a"
             />
             <Area
-              dataKey="desktop"
+              dataKey="pacientes"
               type="natural"
-              fill="var(--color-desktop)"
+              fill="var(--color-pacientes)"
               fillOpacity={0.4}
-              stroke="var(--color-desktop)"
+              stroke="var(--color-pacientes)"
               stackId="a"
             />
           </AreaChart>
