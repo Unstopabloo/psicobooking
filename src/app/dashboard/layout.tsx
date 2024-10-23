@@ -69,7 +69,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Scheduler />
                   </TooltipTrigger>
                   <TooltipContent>
@@ -90,7 +90,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
           </header>
 
-          <div className="flex items-center justify-between px-4 sm:px-12 xl:px-36 bg-card">
+          <div className="flex items-center justify-between px-4 sm:px-12 xl:px-[86px] 2xl:px-20 bg-card">
             <BreadCrumb />
             <SubNav />
           </div>

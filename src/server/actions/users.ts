@@ -2,8 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCard, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
-import { appointmentCardDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
+import { AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { appointmentCardDTO, appointmentCardWithPatientDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
@@ -376,7 +376,7 @@ export async function getAppointmentsByDate(date_from?: string, date_to?: string
   }
 }
 
-export async function getUpcommingAppointments(date_from: string): Promise<{ appointments: AppointmentCard[] | undefined, error?: Error }> {
+export async function getUpcommingAppointments(date_from: string): Promise<{ appointments: AppointmentCardWithPatient[] | undefined, error?: Error }> {
   console.log('get upcomming appointments')
   const { userId } = auth()
 
@@ -392,8 +392,13 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
           app.id,
           app.psychologist_id,
           app.patient_id,
+          app.state,
+          app.session_type,
           pa.avatar,
           pa.first_name || ' ' || pa.last_name AS name,
+          pa.email,
+          pa.phone,
+          pa.nationality,
           app.date_from,
           app.date_to
         FROM
@@ -417,7 +422,7 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
       return { appointments: undefined }
     }
 
-    return { appointments: appointmentCardDTO(rows) }
+    return { appointments: appointmentCardWithPatientDTO(rows) }
   } catch (error) {
     console.error(error)
     return { appointments: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }

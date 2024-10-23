@@ -137,3 +137,10 @@ export interface AppointmentCard {
   date_from: string | null;
   date_to: string | null;
 }
+
+export interface AppointmentCardWithPatient extends AppointmentCard {
+  email: string | null;
+  phone: string | null;
+  nationality: string | null;
+  session_type: string;
+}
