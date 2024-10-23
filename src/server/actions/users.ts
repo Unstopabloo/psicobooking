@@ -440,6 +440,11 @@ export async function getUpcomingAppointmentsData(date_from: string): Promise<{ 
   try {
     const { rows } = await turso.execute({
       sql: `
+      WITH date_parts AS (
+        SELECT 
+          CAST(strftime('%Y', DATE(:date_from)) AS INTEGER) as year,
+          CAST(strftime('%m', DATE(:date_from)) AS INTEGER) as month
+      )
       SELECT
         DATE(app.date_from) AS date,
         COUNT(*) AS quant
@@ -447,10 +452,17 @@ export async function getUpcomingAppointmentsData(date_from: string): Promise<{ 
         psicobooking_appointment app
       LEFT JOIN
         psicobooking_user user ON user.id = app.psychologist_id
+      CROSS JOIN
+        date_parts
       WHERE
         user.clerk_id = :user_id
       AND
-        app.date_from >= DATE(:date_from)
+        strftime('%Y', app.date_from) = CAST(date_parts.year AS TEXT)
+      AND
+        strftime('%m', app.date_from) = CASE 
+          WHEN date_parts.month < 10 THEN '0' || date_parts.month 
+          ELSE CAST(date_parts.month AS TEXT) 
+        END
       GROUP BY
         DATE(app.date_from)
       ORDER BY

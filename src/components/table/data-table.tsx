@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col w-full gap-8 min-h-[500px]">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between gap-4">
         <div className="flex-shrink-0">
           <H1>Pacientes</H1>
           <p className="text-muted-foreground text-pretty text-sm font-normal">Gestiona tus pacientes y gestiona sus citas.</p>

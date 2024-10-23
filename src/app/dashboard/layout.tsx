@@ -11,6 +11,15 @@ import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
 import { MobileNav } from "./_layout-components/mobile-nav";
+import { Scheduler } from "@/components/agenda/scheduler";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Bell } from "lucide-react";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -44,19 +53,44 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </aside>
         <div className="flex flex-col flex-1 overflow-hidden h-screen">
-          <header className="flex items-center justify-between w-full border-b border-border py-4 px-4 sm:px-12">
+
+          <header className="flex items-center justify-between w-full border-b border-border py-4 px-4 sm:px-12 xl:px-[86px] 2xl:px-20">
+
             <Link className="block sm:hidden" href="/dashboard">
               <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
             </Link>
-            <Button className="hidden sm:flex items-center gap-3">Asistente <small>⌘ K</small></Button>
-            <div className="flex items-center sm:hidden gap-3">
-              <Button className="flex items-center gap-3"><small>⌘ K</small></Button>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
+
+            <div className="flex items-center justify-end sm:justify-between w-full gap-2 lg:gap-8">
+              <div className="sm:flex-1">
+                <Button className="flex items-center gap-3">
+                  <span className="hidden sm:block">Asistente</span> <small>⌘ K</small>
+                </Button>
+              </div>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Scheduler />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Mi agenda rápida</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <Button aria-label="Ver notificaciones" variant="outline" className="flex items-center gap-2 text-foreground/80">
+                <span className="hidden sm:block">Notificaciones</span> <Bell size={16} />
+              </Button>
+
+              <div className="sm:hidden">
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </div>
             </div>
           </header>
-          <div className="flex items-center justify-between px-12 bg-card">
+
+          <div className="flex items-center justify-between px-4 sm:px-12 xl:px-36 bg-card">
             <BreadCrumb />
             <SubNav />
           </div>

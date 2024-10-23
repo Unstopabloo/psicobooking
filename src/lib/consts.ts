@@ -2355,3 +2355,16 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     ]
   }
 ]
+
+/*
+{
+  "data": [
+    {"date":"2024-11-23","quant":2},
+    {"date":"2024-11-25","quant":1},
+    {"date":"2024-11-28","quant":1},
+    {"date":"2024-11-30","quant":1},
+    {"date":"2024-12-22","quant":1}
+  ]
+}
+
+*/

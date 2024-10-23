@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { CalendarSearch, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isSameMonth, isToday, parseISO, isBefore } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isToday, isBefore, isAfter, startOfToday } from 'date-fns'
 import {
   Dialog,
   DialogContent,
@@ -42,9 +40,15 @@ export function Scheduler() {
     setIsOpen(true)
   }
 
-  const hasAPPOINTMENTS = (day: number) => {
-    const dateString = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd')
-    return APPOINTMENTS?.data?.some(event => event.date === dateString) || false
+  const isAfterToday = (date: Date): boolean => {
+    const today = startOfToday()
+    return isAfter(date, today) || isToday(date)
+  }
+
+  const hasAppointments = (day: number) => {
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+    const dateString = format(dateToCheck, 'yyyy-MM-dd')
+    return APPOINTMENTS?.data?.some(event => event.date === dateString)
   }
 
   const getAppointmentCount = (day: number) => {
@@ -55,8 +59,9 @@ export function Scheduler() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button aria-label="Modificar disponibilidad" variant="ghost" size="icon" className="p-1 opacity-70">
-          <CalendarSearch size={20} />
+        <Button aria-label="Modificar disponibilidad" variant="outline" className='flex items-center gap-4 text-foreground/80'>
+          <span className="hidden sm:block">Agenda rápida</span>
+          <CalendarSearch size={16} />
         </Button>
       </DialogTrigger>
       <DialogContent className="flex justify-center items-start max-w-md sm:max-w-2xl px-3 pt-10 sm:p-8">
@@ -83,11 +88,12 @@ export function Scheduler() {
             ))}
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1
-              const currentDay = new Date()
               const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-              const isPastDay = isBefore(dateToCheck, currentDay) && !isToday(dateToCheck)
+              const isPastDay = isBefore(dateToCheck, startOfToday())
               const isCurrentDay = isToday(dateToCheck)
               const appointmentCount = getAppointmentCount(day)
+              const hasAppointmentsForDay = hasAppointments(day)
+              const isFutureDay = isAfterToday(dateToCheck)
 
               return (
                 <Button
@@ -95,19 +101,24 @@ export function Scheduler() {
                   variant="outline"
                   className={cn(
                     `relative text-center py-6 sm:py-8`,
-                    isPastDay && 'bg-card/70 opacity-50 cursor-not-allowed',
-                    isCurrentDay && 'border-primary'
+                    isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed shadow-none',
+                    isCurrentDay && 'border-primary',
+                    hasAppointmentsForDay && 'bg-primary/5 hover:bg-primary/15'
                   )}
                   onClick={() => !isPastDay && handleDateClick(day)}
                   disabled={isPastDay}
                 >
-                  {appointmentCount > 0 && (
-                    appointmentCount > 1 ? (
-                      <span className="absolute top-1 right-1 text-xs font-light text-primary">{appointmentCount}</span>
-                    ) : (
-                      <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
+                  {
+                    hasAppointmentsForDay && isFutureDay && (
+                      appointmentCount > 1 ? (
+                        <span className="absolute top-1 right-1 text-xs font-light text-primary z-10">
+                          {appointmentCount}
+                        </span>
+                      ) : (
+                        <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full z-10" />
+                      )
                     )
-                  )}
+                  }
                   {day}
                 </Button>
               )
