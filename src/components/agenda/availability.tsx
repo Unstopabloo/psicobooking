@@ -18,6 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { es } from 'date-fns/locale'
 import { useAvailabilityData } from '@/server/queries/queries'
 import { RecurringAvailability, SpecificAvailability } from '@/types/entities'
+import { Label } from '../ui/label'
+import { Checkbox } from '../ui/checkbox'
 
 const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => i + 8)
   .filter(hour => hour < 21)
@@ -30,6 +32,7 @@ export function Availability() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedDays, setSelectedDays] = useState<number[]>([])
 
   const { data: availabilityData } = useAvailabilityData(format(currentDate, 'yyyy-MM-dd'))
   const { recurring, specific } = availabilityData?.data || { recurring: [], specific: [] }
@@ -59,6 +62,10 @@ export function Availability() {
     // Si no hay específica, buscar la disponibilidad recurrente para ese día de la semana
     const recurringDay = recurring?.find(item => item.day === dayOfWeek)
     return recurringDay?.slots || []
+  }
+
+  const toggleDay = (day: number) => {
+    setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])
   }
 
   return (
@@ -124,14 +131,43 @@ export function Availability() {
               )
             })}
           </div>
-          <AvailabilityForm
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            date={selectedDate}
-            specific={specific}
-            recurring={recurring}
-            dateAvailability={getAvailabilityForDate(selectedDate)}
-          />
+          <h3 className="text-lg font-semibold mb-4">Disponibilidad Recurrente</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {DAYS.map((day, index) => (
+              <div
+                key={day}
+                onClick={() => toggleDay(index + 1)}
+                className={cn(
+                  "flex items-center space-x-2 p-3 cursor-pointer rounded-lg border-2 transition-colors",
+                  selectedDays.includes(index + 1) ? "border-primary bg-primary/10" : "border-gray-200"
+                )}
+              >
+                <Checkbox
+                  id={day}
+                  value={index + 1}
+                  className="h-5 w-5 rounded-full"
+                  checked={selectedDays.includes(index + 1)}
+                  onCheckedChange={() => toggleDay(index + 1)}
+                />
+                <Label
+                  htmlFor={day}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {day}
+                </Label>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8">
+            <AvailabilityForm
+              open={isOpen}
+              onOpenChange={setIsOpen}
+              date={selectedDate}
+              specific={specific}
+              recurring={recurring}
+              dateAvailability={getAvailabilityForDate(selectedDate)}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
