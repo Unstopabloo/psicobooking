@@ -29,10 +29,6 @@ export function AgendaList() {
     <section className="flex flex-col w-full gap-10 py-6">
       <div className="flex md:flex-row flex-col-reverse gap-y-6 items-start md:items-center justify-between">
         <DatePicker setAppointments={setAppointments} />
-        <Button variant="outline" className="flex items-center gap-4">
-          Agendar cita
-          <PlusSignIcon width={16} height={16} />
-        </Button>
       </div>
 
       <div className="flex flex-col gap-2 w-full h-full overflow-y-auto pb-20">

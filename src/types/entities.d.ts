@@ -144,3 +144,20 @@ export interface AppointmentCardWithPatient extends AppointmentCard {
   nationality: string | null;
   session_type: string;
 }
+
+type AvailabilitySlot = [string, string]
+
+export interface RecurringAvailability {
+  day: number;
+  slots: AvailabilitySlot[];
+}
+
+export interface SpecificAvailability {
+  date: string;
+  slots: AvailabilitySlot[];
+}
+
+export interface AvailabilityResponse {
+  recurring: RecurringAvailability[];
+  specific: SpecificAvailability[];
+}

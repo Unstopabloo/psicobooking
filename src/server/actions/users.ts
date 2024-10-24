@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { AppointmentCard, AppointmentCardWithPatient, AvailabilityResponse, AvailabilitySlot, ClinicalHistory, ContactInfo, PatientTicket, RecurringAvailability, SpecificAvailability } from "@/types/entities";
 import { appointmentCardDTO, appointmentCardWithPatientDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
@@ -50,9 +50,9 @@ export const createClinicalHistory = authAction
   .action(async ({ parsedInput }) => {
     try {
       const { id, patient_id, title, content } = parsedInput
-      const contentString = JSON.stringify(content)
+      const sanitizedContent = JSON.stringify(content).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
 
-      if (!patient_id || !title || !contentString) {
+      if (!patient_id || !title || !sanitizedContent) {
         return { data: undefined, error: new Error('No hay suficiente informacion para crear la historia clinica') }
       }
 
@@ -65,7 +65,7 @@ export const createClinicalHistory = authAction
             id: id!,
             patient_id: patient_id!,
             title: title!,
-            content: contentString,
+            content: sanitizedContent,
           }
         });
 
@@ -84,7 +84,7 @@ export const createClinicalHistory = authAction
         args: {
           patient_id: patient_id!,
           title: title!,
-          content: contentString,
+          content: sanitizedContent,
           created_at: new Date().toISOString()
         }
       });
@@ -487,5 +487,120 @@ export async function getUpcomingAppointmentsData(date_from: string): Promise<{ 
   } catch (error) {
     console.error(error)
     return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAvailabilityData(
+  dateFrom: string
+): Promise<{ data: AvailabilityResponse | undefined; error?: Error }> {
+  const { userId } = auth();
+
+  if (!userId) {
+    console.log('No estas autorizado');
+    return { data: undefined, error: new Error('No estas autorizado') };
+  }
+
+  try {
+    // Obtener disponibilidad recurrente
+    const { rows: recurringRows } = await turso.execute({
+      sql: `
+        SELECT 
+          day_of_week,
+          hour_from,
+          hour_to
+        FROM psicobooking_online_availability 
+        WHERE psychologist_id = :user_id
+        ORDER BY day_of_week, hour_from
+      `,
+      args: { user_id: userId }
+    });
+
+    // Obtener excepciones
+    const { rows: exceptionRows } = await turso.execute({
+      sql: `
+        SELECT 
+          exception_date,
+          hour_from,
+          hour_to,
+          is_available
+        FROM psicobooking_online_availability_exception
+        WHERE 
+          psychologist_id = :user_id
+          AND exception_date >= :date_from
+        ORDER BY exception_date, hour_from
+      `,
+      args: {
+        user_id: userId,
+        date_from: dateFrom
+      }
+    });
+
+    // Procesar disponibilidad recurrente
+    const recurringAvailability: RecurringAvailability[] = [];
+    let currentDay: number | null = null;
+    let currentSlots: AvailabilitySlot[] = [];
+
+    for (const row of recurringRows) {
+      if (currentDay !== row.day_of_week) {
+        if (currentDay !== null) {
+          recurringAvailability.push({
+            day: currentDay,
+            slots: [...currentSlots]
+          });
+        }
+        currentDay = row.day_of_week as number;
+        currentSlots = [];
+      }
+      currentSlots.push([row.hour_from as string, row.hour_to as string]);
+    }
+
+    if (currentDay !== null && currentSlots.length > 0) {
+      recurringAvailability.push({
+        day: currentDay,
+        slots: currentSlots
+      });
+    }
+
+    // Procesar excepciones
+    const specificAvailability: SpecificAvailability[] = [];
+    let currentDate: string | null = null;
+    let currentSpecificSlots: AvailabilitySlot[] = [];
+
+    for (const row of exceptionRows) {
+      if (currentDate !== row.exception_date) {
+        if (currentDate !== null) {
+          specificAvailability.push({
+            date: currentDate,
+            slots: row.is_available ? [...currentSpecificSlots] : []
+          });
+        }
+        currentDate = row.exception_date as string;
+        currentSpecificSlots = [];
+      }
+      if (row.is_available) {
+        currentSpecificSlots.push([row.hour_from as string, row.hour_to as string]);
+      }
+    }
+
+    if (currentDate !== null) {
+      specificAvailability.push({
+        date: currentDate,
+        slots: currentSpecificSlots
+      });
+    }
+
+    return {
+      data: {
+        recurring: recurringAvailability,
+        specific: specificAvailability
+      }
+    };
+
+  } catch (error) {
+    console.error(error);
+    return {
+      data: undefined,
+      error: error instanceof Error ? error : new Error('Error inesperado')
+    };
   }
 }

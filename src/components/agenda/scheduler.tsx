@@ -59,7 +59,7 @@ export function Scheduler() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button aria-label="Modificar disponibilidad" variant="outline" className='flex items-center gap-4 text-foreground/80'>
+        <Button aria-label="Ver agenda rápida" variant="outline" className='flex items-center gap-4 text-foreground/80'>
           <span className="hidden sm:block">Agenda rápida</span>
           <CalendarSearch size={16} />
         </Button>
@@ -100,7 +100,7 @@ export function Scheduler() {
                   key={day}
                   variant="outline"
                   className={cn(
-                    `relative text-center py-6 sm:py-8`,
+                    `relative text-center py-6 sm:py-8 hover:shadow-md`,
                     isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed shadow-none',
                     isCurrentDay && 'border-primary',
                     hasAppointmentsForDay && 'bg-primary/5 hover:bg-primary/15'
