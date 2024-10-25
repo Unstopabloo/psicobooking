@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Bell } from "lucide-react";
+import { ChatAsistant } from "@/components/ai-asistant/ui-chat-asistant";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -62,9 +63,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
             <div className="flex items-center justify-end sm:justify-between w-full gap-2 lg:gap-8">
               <div className="sm:flex-1">
-                <Button className="flex items-center gap-3">
-                  <span className="hidden sm:block">Asistente</span> <small>⌘ K</small>
-                </Button>
+                <ChatAsistant />
               </div>
 
               <TooltipProvider>

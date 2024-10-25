@@ -52,6 +52,17 @@ export interface Appointment {
   appointmentDate: Date;
 }
 
+export interface NextAppointment {
+  id: number;
+  patient_id: number;
+  session_type: string;
+  date_from: string;
+  state: string;
+  avatar: string | null;
+  name: string;
+  email: string;
+}
+
 export interface PatientTicket {
   id: number;
   name: string;
