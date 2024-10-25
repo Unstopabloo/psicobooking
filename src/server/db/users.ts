@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient } from "@/types/entities";
-import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment } from "@/types/entities";
+import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -212,6 +212,7 @@ export async function getDashboardAppointments(): Promise<{ appointments: Dashbo
         WHERE 
           psy.clerk_id = ?
           AND a.state = 'scheduled'
+          AND datetime(a.date_from) > datetime('now', 'localtime')
         LIMIT 4;
       `,
       args: [userId]
@@ -270,5 +271,57 @@ export async function getDashboardPatients(): Promise<{ patients: DashboardPatie
   } catch (error) {
     console.error(error)
     return { patients: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getNextAppointment(): Promise<{ nextAppointment: NextAppointment | undefined, error?: Error }> {
+  console.log('getNextAppointment')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    return { nextAppointment: undefined, error: new Error('Unauthorized') }
+  }
+
+  try {
+    const { rows: nextAppointment } = await turso.execute({
+      sql: `
+        SELECT 
+          app.id,
+          app.patient_id,
+          app.session_type,
+          app.date_from,
+          app.state,
+          patient.avatar,
+          patient.first_name || ' ' || patient.last_name AS name,
+          patient.email
+        FROM 
+          psicobooking_appointment app
+        LEFT JOIN 
+          psicobooking_user patient ON patient.id = app.patient_id
+        LEFT JOIN 
+          psicobooking_user user ON user.id = app.psychologist_id
+        WHERE 
+          user.clerk_id = ?
+          AND app.state = 'scheduled'
+          AND datetime(app.date_from) > datetime('now', 'localtime')
+        ORDER BY 
+          datetime(app.date_from) ASC
+        LIMIT 1;
+      `,
+      args: [userId]
+    })
+
+    if (nextAppointment[0]?.length === 0 || !nextAppointment[0]) {
+      console.log('No appointments found')
+      return { nextAppointment: undefined }
+    }
+
+    const result = nextAppointmentDTO(nextAppointment[0])
+    console.log("result", result)
+    return { nextAppointment: result }
+  } catch (error) {
+    console.error(error)
+    return { nextAppointment: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

@@ -52,6 +52,17 @@ export interface Appointment {
   appointmentDate: Date;
 }
 
+export interface NextAppointment {
+  id: number;
+  patient_id: number;
+  session_type: string;
+  date_from: string;
+  state: string;
+  avatar: string | null;
+  name: string;
+  email: string;
+}
+
 export interface PatientTicket {
   id: number;
   name: string;
@@ -136,4 +147,28 @@ export interface AppointmentCard {
   name: string | null;
   date_from: string | null;
   date_to: string | null;
+}
+
+export interface AppointmentCardWithPatient extends AppointmentCard {
+  email: string | null;
+  phone: string | null;
+  nationality: string | null;
+  session_type: string;
+}
+
+type AvailabilitySlot = [string, string]
+
+export interface RecurringAvailability {
+  day: number;
+  slots: AvailabilitySlot[];
+}
+
+export interface SpecificAvailability {
+  date: string;
+  slots: AvailabilitySlot[];
+}
+
+export interface AvailabilityResponse {
+  recurring: RecurringAvailability[];
+  specific: SpecificAvailability[];
 }

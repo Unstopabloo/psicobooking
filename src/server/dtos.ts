@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCard, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -125,4 +125,40 @@ export const appointmentCardDTO = (appointmentCard: Row[]): AppointmentCard[] =>
     date_from: app.date_from as string | null,
     date_to: app.date_to as string | null
   }))
+}
+
+export const appointmentCardWithPatientDTO = (appointmentCardWithPatient: Row[]): AppointmentCardWithPatient[] => {
+  return appointmentCardWithPatient.map(app => ({
+    id: app.id as number,
+    psychologist_id: app.psychologist_id as number,
+    patient_id: app.patient_id as number,
+    avatar: app.avatar as string | null,
+    name: app.name as string | null,
+    date_from: app.date_from as string | null,
+    date_to: app.date_to as string | null,
+    email: app.email as string | null,
+    phone: app.phone as string | null,
+    nationality: app.nationality as string | null,
+    session_type: app.session_type as string
+  }))
+}
+
+export const upcomingAppointmentDTO = (upcomingAppointment: Row[]): { date: string, quant: number }[] => {
+  return upcomingAppointment.map(app => ({
+    date: app.date as string,
+    quant: app.quant as number
+  }))
+}
+
+export const nextAppointmentDTO = (nextAppointment: Row): NextAppointment => {
+  return {
+    id: nextAppointment.id as number,
+    patient_id: nextAppointment.patient_id as number,
+    session_type: nextAppointment.session_type as string,
+    date_from: nextAppointment.date_from as string,
+    state: nextAppointment.state as string,
+    avatar: nextAppointment.avatar as string | null,
+    name: nextAppointment.name as string,
+    email: nextAppointment.email as string
+  }
 }

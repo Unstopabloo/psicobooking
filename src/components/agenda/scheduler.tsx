@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarSearch, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isSameMonth, isToday, parseISO, isBefore } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isToday, isBefore, isAfter, startOfToday } from 'date-fns'
 import {
   Dialog,
   DialogContent,
@@ -14,28 +12,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
+import { useUpcomingAppointmentData } from '@/server/queries/queries'
+import { DAYS, MONTHS } from '@/lib/consts'
+import { SchedulerAppointmentsSheet } from './schedulerAppointmentsSheet'
 
-const DAYS = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM']
-const MONTHS = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
-
-// Sample event data
-const EVENTS = {
-  '2024-10-30': [{ title: 'Reunion con el equipo' }],
-  '2024-10-22': [{ title: 'Cita con el dentista' }],
-  '2024-10-21': [{ title: 'Fiesta de cumpleaños' }],
-}
-
-export function Scheduler({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export function Scheduler() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
+
+  const { data: APPOINTMENTS } = useUpcomingAppointmentData(format(currentDate, 'yyyy-MM-dd'))
 
   const prevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1))
@@ -51,16 +40,32 @@ export function Scheduler({
     setIsOpen(true)
   }
 
-  const hasEvents = (day: number) => {
+  const isAfterToday = (date: Date): boolean => {
+    const today = startOfToday()
+    return isAfter(date, today) || isToday(date)
+  }
+
+  const hasAppointments = (day: number) => {
+    const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+    const dateString = format(dateToCheck, 'yyyy-MM-dd')
+    return APPOINTMENTS?.data?.some(event => event.date === dateString)
+  }
+
+  const getAppointmentCount = (day: number) => {
     const dateString = format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day), 'yyyy-MM-dd')
-    return dateString in EVENTS && EVENTS[dateString as keyof typeof EVENTS].length > 0
+    return APPOINTMENTS?.data?.find(event => event.date === dateString)?.quant || 0
   }
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex justify-center items-start pt-10 max-w-2xl">
-        <div className="p-4 rounded-lg w-[850px]">
+      <DialogTrigger asChild>
+        <Button aria-label="Ver agenda rápida" variant="outline" className='flex items-center gap-4 text-foreground/80'>
+          <span className="hidden sm:block">Agenda rápida</span>
+          <CalendarSearch size={16} />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex justify-center items-start max-w-md sm:max-w-2xl px-3 pt-10 sm:p-8">
+        <div className="p-1 sm:p-4 rounded-lg w-[850px]">
           <DialogHeader className="flex flex-row justify-between items-center mb-4">
             <DialogTitle className="font-semibold">{MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}</DialogTitle>
             <div className="flex space-x-2">
@@ -83,55 +88,49 @@ export function Scheduler({
             ))}
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1
-              const currentDay = new Date()
               const dateToCheck = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-              const isPastDay = isBefore(dateToCheck, currentDay) && !isToday(dateToCheck)
+              const isPastDay = isBefore(dateToCheck, startOfToday())
               const isCurrentDay = isToday(dateToCheck)
+              const appointmentCount = getAppointmentCount(day)
+              const hasAppointmentsForDay = hasAppointments(day)
+              const isFutureDay = isAfterToday(dateToCheck)
 
               return (
                 <Button
                   key={day}
                   variant="outline"
                   className={cn(
-                    `relative text-center py-8`,
-                    isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed',
-                    isCurrentDay && 'border-primary'
+                    `relative text-center py-6 sm:py-8 hover:shadow-md`,
+                    isPastDay && 'bg-card/70 opacity-10 cursor-not-allowed shadow-none',
+                    isCurrentDay && 'border-primary',
+                    hasAppointmentsForDay && 'bg-primary/5 hover:bg-primary/15'
                   )}
                   onClick={() => !isPastDay && handleDateClick(day)}
                   disabled={isPastDay}
                 >
-                  {hasEvents(day) && (
-                    <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full"></span>
-                  )}
+                  {
+                    hasAppointmentsForDay && isFutureDay && (
+                      appointmentCount > 1 ? (
+                        <span className="absolute top-1 right-1 text-xs font-light text-primary z-10">
+                          {appointmentCount}
+                        </span>
+                      ) : (
+                        <span className="absolute top-1 right-1 size-[6px] bg-primary rounded-full z-10" />
+                      )
+                    )
+                  }
                   {day}
                 </Button>
               )
             })}
           </div>
         </div>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>
-                {selectedDate && format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-              </SheetTitle>
-            </SheetHeader>
-            <div className="mt-4">
-              {selectedDate && (
-                <>
-                  <h3 className="font-bold mb-2">Eventos:</h3>
-                  {EVENTS[format(selectedDate, 'yyyy-MM-dd') as keyof typeof EVENTS] ? (
-                    EVENTS[format(selectedDate, 'yyyy-MM-dd') as keyof typeof EVENTS].map((event, index) => (
-                      <p key={index}>{event.title}</p>
-                    ))
-                  ) : (
-                    <p>No hay eventos para este día.</p>
-                  )}
-                </>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        <SchedulerAppointmentsSheet
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          selectedDate={selectedDate}
+          currentDate={currentDate}
+        />
       </DialogContent>
     </Dialog>
   )

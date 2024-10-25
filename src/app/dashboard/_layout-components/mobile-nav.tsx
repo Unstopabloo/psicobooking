@@ -15,14 +15,17 @@ export function MobileNav() {
       <div className="flex flex-col items-center gap-4 justify-end w-full ps-4 pe-8">
         <Button
           onClick={() => setOpen(!open)}
-          aria-label="Abrir o cerrar menú"
+          aria-expanded={open}
+          aria-label={open ? "Close menu" : "Open menu"}
           className={cn(
-            "self-end rounded-full p-2 shadow-md shadow-black/30 transition-transform duration-300 ease-in-out translate-y-16",
+            "group self-end rounded-full p-2 shadow-md shadow-black/30 transition-transform duration-300 ease-in-out translate-y-16",
             open && "translate-y-0"
           )}
           size="icon"
         >
-          {open ? <XIcon color="#ffffff" /> : <MenuIcon color="#ffffff" />}
+          <span className="transition-transform duration-500 [transition-timing-function:cubic-bezier(0.68,-0.6,0.32,1.6)] group-aria-expanded:rotate-[90deg]">
+            {open ? <XIcon color="#ffffff" /> : <MenuIcon color="#ffffff" />}
+          </span>
         </Button>
         <nav
           className={cn(

@@ -320,7 +320,7 @@ export default function HomePage() {
             <SignedOut>
               <SignUpButton>
                 <Button className="px-1 sm:px-4 py-1 rounded-xl tracking-normal sm:tracking-wider text-sm opacity-90">
-                  Comenzar
+                  Registrarse
                 </Button>
               </SignUpButton>
             </SignedOut>

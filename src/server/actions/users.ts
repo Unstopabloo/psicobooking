@@ -2,8 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCard, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
-import { appointmentCardDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO } from "../dtos";
+import { AppointmentCard, AppointmentCardWithPatient, AvailabilityResponse, AvailabilitySlot, ClinicalHistory, ContactInfo, PatientTicket, RecurringAvailability, SpecificAvailability } from "@/types/entities";
+import { appointmentCardDTO, appointmentCardWithPatientDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
@@ -50,9 +50,9 @@ export const createClinicalHistory = authAction
   .action(async ({ parsedInput }) => {
     try {
       const { id, patient_id, title, content } = parsedInput
-      const contentString = JSON.stringify(content)
+      const sanitizedContent = JSON.stringify(content).replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
 
-      if (!patient_id || !title || !contentString) {
+      if (!patient_id || !title || !sanitizedContent) {
         return { data: undefined, error: new Error('No hay suficiente informacion para crear la historia clinica') }
       }
 
@@ -65,7 +65,7 @@ export const createClinicalHistory = authAction
             id: id!,
             patient_id: patient_id!,
             title: title!,
-            content: contentString,
+            content: sanitizedContent,
           }
         });
 
@@ -84,7 +84,7 @@ export const createClinicalHistory = authAction
         args: {
           patient_id: patient_id!,
           title: title!,
-          content: contentString,
+          content: sanitizedContent,
           created_at: new Date().toISOString()
         }
       });
@@ -373,5 +373,234 @@ export async function getAppointmentsByDate(date_from?: string, date_to?: string
     console.error(error)
     const response = JSON.stringify({ appointments: [], error: error instanceof Error ? error : new Error('Error inesperado') })
     return response
+  }
+}
+
+export async function getUpcommingAppointments(date_from: string): Promise<{ appointments: AppointmentCardWithPatient[] | undefined, error?: Error }> {
+  console.log('get upcomming appointments')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { appointments: undefined, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT
+          app.id,
+          app.psychologist_id,
+          app.patient_id,
+          app.state,
+          app.session_type,
+          pa.avatar,
+          pa.first_name || ' ' || pa.last_name AS name,
+          pa.email,
+          pa.phone,
+          pa.nationality,
+          app.date_from,
+          app.date_to
+        FROM
+          psicobooking_appointment app
+        LEFT JOIN 
+          psicobooking_user pa ON pa.id = app.patient_id
+        LEFT JOIN 
+          psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE
+          psy.clerk_id = :user_id
+        AND
+          DATE(app.date_from) = DATE(:date_from)
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { appointments: undefined }
+    }
+
+    return { appointments: appointmentCardWithPatientDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { appointments: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getUpcomingAppointmentsData(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
+  console.log('get upcoming appointment data')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { data: undefined, error: new Error('No estas autorizado') }
+  }
+
+  if (!date_from) {
+    return { data: undefined, error: new Error('No se proporcionó la fecha de inicio') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+      WITH date_parts AS (
+        SELECT 
+          CAST(strftime('%Y', DATE(:date_from)) AS INTEGER) as year,
+          CAST(strftime('%m', DATE(:date_from)) AS INTEGER) as month
+      )
+      SELECT
+        DATE(app.date_from) AS date,
+        COUNT(*) AS quant
+      FROM
+        psicobooking_appointment app
+      LEFT JOIN
+        psicobooking_user user ON user.id = app.psychologist_id
+      CROSS JOIN
+        date_parts
+      WHERE
+        user.clerk_id = :user_id
+      AND
+        strftime('%Y', app.date_from) = CAST(date_parts.year AS TEXT)
+      AND
+        strftime('%m', app.date_from) = CASE 
+          WHEN date_parts.month < 10 THEN '0' || date_parts.month 
+          ELSE CAST(date_parts.month AS TEXT) 
+        END
+      GROUP BY
+        DATE(app.date_from)
+      ORDER BY
+        DATE(app.date_from);
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { data: undefined }
+    }
+
+    return { data: upcomingAppointmentDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAvailabilityData(
+  dateFrom: string
+): Promise<{ data: AvailabilityResponse | undefined; error?: Error }> {
+  const { userId } = auth();
+
+  if (!userId) {
+    console.log('No estas autorizado');
+    return { data: undefined, error: new Error('No estas autorizado') };
+  }
+
+  try {
+    // Obtener disponibilidad recurrente
+    const { rows: recurringRows } = await turso.execute({
+      sql: `
+        SELECT 
+          day_of_week,
+          hour_from,
+          hour_to
+        FROM psicobooking_online_availability 
+        WHERE psychologist_id = :user_id
+        ORDER BY day_of_week, hour_from
+      `,
+      args: { user_id: userId }
+    });
+
+    // Obtener excepciones
+    const { rows: exceptionRows } = await turso.execute({
+      sql: `
+        SELECT 
+          exception_date,
+          hour_from,
+          hour_to,
+          is_available
+        FROM psicobooking_online_availability_exception
+        WHERE 
+          psychologist_id = :user_id
+          AND exception_date >= :date_from
+        ORDER BY exception_date, hour_from
+      `,
+      args: {
+        user_id: userId,
+        date_from: dateFrom
+      }
+    });
+
+    // Procesar disponibilidad recurrente
+    const recurringAvailability: RecurringAvailability[] = [];
+    let currentDay: number | null = null;
+    let currentSlots: AvailabilitySlot[] = [];
+
+    for (const row of recurringRows) {
+      if (currentDay !== row.day_of_week) {
+        if (currentDay !== null) {
+          recurringAvailability.push({
+            day: currentDay,
+            slots: [...currentSlots]
+          });
+        }
+        currentDay = row.day_of_week as number;
+        currentSlots = [];
+      }
+      currentSlots.push([row.hour_from as string, row.hour_to as string]);
+    }
+
+    if (currentDay !== null && currentSlots.length > 0) {
+      recurringAvailability.push({
+        day: currentDay,
+        slots: currentSlots
+      });
+    }
+
+    // Procesar excepciones
+    const specificAvailability: SpecificAvailability[] = [];
+    let currentDate: string | null = null;
+    let currentSpecificSlots: AvailabilitySlot[] = [];
+
+    for (const row of exceptionRows) {
+      if (currentDate !== row.exception_date) {
+        if (currentDate !== null) {
+          specificAvailability.push({
+            date: currentDate,
+            slots: row.is_available ? [...currentSpecificSlots] : []
+          });
+        }
+        currentDate = row.exception_date as string;
+        currentSpecificSlots = [];
+      }
+      if (row.is_available) {
+        currentSpecificSlots.push([row.hour_from as string, row.hour_to as string]);
+      }
+    }
+
+    if (currentDate !== null) {
+      specificAvailability.push({
+        date: currentDate,
+        slots: currentSpecificSlots
+      });
+    }
+
+    return {
+      data: {
+        recurring: recurringAvailability,
+        specific: specificAvailability
+      }
+    };
+
+  } catch (error) {
+    console.error(error);
+    return {
+      data: undefined,
+      error: error instanceof Error ? error : new Error('Error inesperado')
+    };
   }
 }
