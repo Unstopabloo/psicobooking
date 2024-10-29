@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default async function AgendaPage() {
   return (
     <Container className="px-2 lg:px-4 xl:px-32 2xl:px-80">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between w-full">
         <div className="flex flex-col items-start">
           <H1>Mi agenda</H1>
           <p className="text-sm text-muted-foreground">Explora tu agenda de citas y gestiona tus citas con facilidad.</p>

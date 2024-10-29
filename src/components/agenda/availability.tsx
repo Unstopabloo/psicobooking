@@ -20,7 +20,10 @@ import { useAvailabilityData } from '@/server/queries/queries'
 import { RecurringAvailability, SpecificAvailability } from '@/types/entities'
 import { Badge } from '../ui/badge'
 import { toast } from 'sonner'
-import { saveRecurringAvailability } from '@/server/actions/users'
+import { clearSpecificAvailability, deleteRecurringAvailability, saveRecurringAvailability } from '@/server/actions/users'
+import { saveSpecificAvailability } from '@/server/actions/users'
+
+import { useRouter } from 'next/navigation'
 
 const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
   const hour = Math.floor(i / 2) + 8
@@ -36,19 +39,12 @@ export function Availability() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDays, setSelectedDays] = useState<number[]>([])
-  const [concurrentStartTime, setConcurrentStartTime] = useState('')
-  const [concurrentEndTime, setConcurrentEndTime] = useState('')
   const [recurringTimes, setRecurringTimes] = useState<{ [key: number]: { start: string, end: string } }>({})
   const [recurringDisabledDays, setRecurringDisabledDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
   const [disabledEndTime, setDisabledEndTime] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
 
   const { data: availabilityData } = useAvailabilityData(format(currentDate, 'yyyy-MM-dd'))
-  console.log("availabilityData", availabilityData?.data)
-
   const { recurring, specific } = availabilityData?.data || { recurring: [], specific: [] }
-
-  console.log("recurring", recurring)
-  console.log("specific", specific)
 
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
@@ -69,12 +65,14 @@ export function Availability() {
     // Buscar si hay una disponibilidad específica para esta fecha
     const specificDay = specific?.find(item => item.date === dateString)
     if (specificDay !== undefined) {
+      // Si existe una disponibilidad específica y está marcada como no disponible (slots vacíos),
+      // retornamos un array vacío independientemente de la disponibilidad recurrente
       return specificDay.slots
     }
 
     // Si no hay específica, buscar la disponibilidad recurrente para ese día de la semana
-    const recurringDay = recurring?.find(item => item.day === dayOfWeek)
-    console.log("recurringDay for getAvailabilityForDate", recurringDay)
+    const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek
+    const recurringDay = recurring?.find(item => item.day === adjustedDayOfWeek)
     return recurringDay?.slots || []
   }
 
@@ -142,22 +140,23 @@ export function Availability() {
 
     toast.promise(saveRecurringAvailability(adjustedDayIndex, recurringTimes[dayIndex]!.start, recurringTimes[dayIndex]!.end), {
       loading: 'Actualizando disponibilidad...',
-      success: 'Disponibilidad recurrente actualizada',
-      error: 'No se pudo actualizar la disponibilidad recurrente'
+      success: 'Disponibilidad actualizada',
+      error: 'No se pudo actualizar la disponibilidad, por favor intenta nuevamente'
     })
   }
 
   const handleClearRecurringAvailability = (dayIndex: number) => {
-    setRecurringTimes(prev => ({
-      ...prev,
-      [dayIndex]: {
-        start: '',
-        end: ''
-      }
-    }))
+    const adjustedDayIndex = dayIndex === 6 ? 0 : dayIndex + 1
 
-    toast.success('Disponibilidad recurrente eliminada', {
-      description: `${DAYS[dayIndex]} de ${MONTHS[currentDate.getMonth()]}`
+    if (recurringTimes[dayIndex]?.start === '' && recurringTimes[dayIndex]?.end === '') {
+      toast.error('No se puede eliminar la disponibilidad recurrente de un día que no tiene disponibilidad')
+      return
+    }
+
+    toast.promise(deleteRecurringAvailability(adjustedDayIndex), {
+      loading: 'Limpiando disponibilidad...',
+      success: 'Disponibilidad eliminada',
+      error: 'No se pudo eliminar la disponibilidad, por favor intenta nuevamente'
     })
   }
 
@@ -268,7 +267,12 @@ export function Availability() {
                 return (
                   <div key={index} className='flex items-center justify-between gap-7'>
                     <div className='flex items-center gap-2'>
-                      <Badge variant="outline" className='min-w-12 h-full border-primary/60 flex items-center justify-center'>{DAYS[index]}</Badge>
+                      <Badge
+                        variant="outline"
+                        className='min-w-12 h-full border-primary/60 flex items-center justify-center'
+                      >
+                        {DAYS[index]}
+                      </Badge>
                       <Select
                         onValueChange={(time) => handleStartTimeChange(time, index)}
                         value={recurringTimes[index]?.start || ''}
@@ -313,6 +317,7 @@ export function Availability() {
                         aria-label="Limpiar disponibilidad recurrente"
                         variant="outline"
                         size="icon"
+                        disabled={recurringDisabledDays.includes(index)}
                         onClick={() => handleClearRecurringAvailability(index)}
                       >
                         <X className="h-4 w-4" />
@@ -356,6 +361,45 @@ function AvailabilityForm({
 }) {
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
+  const router = useRouter()
+
+  const handleSaveAvailability = async () => {
+    if (!startTime || !endTime) {
+      toast.error('Debes seleccionar una hora de inicio y fin')
+      return
+    }
+
+    if (startTime === endTime) {
+      toast.error('La hora de inicio y fin no pueden ser iguales')
+      return
+    }
+
+    if (startTime > endTime) {
+      toast.error('La hora de inicio no puede ser mayor a la hora de fin')
+      return
+    }
+    const dateString = format(date, 'yyyy-MM-dd')
+
+    toast.promise(saveSpecificAvailability(dateString, startTime, endTime), {
+      loading: 'Guardando disponibilidad...',
+      success: 'Disponibilidad guardada correctamente',
+      error: 'No se pudo guardar la disponibilidad'
+    })
+
+    router.refresh()
+  }
+
+  const handleClearSpecificAvailability = () => {
+    const dateString = format(date, 'yyyy-MM-dd')
+
+    toast.promise(clearSpecificAvailability(dateString), {
+      loading: 'Limpiando disponibilidad...',
+      success: 'Disponibilidad eliminada',
+      error: 'No se pudo eliminar la disponibilidad'
+    })
+
+    router.refresh()
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -363,7 +407,9 @@ function AvailabilityForm({
         <div className="p-1 sm:p-4 rounded-lg w-[850px]">
           <DialogHeader>
             <DialogTitle>Modificar disponibilidad</DialogTitle>
-            <DialogDescription className='pb-6'>Modifica tu disponibilidad para el día {format(date, 'EEEE MM/yy', { locale: es })}.</DialogDescription>
+            <DialogDescription className='pb-6'>
+              Modifica tu disponibilidad para el día {format(date, 'EEEE dd/MM/yy', { locale: es })}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex space-x-4">
@@ -387,17 +433,22 @@ function AvailabilityForm({
                   ))}
                 </SelectContent>
               </Select>
+              <Button
+                onClick={handleSaveAvailability}
+                disabled={!startTime || !endTime}
+              >
+                Modificar disponibilidad
+              </Button>
             </div>
             {dateAvailability.map((slot, index) => (
               <div key={index} className="flex items-center justify-between">
                 <span>{slot[0]} - {slot[1]}</span>
-                <Button variant="destructive" size="sm">
-                  Eliminar
+                <Button onClick={handleClearSpecificAvailability} variant="outline" size="sm">
+                  Este día no estaré disponible
                 </Button>
               </div>
             ))}
           </div>
-
         </div>
       </DialogContent>
     </Dialog>
