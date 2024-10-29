@@ -19,7 +19,7 @@ import { Input } from "../ui/input"
 import { cn } from "@/lib/utils"
 import { Textarea } from "../ui/textarea"
 import { SendIcon } from "lucide-react"
-import { GenerativeNextAppointment } from "./generative-next-appointment"
+import { GenerativeNextAppointment, SkeletonGenerativeNextAppointment } from "./generative-next-appointment"
 
 export function ChatAsistant() {
   const { user } = useUser();
@@ -107,7 +107,6 @@ export function ChatAsistant() {
                     if (state === 'result') {
                       if (toolName === 'nextAppointment') {
                         const { result } = toolInvocation;
-                        console.log('result', result.nextAppointment);
                         return (
                           <div key={toolCallId}>
                             <GenerativeNextAppointment nextAppointment={result.nextAppointment} />
@@ -118,7 +117,7 @@ export function ChatAsistant() {
                       return (
                         <div key={toolCallId}>
                           {toolName === 'nextAppointment' ? (
-                            <div>Loading next appointment...</div>
+                            <SkeletonGenerativeNextAppointment />
                           ) : null}
                         </div>
                       );

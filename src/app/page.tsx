@@ -30,8 +30,8 @@ import React from "react";
 import { TestimonialSlider } from '@/components/TestimonialSlider';
 
 export const metadata: Metadata = {
-  title: "Psicobooking",
-  description: "La plataforma de psicología médica para personas que buscan ayuda y psicologos que busscan organizar citas",
+  title: "Psicobooking | Plataforma de psicología médica",
+  description: "La plataforma de psicología médica para personas que buscan ayuda y psicologos que buscan organizar citas",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   referrer: "origin-when-cross-origin",
   keywords: ['Psicologia', 'Atencion de pacientes', 'Psicología médica', 'Organización de citas', 'Citas', 'Psicología', 'Atención médica'],
@@ -262,7 +262,7 @@ const TIPS: Tip[] = [
 export default function HomePage() {
   return (
     <div className="flex flex-col relative min-h-screen overflow-x-hidden">
-      <header className="w-full fixed top-0 left-0 z-50 bg-gradient-to-b from-card to-card/0 filter backdrop-blur-md">
+      <header className="w-full fixed top-0 left-0 z-50 bg-gradient-to-b from-card to-card/0 filter backdrop-blur-md animate-fade">
         <div aria-label="contenedor de header" className="container mx-auto flex items-center justify-between py-2 md:py-6 px-4 lg:px-6 xl:px-28 2xl:px-52">
           <div className="flex items-center">
             <Image src={isotipo} priority alt="logo" width={70} height={70} />
@@ -399,15 +399,15 @@ export default function HomePage() {
             aria-label="Contenedor de hero"
             className="container mx-auto px-2 lg:px-20 xl:px-52 flex flex-col items-center justify-center gap-4 text-center"
           >
-            <strong className="uppercase text-primary/40 font-bold tracking-[4px]">Psicobooking</strong>
-            <h1 className="text-foreground/85 text-5xl font-medium tracking-normal leading-tight">
-              Tu bienestar emocional <br /> <span className="text-primary">nos importa.</span>
+            <strong className="uppercase text-primary/40 font-bold tracking-[4px] animate-fade-up">Psicobooking</strong>
+            <h1 className="text-foreground/85 text-5xl font-medium tracking-normal leading-tight animate-fade-up">
+              Tu bienestar emocional <br /> <span className="text-primary animate-fade-up animate-delay-200">nos importa.</span>
             </h1>
-            <p className="text-foreground/75 font-normal text-base text-pretty w-full max-w-[850px] pt-6 pb-20">
+            <p className="text-foreground/75 font-normal text-base text-pretty w-full max-w-[850px] pt-6 pb-20 animate-fade-up animate-delay-300">
               Tu bienestar mental es tan importante como tu bienestar físico. No estás solo, y hablar con un profesional puede marcar la diferencia. Encuentra el apoyo que necesitas y comienza a tomar medidas para sentirte mejor, paso a paso. No lo dejes para mañana, reserva tu consulta hoy mismo.
             </p>
 
-            <div className="hidden lg:flex items-center w-full max-w-[800px] py-3">
+            <div className="hidden lg:flex items-center w-full max-w-[800px] py-3 animate-fade-up animate-delay-500">
               <span className="rounded-full size-2 bg-primary/70"></span>
               <span className="h-px flex-1 rounded-full bg-primary/50"></span>
               <span className="rounded-full size-3 bg-primary"></span>
@@ -415,7 +415,7 @@ export default function HomePage() {
               <span className="rounded-full size-2 bg-primary/70"></span>
             </div>
 
-            <div className="flex items-center w-[920px] justify-center lg:justify-between gap-4 [&>p]:flex-1 [&>p]:text-foreground/75">
+            <div className="flex items-center w-[920px] justify-center lg:justify-between gap-4 [&>p]:flex-1 [&>p]:text-foreground/75 animate-fade-up animate-delay-500">
               <p className="hidden lg:block text-start">Escoge tu profesional</p>
               <SignedOut>
                 <SignInButton>
@@ -435,7 +435,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52">
+        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 animate-fade-up animate-delay-500">
           <div className="flex flex-col items-center gap-10 bg-card rounded-[60px] md:rounded-[100px] pt-14">
             <header className="flex flex-col items-center gap-3 text-center px-4 sm:px-10 lg:px-24">
               <h2 className="font-normal text-balance text-2xl">Encuentra tu profesional ideal</h2>
@@ -458,7 +458,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="relative container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
+        <section className="relative container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36 animate-fade-up animate-delay-500">
           <div className="absolute inset-0 -z-30 opacity-55">
             <svg width="100%" height="100%" viewBox="0 0 1440 643" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
               <g opacity="0.13" clipPath="url(#clip0_22_999)">
@@ -577,7 +577,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
+        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36 animate-fade-up animate-delay-500">
           <header className='flex flex-col items-center gap-4 text-center'>
             <h2 className="font-normal text-balance text-2xl [&>strong]:text-primary">Beneficios que obtendrás con <strong>PsicoBooking</strong></h2>
             <p className='font-light'>Soporte emocional accesible y adaptado a ti.</p>

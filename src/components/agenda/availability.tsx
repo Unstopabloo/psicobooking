@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { CalendarRange, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CalendarRange, Check, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isBefore, startOfToday, isToday } from 'date-fns'
 import {
@@ -18,24 +18,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { es } from 'date-fns/locale'
 import { useAvailabilityData } from '@/server/queries/queries'
 import { RecurringAvailability, SpecificAvailability } from '@/types/entities'
-import { Label } from '../ui/label'
-import { Checkbox } from '../ui/checkbox'
+import { Badge } from '../ui/badge'
+import { toast } from 'sonner'
+import { saveRecurringAvailability } from '@/server/actions/users'
 
-const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => i + 8)
-  .filter(hour => hour < 21)
-  .flatMap(hour => [
-    `${hour.toString().padStart(2, '0')}:00`,
-    `${hour.toString().padStart(2, '0')}:30`
-  ])
+const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
+  const hour = Math.floor(i / 2) + 8
+  const minutes = i % 2 === 0 ? '00' : '30'
+  return `${hour.toString().padStart(2, '0')}:${minutes}`
+}).filter(time => {
+  const hour = parseInt(time.split(':')[0] || '0')
+  return hour < 21
+})
 
 export function Availability() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDays, setSelectedDays] = useState<number[]>([])
+  const [concurrentStartTime, setConcurrentStartTime] = useState('')
+  const [concurrentEndTime, setConcurrentEndTime] = useState('')
+  const [recurringTimes, setRecurringTimes] = useState<{ [key: number]: { start: string, end: string } }>({})
+  const [recurringDisabledDays, setRecurringDisabledDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
+  const [disabledEndTime, setDisabledEndTime] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
 
   const { data: availabilityData } = useAvailabilityData(format(currentDate, 'yyyy-MM-dd'))
+  console.log("availabilityData", availabilityData?.data)
+
   const { recurring, specific } = availabilityData?.data || { recurring: [], specific: [] }
+
+  console.log("recurring", recurring)
+  console.log("specific", specific)
 
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
@@ -51,7 +64,7 @@ export function Availability() {
 
   const getAvailabilityForDate = (date: Date) => {
     const dateString = format(date, 'yyyy-MM-dd')
-    const dayOfWeek = getDay(date) || 7 // 0 for Sunday, so we change it to 7
+    const dayOfWeek = getDay(date)
 
     // Buscar si hay una disponibilidad específica para esta fecha
     const specificDay = specific?.find(item => item.date === dateString)
@@ -61,12 +74,120 @@ export function Availability() {
 
     // Si no hay específica, buscar la disponibilidad recurrente para ese día de la semana
     const recurringDay = recurring?.find(item => item.day === dayOfWeek)
+    console.log("recurringDay for getAvailabilityForDate", recurringDay)
     return recurringDay?.slots || []
   }
 
   const toggleDay = (day: number) => {
     setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])
   }
+
+  const handleStartTimeChange = (time: string, dayIndex: number) => {
+
+    if (time === (recurringTimes[dayIndex]?.end || '')) {
+      toast.error('La hora de inicio y fin no pueden ser iguales')
+      return
+    }
+
+    if (recurringTimes[dayIndex]?.end && recurringTimes[dayIndex]?.start > recurringTimes[dayIndex]?.end) {
+      toast.error('La hora de inicio no puede ser mayor a la hora de fin')
+      return
+    }
+
+    setRecurringTimes(prev => ({
+      ...prev,
+      [dayIndex]: {
+        start: time,
+        end: prev[dayIndex]?.end || ''
+      }
+    }))
+
+    setDisabledEndTime(prev => prev.filter(d => d !== dayIndex))
+  }
+
+  const handleEndTimeChange = (time: string, dayIndex: number) => {
+    if (time < (recurringTimes[dayIndex]?.start || '')) {
+      toast.error('La hora de fin no puede ser menor a la hora de inicio')
+      return
+    }
+
+    setRecurringDisabledDays(prev => prev.filter(d => d !== dayIndex))
+
+    setRecurringTimes(prev => ({
+      ...prev,
+      [dayIndex]: {
+        start: prev[dayIndex]?.start || '',
+        end: time
+      }
+    }))
+  }
+
+  const handleSaveRecurringAvailability = async (dayIndex: number) => {
+    const adjustedDayIndex = dayIndex === 6 ? 0 : dayIndex + 1
+
+    if (recurringTimes[dayIndex]?.start === '' || recurringTimes[dayIndex]?.end === '') {
+      toast.error('Debes seleccionar una hora de inicio y fin')
+      return
+    }
+
+    if (recurringTimes[dayIndex]?.start === recurringTimes[dayIndex]?.end) {
+      toast.error('La hora de inicio y fin no pueden ser iguales')
+      return
+    }
+
+    if ((recurringTimes[dayIndex]?.start || '') > (recurringTimes[dayIndex]?.end || '')) {
+      toast.error('La hora de inicio no puede ser mayor a la hora de fin')
+      return
+    }
+
+    toast.promise(saveRecurringAvailability(adjustedDayIndex, recurringTimes[dayIndex]!.start, recurringTimes[dayIndex]!.end), {
+      loading: 'Actualizando disponibilidad...',
+      success: 'Disponibilidad recurrente actualizada',
+      error: 'No se pudo actualizar la disponibilidad recurrente'
+    })
+  }
+
+  const handleClearRecurringAvailability = (dayIndex: number) => {
+    setRecurringTimes(prev => ({
+      ...prev,
+      [dayIndex]: {
+        start: '',
+        end: ''
+      }
+    }))
+
+    toast.success('Disponibilidad recurrente eliminada', {
+      description: `${DAYS[dayIndex]} de ${MONTHS[currentDate.getMonth()]}`
+    })
+  }
+
+  useEffect(() => {
+    if (recurring?.length) {
+      const initialTimes: { [key: number]: { start: string, end: string } } = {}
+
+      recurring.forEach(item => {
+        // Convertir de domingo=0 a lunes=0
+        const adjustedDay = item.day === 0 ? 6 : item.day - 1
+
+        if (item.slots?.[0]) {
+          initialTimes[adjustedDay] = {
+            start: item.slots[0][0],
+            end: item.slots[0][1]
+          }
+        }
+      })
+
+      setRecurringTimes(initialTimes)
+      // Actualizar los días habilitados
+      setRecurringDisabledDays(prev =>
+        prev.filter(day => !initialTimes[day])
+      )
+      // Actualizar los tiempos finales habilitados
+      setDisabledEndTime(prev =>
+        prev.filter(day => !initialTimes[day]?.start)
+      )
+    }
+  }, [recurring])
 
   return (
     <Dialog>
@@ -76,8 +197,8 @@ export function Availability() {
           <CalendarRange size={16} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex justify-center items-start max-w-md sm:max-w-2xl px-3 pt-10 sm:p-8">
-        <div className="p-1 sm:p-4 rounded-lg w-[850px]">
+      <DialogContent className="grid grid-cols-1 sm:grid-cols-2 max-w-md sm:max-w-[1150px] px-3 pt-10 sm:p-8">
+        <div className="p-1 sm:p-4 rounded-lg">
           <DialogHeader>
             <DialogTitle>Gestor de disponibilidad</DialogTitle>
             <DialogDescription className='pb-6'>Acá puedes ver y modificar tu disponibilidad para los próximos meses.</DialogDescription>
@@ -114,7 +235,11 @@ export function Availability() {
                   key={day}
                   variant="outline"
                   disabled={isBeforeToday}
-                  className={cn(`relative text-center py-6 sm:py-8 hover:shadow-md`, isTodayDate && 'bg-primary/5 border-primary/60')}
+                  className={cn(
+                    `relative text-center py-6 sm:py-8 hover:shadow-md`,
+                    isTodayDate && 'bg-primary/5 border-primary/60',
+                    hasAvailability && 'bg-primary/5 border-primary/60'
+                  )}
                   onClick={() => handleDateClick(day)}
                 >
                   {day}
@@ -131,45 +256,85 @@ export function Availability() {
               )
             })}
           </div>
-          <h3 className="text-lg font-semibold mb-4">Disponibilidad Recurrente</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {DAYS.map((day, index) => (
-              <div
-                key={day}
-                onClick={() => toggleDay(index + 1)}
-                className={cn(
-                  "flex items-center space-x-2 p-3 cursor-pointer rounded-lg border-2 transition-colors",
-                  selectedDays.includes(index + 1) ? "border-primary bg-primary/10" : "border-gray-200"
-                )}
-              >
-                <Checkbox
-                  id={day}
-                  value={index + 1}
-                  className="h-5 w-5 rounded-full"
-                  checked={selectedDays.includes(index + 1)}
-                  onCheckedChange={() => toggleDay(index + 1)}
-                />
-                <Label
-                  htmlFor={day}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  {day}
-                </Label>
-              </div>
-            ))}
+        </div>
+        <div className="flex flex-col items-start gap-12 mt-3">
+          <div className='flex flex-col items-start'>
+            <h3 className="text-lg font-semibold">Disponibilidad Recurrente</h3>
+            <p className='text-sm text-muted-foreground'>Selecciona los días de la semana en los que quieres que estés disponible.</p>
           </div>
-          <div className="mt-8">
-            <AvailabilityForm
-              open={isOpen}
-              onOpenChange={setIsOpen}
-              date={selectedDate}
-              specific={specific}
-              recurring={recurring}
-              dateAvailability={getAvailabilityForDate(selectedDate)}
-            />
+          <div className='flex flex-col items-start gap-6 w-full'>
+            {
+              Array.from({ length: 7 }).map((_, index) => {
+                return (
+                  <div key={index} className='flex items-center justify-between gap-7'>
+                    <div className='flex items-center gap-2'>
+                      <Badge variant="outline" className='min-w-12 h-full border-primary/60 flex items-center justify-center'>{DAYS[index]}</Badge>
+                      <Select
+                        onValueChange={(time) => handleStartTimeChange(time, index)}
+                        value={recurringTimes[index]?.start || ''}
+                      >
+                        <SelectTrigger className="w-36">
+                          <SelectValue placeholder="Hora de inicio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_SLOTS.map(time => (
+                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select
+                        onValueChange={(time) => handleEndTimeChange(time, index)}
+                        value={recurringTimes[index]?.end || ''}
+                        disabled={disabledEndTime.includes(index)}
+                      >
+                        <SelectTrigger className="w-36">
+                          <SelectValue placeholder="Hora de fin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_SLOTS.map(time => (
+                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className='self-end flex items-center gap-1'>
+                      <Button
+                        className='border-primary/30 hover:bg-primary/10'
+                        aria-label="Guardar disponibilidad recurrente"
+                        variant="outline"
+                        size="icon"
+                        disabled={recurringDisabledDays.includes(index)}
+                        onClick={() => handleSaveRecurringAvailability(index)}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        className='border-red-500/20 hover:bg-red-500/10'
+                        aria-label="Limpiar disponibilidad recurrente"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleClearRecurringAvailability(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })
+            }
           </div>
         </div>
       </DialogContent>
+      <div className="mt-8">
+        <AvailabilityForm
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          date={selectedDate}
+          specific={specific}
+          recurring={recurring}
+          dateAvailability={getAvailabilityForDate(selectedDate)}
+        />
+      </div>
     </Dialog>
   )
 }
