@@ -7,6 +7,7 @@ import { appointmentCardDTO, appointmentCardWithPatientDTO, clinicalHistoryDTO, 
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 
 export const updatePatient = authAction
   .schema(PatientSchema)
@@ -501,6 +502,10 @@ export async function getAvailabilityData(
   }
 
   try {
+    // Calcular el primer y último día del mes
+    const startDate = format(startOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
+
     // Obtener disponibilidad recurrente
     const { rows: recurringRows } = await turso.execute({
       sql: `
@@ -509,13 +514,14 @@ export async function getAvailabilityData(
           hour_from,
           hour_to
         FROM psicobooking_online_availability 
-        WHERE psychologist_id = :user_id
+        LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability.psychologist_id
+        WHERE psy.clerk_id = :user_id
         ORDER BY day_of_week, hour_from
       `,
       args: { user_id: userId }
     });
 
-    // Obtener excepciones
+    // Obtener excepciones para todo el mes
     const { rows: exceptionRows } = await turso.execute({
       sql: `
         SELECT 
@@ -524,16 +530,18 @@ export async function getAvailabilityData(
           hour_to,
           is_available
         FROM psicobooking_online_availability_exception
-        WHERE 
-          psychologist_id = :user_id
-          AND exception_date >= :date_from
+        LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability_exception.psychologist_id
+        WHERE psy.clerk_id = :user_id
+        AND exception_date >= :start_date
+        AND exception_date <= :end_date
         ORDER BY exception_date, hour_from
       `,
       args: {
         user_id: userId,
-        date_from: dateFrom
+        start_date: startDate,
+        end_date: endDate
       }
-    });
+    })
 
     // Procesar disponibilidad recurrente
     const recurringAvailability: RecurringAvailability[] = [];
@@ -602,5 +610,280 @@ export async function getAvailabilityData(
       data: undefined,
       error: error instanceof Error ? error : new Error('Error inesperado')
     };
+  }
+}
+
+export async function saveRecurringAvailability(day: number, startTime: string, endTime: string): Promise<{ data: boolean | undefined, error?: Error }> {
+  console.log('save recurring availability')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    return { data: false, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { data: false, error: new Error('No se encontró el usuario') }
+    }
+
+    const psychologistId = rows[0].id as number
+    console.log("psychologistId", psychologistId)
+
+    // Verificar si ya existe disponibilidad para ese día
+    const { rows: existingAvailability } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_online_availability 
+            WHERE psychologist_id = ? AND day_of_week = ?`,
+      args: [psychologistId, day]
+    })
+
+    let rowsAffected = 0
+
+    if (existingAvailability.length > 0) {
+      // Si existe, actualizar
+      const { rowsAffected: updated } = await turso.execute({
+        sql: `UPDATE psicobooking_online_availability 
+              SET hour_from = :hour_from, hour_to = :hour_to 
+              WHERE psychologist_id = :user_id AND day_of_week = :day_of_week`,
+        args: {
+          user_id: psychologistId,
+          day_of_week: day,
+          hour_from: startTime,
+          hour_to: endTime
+        }
+      })
+      rowsAffected = updated
+    } else {
+      // Si no existe, insertar
+      const { rowsAffected: inserted } = await turso.execute({
+        sql: `INSERT INTO psicobooking_online_availability 
+              (psychologist_id, day_of_week, hour_from, hour_to) 
+              VALUES (:user_id, :day_of_week, :hour_from, :hour_to)`,
+        args: {
+          user_id: psychologistId,
+          day_of_week: day,
+          hour_from: startTime,
+          hour_to: endTime
+        }
+      })
+      rowsAffected = inserted
+    }
+
+    if (rowsAffected === 0) {
+      return { data: false, error: new Error('No se pudo guardar la disponibilidad') }
+    }
+
+    revalidatePath('/agenda')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function deleteRecurringAvailability(day: number): Promise<{ data: boolean | undefined, error?: Error }> {
+  console.log('delete recurring availability')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    return { data: false }
+  }
+
+  try {
+    console.log("day", day)
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { data: false }
+    }
+
+    const psychologistId = rows[0].id as number
+    console.log("psychologistId", psychologistId)
+
+    const { rowsAffected } = await turso.execute({
+      sql: `DELETE FROM psicobooking_online_availability WHERE psychologist_id = ? AND day_of_week = ?`,
+      args: [psychologistId, day]
+    })
+    console.log("rowsAffected", rowsAffected)
+
+    if (rowsAffected === 0) {
+      return { data: false }
+    }
+
+    revalidatePath('/agenda')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function saveSpecificAvailability(
+  date: string,
+  startTime: string,
+  endTime: string
+): Promise<{ data: boolean | undefined, error?: Error }> {
+  console.log('save specific availability')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    return { data: false }
+  }
+
+  try {
+    // Obtener el ID del psicólogo
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { data: false }
+    }
+
+    const psychologistId = rows[0].id as number
+
+    // Verificar si ya existe una excepción para esa fecha
+    const { rows: existingException } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_online_availability_exception 
+            WHERE psychologist_id = ? AND exception_date = ?`,
+      args: [psychologistId, date]
+    })
+
+    let rowsAffected = 0
+
+    const id = existingException[0]?.id as number
+
+    if (id > 0) {
+      // Si existe, actualizar
+      const { rowsAffected: updated } = await turso.execute({
+        sql: `UPDATE psicobooking_online_availability_exception 
+              SET hour_from = :hour_from, 
+                  hour_to = :hour_to,
+                  is_available = true
+              WHERE psychologist_id = :user_id 
+              AND exception_date = :exception_date
+              AND id = :id`,
+        args: {
+          user_id: psychologistId,
+          exception_date: date,
+          hour_from: startTime,
+          hour_to: endTime,
+          id: id
+        }
+      })
+      rowsAffected = updated
+    } else {
+      // Si no existe, insertar
+      const { rowsAffected: inserted } = await turso.execute({
+        sql: `INSERT INTO psicobooking_online_availability_exception 
+              (psychologist_id, exception_date, hour_from, hour_to, is_available) 
+              VALUES (:user_id, :exception_date, :hour_from, :hour_to, true)`,
+        args: {
+          user_id: psychologistId,
+          exception_date: date,
+          hour_from: startTime,
+          hour_to: endTime
+        }
+      })
+      rowsAffected = inserted
+    }
+
+    if (rowsAffected === 0) {
+      return { data: false }
+    }
+
+    revalidatePath('/agenda')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function clearSpecificAvailability(
+  date: string
+): Promise<{ data: boolean | undefined, error?: Error }> {
+  console.log('clear specific availability')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    return { data: false, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      return { data: false, error: new Error('No se encontró el usuario') }
+    }
+
+    const psychologistId = rows[0].id as number
+
+    // Verificar si ya existe una excepción para esa fecha
+    const { rows: existingException } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_online_availability_exception 
+            WHERE psychologist_id = ? AND exception_date = ?`,
+      args: [psychologistId, date]
+    })
+
+    let rowsAffected = 0
+
+    const id = existingException[0]?.id as number
+
+    if (id > 0) {
+      // Si existe, actualizar
+      const { rowsAffected: updated } = await turso.execute({
+        sql: `UPDATE psicobooking_online_availability_exception 
+              SET is_available = false,
+                  hour_from = NULL,
+                  hour_to = NULL
+              WHERE psychologist_id = :user_id 
+              AND exception_date = :exception_date
+              AND id = :id`,
+        args: {
+          user_id: psychologistId,
+          exception_date: date,
+          id: id
+        }
+      })
+      rowsAffected = updated
+    } else {
+      // Si no existe, insertar
+      const { rowsAffected: inserted } = await turso.execute({
+        sql: `INSERT INTO psicobooking_online_availability_exception 
+              (psychologist_id, exception_date, is_available) 
+              VALUES (:user_id, :exception_date, false)`,
+        args: {
+          user_id: psychologistId,
+          exception_date: date
+        }
+      })
+      rowsAffected = inserted
+    }
+
+    if (rowsAffected === 0) {
+      return { data: false, error: new Error('No se pudo limpiar la disponibilidad') }
+    }
+
+    revalidatePath('/agenda')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

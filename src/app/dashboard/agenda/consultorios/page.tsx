@@ -30,7 +30,7 @@ export default async function ConsultoriosPage() {
       <aside className="relative col-span-2 flex flex-col items-start gap-8">
         <header>
           <H1 className="pb-2">Consultorios</H1>
-          <p className="text-muted-foreground text-pretty text-sm font-normal">Revisa, añade y gestiona tus consultorios de atención psicologica.</p>
+          <p className="text-muted-foreground text-pretty text-sm font-normal">Revisa, separa y gestiona tus consultorios para dar atención prescencial.</p>
         </header>
         <div className="relative">
           <div className="consultorios-list flex flex-col gap-4 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-10 pt-3">
@@ -45,11 +45,6 @@ export default async function ConsultoriosPage() {
       </aside>
       <div className="relative col-span-4">
         <div className="citas-list flex flex-col w-full overflow-x-hidden items-start gap-10 py-6 overflow-y-auto last:pb-20">
-          <AgendaItem />
-          <AgendaItem />
-          <AgendaItem />
-          <AgendaItem />
-          <AgendaItem />
           <ScrollFade />
           <ScrollFade is_reached_top />
         </div>

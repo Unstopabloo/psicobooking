@@ -35,3 +35,7 @@ export function GenerativeNextAppointment({
     </Card>
   )
 }
+
+export function SkeletonGenerativeNextAppointment() {
+  return <div className="w-72 h-24 bg-card rounded-lg animate-pulse"></div>
+}
