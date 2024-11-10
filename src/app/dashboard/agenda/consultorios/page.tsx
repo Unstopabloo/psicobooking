@@ -3,8 +3,18 @@ import { Container } from "../../_layout-components/container"
 import H1 from "@/components/H1"
 import { Consultorios } from "@/components/agenda/Consultorios"
 import { Button } from "@/components/ui/button"
-import { AgendaItem } from "@/components/agenda/AgendaItem"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 import { ScrollFade } from "@/components/scroll-fade"
+import { NewClinic } from "@/components/agenda/new-clinic"
+import { headers } from "next/headers"
 
 export const metadata: Metadata = {
   title: "Consultorios | Psicobooking",
@@ -39,9 +49,23 @@ export default async function ConsultoriosPage() {
             <ScrollFade is_reached_top />
           </div>
         </div>
-        <Button className="px-10 2xl:px-20">
-          Agregar consultorio
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="px-10 2xl:px-20">
+              Agregar consultorio
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Agregar consultorio</DialogTitle>
+              <DialogDescription>
+                Agrega un nuevo consultorio para dar atención prescencial.
+              </DialogDescription>
+              <NewClinic />
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
       </aside>
       <div className="relative col-span-4">
         <div className="citas-list flex flex-col w-full overflow-x-hidden items-start gap-10 py-6 overflow-y-auto last:pb-20">

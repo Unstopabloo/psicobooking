@@ -55,7 +55,7 @@ function applyCsp(request: NextRequest) {
     img-src 'self' data: blob: https: http: https://img.clerk.com https://*.posthog.com;
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline';
-    frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com;
+    frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com https://www.google.com;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;

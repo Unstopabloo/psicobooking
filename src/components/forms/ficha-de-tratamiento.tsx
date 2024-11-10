@@ -67,7 +67,7 @@ export function TreatmentSheetForm({ patient }: { patient: SinglePatientTicket }
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 bg-card/35 rounded-xl p-5">
         <section>
-          <h2 className="pb-10 font-semibold">Datos personales</h2>
+          <h2 className="pb-10 font-semibold">Ficha de tratamiento</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <FormField
               control={form.control}

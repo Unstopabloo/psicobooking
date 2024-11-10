@@ -6,6 +6,7 @@ import { HistorialesMain } from "./_components/historiales-main";
 import { HistorialesLoader, HistoricComponent } from "./_components/historic-component";
 import { Suspense } from "react";
 import Link from "next/link";
+import { getPatientUserName } from "@/server/db/users";
 
 export const metadata: Metadata = {
   title: "Historial clinico | Psicobooking",
@@ -27,11 +28,13 @@ export const metadata: Metadata = {
 export default async function HistorialClinico({ params }: { params: { patientId: string } }) {
   const { patientId } = params
 
+  const patientUserName = await getPatientUserName(parseInt(patientId))
+
   return (
     <Container className="grid grid-cols-1 md:grid-cols-6 gap-y-8 gap-x-28 lg:px-4 xl:px-20 2xl:px-28">
       <aside className="relative col-span-2 flex flex-col items-start gap-8">
         <header>
-          <H1 className="pb-2">Historial Clinico de {patientId}</H1>
+          <H1 className="pb-2">Historial Clinico de {patientUserName?.toString() || patientId}</H1>
           <p className="text-muted-foreground text-pretty text-sm font-normal">Acá podrás ver los historiales clinicos de tus pacientes, añadir nuevos y modificar los existentes.</p>
         </header>
         <Suspense fallback={<HistorialesLoader />}>

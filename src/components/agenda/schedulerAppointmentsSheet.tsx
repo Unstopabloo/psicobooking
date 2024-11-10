@@ -46,11 +46,9 @@ export function SchedulerAppointmentsSheet({
                 <h3 className="font-semibold text-foreground/90 mb-8">Citas:</h3>
                 <div className="flex flex-col gap-8">
                   {
-                    UPCOMING_APPOINTMENTS?.appointments ? UPCOMING_APPOINTMENTS.appointments.map((appointment, index) => (
-                      <Appointment key={index} appointment={appointment} />
-                    )) : (
-                      <p>No hay eventos para este día.</p>
-                    )
+                    UPCOMING_APPOINTMENTS?.appointments?.map(appointment => (
+                      <Appointment key={appointment.id} appointment={appointment} />
+                    ))
                   }
                 </div>
               </>

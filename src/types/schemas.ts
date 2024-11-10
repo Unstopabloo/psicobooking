@@ -50,3 +50,11 @@ export const ClinicalHistorySchema = z.object({
   title: z.string().optional(),
   content: z.string().optional()
 })
+
+export const ClinicSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  day_of_week: z.string(),
+  hour_from: z.string(),
+  hour_to: z.string()
+})

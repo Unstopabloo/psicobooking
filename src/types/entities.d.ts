@@ -156,6 +156,15 @@ export interface AppointmentCardWithPatient extends AppointmentCard {
   session_type: string;
 }
 
+export interface AppointmentCalendarScheduler {
+  id: number;
+  title: string;
+  start: string;
+  end: string;
+  people: string[];
+  location: string;
+}
+
 type AvailabilitySlot = [string, string]
 
 export interface RecurringAvailability {
@@ -171,4 +180,14 @@ export interface SpecificAvailability {
 export interface AvailabilityResponse {
   recurring: RecurringAvailability[];
   specific: SpecificAvailability[];
+}
+
+export interface Clinic {
+  id: number;
+  clinic_id: number;
+  day_of_week: number;
+  hour_from: string;
+  hour_to: string;
+  name: string;
+  address: string;
 }

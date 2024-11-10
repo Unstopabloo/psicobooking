@@ -112,7 +112,7 @@ export function NavLink({ href, description, children }: { href: string; descrip
               href={href}
               className={
                 cn(`flex items-center justify-center rounded-lg p-3 stroke-foreground/45 
-            ${pathname === href ? 'bg-primary/15 stroke-foreground' : 'opacity-55'}
+            ${pathname.split('/')[2] === href.split('/')[2] ? 'bg-primary/15 stroke-foreground' : 'opacity-55'}
             
           `)}>
               {children}

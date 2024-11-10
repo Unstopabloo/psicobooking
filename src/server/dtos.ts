@@ -1,4 +1,9 @@
-import { Appointment, AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, Clinic, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 16).replace('T', ' ');
+}
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -133,13 +138,24 @@ export const appointmentCardWithPatientDTO = (appointmentCardWithPatient: Row[])
     psychologist_id: app.psychologist_id as number,
     patient_id: app.patient_id as number,
     avatar: app.avatar as string | null,
-    name: app.name as string | null,
-    date_from: app.date_from as string | null,
-    date_to: app.date_to as string | null,
-    email: app.email as string | null,
-    phone: app.phone as string | null,
-    nationality: app.nationality as string | null,
-    session_type: app.session_type as string
+    name: app.name as string,
+    email: app.email as string,
+    phone: app.phone as string,
+    nationality: app.nationality as string,
+    session_type: app.session_type as string,
+    date_from: app.date_from as string,
+    date_to: app.date_to as string
+  }))
+}
+
+export const schedulerAppointmentsDTO = (schedulerAppointments: Row[]): AppointmentCalendarScheduler[] => {
+  return schedulerAppointments.map(app => ({
+    id: app.id as number,
+    start: formatDate(app.start as string),
+    end: formatDate(app.end as string),
+    people: [app.name as string],
+    location: app.session_type as string,
+    title: `Cita con ${app.name}`
   }))
 }
 
@@ -161,4 +177,16 @@ export const nextAppointmentDTO = (nextAppointment: Row): NextAppointment => {
     name: nextAppointment.name as string,
     email: nextAppointment.email as string
   }
+}
+
+export const clinicDTO = (clinic: Row[]): Clinic[] => {
+  return clinic.map(clinic => ({
+    id: clinic.id as number,
+    clinic_id: clinic.clinic_id as number,
+    day_of_week: clinic.day_of_week as number,
+    hour_from: clinic.hour_from as string,
+    hour_to: clinic.hour_to as string,
+    name: clinic.name as string,
+    address: clinic.address as string
+  }))
 }

@@ -8,6 +8,10 @@ import H1 from "@/components/H1";
 import { Scheduler } from "@/components/agenda/scheduler";
 import { CalendarRange, CalendarSearch } from 'lucide-react';
 import { Availability } from "@/components/agenda/availability";
+import { CalendarApp } from "@/components/agenda/scheduler-calendar";
+import { turso } from "@/server/db";
+import { auth } from "@clerk/nextjs/server";
+import { schedulerAppointmentsDTO } from "@/server/dtos";
 
 export const metadata: Metadata = {
   title: "Agenda | Psicobooking",
@@ -26,9 +30,31 @@ export const metadata: Metadata = {
   ]
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AgendaPage() {
+  const { userId } = auth()
+
+  const { rows } = await turso.execute({
+    sql: `
+      SELECT 
+        app.id,
+        app.date_from as start,
+        app.date_to as end,
+        pa.first_name || ' ' || pa.last_name AS name,
+        app.session_type
+      FROM psicobooking_appointment app
+      LEFT JOIN psicobooking_user pa ON pa.id = app.patient_id
+      LEFT JOIN psicobooking_user ps ON ps.id = app.psychologist_id
+      WHERE ps.clerk_id = :user_id
+    `,
+    args: { user_id: userId }
+  })
+
+  const appointments = rows.length > 0 ? schedulerAppointmentsDTO(rows) : []
+
   return (
-    <Container className="px-2 lg:px-4 xl:px-32 2xl:px-80">
+    <Container className="px-2 lg:px-4 xl:px-32 2xl:px-40">
       <header className="flex items-center justify-between w-full">
         <div className="flex flex-col items-start">
           <H1>Mi agenda</H1>
@@ -46,7 +72,7 @@ export default async function AgendaPage() {
         </TooltipProvider>
       </header>
 
-      <AgendaList />
+      <CalendarApp events={appointments} />
     </Container>
   )
 }

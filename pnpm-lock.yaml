@@ -62,6 +62,21 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@schedule-x/calendar':
+        specifier: ^2.4.3
+        version: 2.4.3(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2)
+      '@schedule-x/event-modal':
+        specifier: ^2.5.0
+        version: 2.5.0(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2)
+      '@schedule-x/events-service':
+        specifier: ^2.4.3
+        version: 2.4.3
+      '@schedule-x/react':
+        specifier: ^2.4.2
+        version: 2.4.2(@schedule-x/calendar@2.4.3(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@schedule-x/theme-default':
+        specifier: ^2.4.3
+        version: 2.4.3
       '@sentry/nextjs':
         specifier: '8'
         version: 8.28.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.26.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.52.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.26.0(@opentelemetry/api@1.9.0))(next@14.2.8(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.94.0(esbuild@0.19.12))
@@ -131,6 +146,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^2.8.0
         version: 2.8.0(@tiptap/extension-text-style@2.8.0(@tiptap/core@2.8.0(@tiptap/pm@2.8.0)))
+      '@vis.gl/react-google-maps':
+        specifier: ^1.4.0
+        version: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ai:
         specifier: ^3.4.18
         version: 3.4.18(react@18.3.1)(sswr@2.1.0(svelte@4.2.19))(svelte@4.2.19)(vue@3.5.12(typescript@5.5.4))(zod@3.23.8)
@@ -1275,6 +1293,14 @@ packages:
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
+  '@preact/signals-core@1.8.0':
+    resolution: {integrity: sha512-OBvUsRZqNmjzCZXWLxkZfhcgT+Fk8DDcT/8vD6a1xhDemodyy87UJRJfASMuSD8FaAIeGgGm85ydXhm7lr4fyA==}
+
+  '@preact/signals@1.3.0':
+    resolution: {integrity: sha512-EOMeg42SlLS72dhoq6Vjq08havnLseWmPQ8A0YsgIAqMgWgx7V1a39+Pxo6i7SY5NwJtH4849JogFq3M67AzWg==}
+    peerDependencies:
+      preact: 10.x
+
   '@prisma/instrumentation@5.18.0':
     resolution: {integrity: sha512-r074avGkpPXItk+josQPhufZEmGhUCb16PQx4ITPS40vWTpTPET4VsgCBZB2alIN6SS7pRFod2vz2M2HHEEylQ==}
 
@@ -1919,6 +1945,31 @@ packages:
   '@rushstack/eslint-patch@1.10.4':
     resolution: {integrity: sha512-WJgX9nzTqknM393q1QJDJmoW28kUfEnybeTfVNcNAPnIx210RXm2DiXiHzfNPJNIUUb1tJnz/l4QGtJ30PgWmA==}
 
+  '@schedule-x/calendar@2.4.3':
+    resolution: {integrity: sha512-G2iXkaLqMr6xUCaa0tzfKnTDZN7j1vJyXRvJ9oOGatZ8fCfSQgoPW5OT+28p04fDlmrQgCbCrjyyB3YzxY5xeA==}
+    peerDependencies:
+      '@preact/signals': ^1.1.5
+      preact: ^10.19.2
+
+  '@schedule-x/event-modal@2.5.0':
+    resolution: {integrity: sha512-7D5hoIf+6+rfXzqAY2BSgNb0iYWy0euKnc6sHj0ViKj1Gfki4zrisbfJ8fxyRiE0qguxca11ejROBkiElBk1+A==}
+    peerDependencies:
+      '@preact/signals': ^1.1.5
+      preact: ^10.19.2
+
+  '@schedule-x/events-service@2.4.3':
+    resolution: {integrity: sha512-0xy6IvBm1jldrR0YVgRb01V1YG/PPpbEFR2kk5tGXMdCqJZXpkzt5tpXPqgU8Fkx5R6mn4PzMhFHQwColPHO2Q==}
+
+  '@schedule-x/react@2.4.2':
+    resolution: {integrity: sha512-JSxve77bsbEqq+r70eyV8Qk9OL2urkNht79uDR61n74prl0W9B53H+YudLuKn7nzbudmnTm3QCg3QBRoE5DmmQ==}
+    peerDependencies:
+      '@schedule-x/calendar': ^2.3.0
+      react: ^16.7.0 || ^17 || ^18
+      react-dom: ^16.7.0 || ^17 || ^18
+
+  '@schedule-x/theme-default@2.4.3':
+    resolution: {integrity: sha512-laeWS0eb7uXYbcb8yO1r7ZzJyqoSi9DaviOESPyFdC2xaYVEmZNny31MK63BgoJVJvxtq1zWh1YobfPjhIg2bA==}
+
   '@sentry-internal/browser-utils@8.28.0':
     resolution: {integrity: sha512-tE9++KEy8SlqibTmYymuxFVAnutsXBqrwQ936WJbjaMfkqXiro7C1El0ybkprskd0rKS7kln20Q6nQlNlMEoTA==}
     engines: {node: '>=14.18'}
@@ -2301,6 +2352,9 @@ packages:
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
+  '@types/google.maps@3.58.1':
+    resolution: {integrity: sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -2469,6 +2523,12 @@ packages:
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+
+  '@vis.gl/react-google-maps@1.4.0':
+    resolution: {integrity: sha512-M2pW1NjLGlT/HAMqtd3vWPfrlPh9wgcxVlnSmwCtmEJYzNV9ihiUz1awp7LHzsDoJ2XV0DuD4bwmnElKbxt9Ug==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@vue/compiler-core@3.5.12':
     resolution: {integrity: sha512-ISyBTRMmMYagUxhcpyEH0hpXRd/KqDU4ymofPgl2XAkY9ZhQ+h0ovEZJIiPop13UmR/54oA2cgMDjgroRelaEw==}
@@ -6052,6 +6112,13 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
+  '@preact/signals-core@1.8.0': {}
+
+  '@preact/signals@1.3.0(preact@10.23.2)':
+    dependencies:
+      '@preact/signals-core': 1.8.0
+      preact: 10.23.2
+
   '@prisma/instrumentation@5.18.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -6700,6 +6767,26 @@ snapshots:
 
   '@rushstack/eslint-patch@1.10.4': {}
 
+  '@schedule-x/calendar@2.4.3(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2)':
+    dependencies:
+      '@preact/signals': 1.3.0(preact@10.23.2)
+      preact: 10.23.2
+
+  '@schedule-x/event-modal@2.5.0(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2)':
+    dependencies:
+      '@preact/signals': 1.3.0(preact@10.23.2)
+      preact: 10.23.2
+
+  '@schedule-x/events-service@2.4.3': {}
+
+  '@schedule-x/react@2.4.2(@schedule-x/calendar@2.4.3(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@schedule-x/calendar': 2.4.3(@preact/signals@1.3.0(preact@10.23.2))(preact@10.23.2)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@schedule-x/theme-default@2.4.3': {}
+
   '@sentry-internal/browser-utils@8.28.0':
     dependencies:
       '@sentry/core': 8.28.0
@@ -7171,6 +7258,8 @@ snapshots:
 
   '@types/estree@1.0.6': {}
 
+  '@types/google.maps@3.58.1': {}
+
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
@@ -7395,6 +7484,13 @@ snapshots:
       eslint-visitor-keys: 3.4.3
 
   '@ungap/structured-clone@1.2.0': {}
+
+  '@vis.gl/react-google-maps@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@types/google.maps': 3.58.1
+      fast-deep-equal: 3.1.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   '@vue/compiler-core@3.5.12':
     dependencies:

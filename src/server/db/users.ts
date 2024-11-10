@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment } from "@/types/entities";
-import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, Clinic, ClinicalHistory } from "@/types/entities";
+import { appointmentDTO, clinicalHistoryDTO, clinicDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -323,5 +323,33 @@ export async function getNextAppointment(): Promise<{ nextAppointment: NextAppoi
   } catch (error) {
     console.error(error)
     return { nextAppointment: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getPatientUserName(patient_id: number) {
+  console.log('get username of patient', patient_id)
+
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    if (!patient_id) {
+      throw new Error('No patient id found')
+    }
+
+    const { rows } = await turso.execute({
+      sql: `SELECT first_name || ' ' || last_name as name FROM psicobooking_user WHERE id = ?`,
+      args: [patient_id]
+    })
+
+    const result = rows[0]?.name
+    console.log('result', result)
+    return result
+  } catch (error) {
+    console.error(error)
+    return { error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

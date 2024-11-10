@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query";
-import { getAvailabilityData, getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentsData, getUpcommingAppointments } from "../actions/users";
+import { getAvailabilityData, getConsultorios, getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentsData, getUpcommingAppointments, schedulerUpcommingAppointments } from "../actions/users";
 
 export function usePatient(patientId: number) {
   return useQuery({
@@ -46,7 +46,17 @@ export function useUpcomingAppointments(date_from: string) {
   return useQuery({
     queryKey: ['upcoming-appointments', date_from],
     queryFn: () => getUpcommingAppointments(date_from),
-    refetchOnMount: false,
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useSchedulerUpcomingAppointments() {
+  return useQuery({
+    queryKey: ['scheduler-upcoming-appointments'],
+    queryFn: () => schedulerUpcommingAppointments(),
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -54,6 +64,14 @@ export function useAvailabilityData(date_from: string) {
   return useQuery({
     queryKey: ['availability-data', date_from],
     queryFn: () => getAvailabilityData(date_from),
+    refetchOnMount: false,
+  });
+}
+
+export function useConsultorios() {
+  return useQuery({
+    queryKey: ['consultorios'],
+    queryFn: () => getConsultorios(),
     refetchOnMount: false,
   });
 }

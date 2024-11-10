@@ -2,7 +2,7 @@ import { DatosPersonalesForm } from "@/components/forms/datos-personales"
 import { TreatmentSheetForm } from "@/components/forms/ficha-de-tratamiento"
 import H1 from "@/components/H1"
 import { Button } from "@/components/ui/button"
-import { getSinglePatientTicket } from "@/server/db/users"
+import { getPatientUserName, getSinglePatientTicket } from "@/server/db/users"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
