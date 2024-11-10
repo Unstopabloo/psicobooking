@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCard, AppointmentCardWithPatient, AvailabilitySlot, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -161,4 +161,13 @@ export const nextAppointmentDTO = (nextAppointment: Row): NextAppointment => {
     name: nextAppointment.name as string,
     email: nextAppointment.email as string
   }
+}
+
+export const availabilityDTO = (availability: Row[]): DailyAvailability[] => {
+  return availability.map(ava => ({
+    day_name: ava.day_name as string,
+    availability_slots: ava.availability_slots
+      ? JSON.parse(`[${ava.availability_slots as string}]`)
+      : []
+  }))
 }

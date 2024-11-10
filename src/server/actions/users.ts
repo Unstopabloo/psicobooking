@@ -491,127 +491,127 @@ export async function getUpcomingAppointmentsData(date_from: string): Promise<{ 
   }
 }
 
-export async function getAvailabilityData(
-  dateFrom: string
-): Promise<{ data: AvailabilityResponse | undefined; error?: Error }> {
-  const { userId } = auth();
+// export async function getAvailabilityData(
+//   dateFrom: string
+// ): Promise<{ data: AvailabilityResponse | undefined; error?: Error }> {
+//   const { userId } = auth();
 
-  if (!userId) {
-    console.log('No estas autorizado');
-    return { data: undefined, error: new Error('No estas autorizado') };
-  }
+//   if (!userId) {
+//     console.log('No estas autorizado');
+//     return { data: undefined, error: new Error('No estas autorizado') };
+//   }
 
-  try {
-    // Calcular el primer y último día del mes
-    const startDate = format(startOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
+//   try {
+//     // Calcular el primer y último día del mes
+//     const startDate = format(startOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
+//     const endDate = format(endOfMonth(new Date(dateFrom)), 'yyyy-MM-dd');
 
-    // Obtener disponibilidad recurrente
-    const { rows: recurringRows } = await turso.execute({
-      sql: `
-        SELECT 
-          day_of_week,
-          hour_from,
-          hour_to
-        FROM psicobooking_online_availability 
-        LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability.psychologist_id
-        WHERE psy.clerk_id = :user_id
-        ORDER BY day_of_week, hour_from
-      `,
-      args: { user_id: userId }
-    });
+//     // Obtener disponibilidad recurrente
+//     const { rows: recurringRows } = await turso.execute({
+//       sql: `
+//         SELECT 
+//           day_of_week,
+//           hour_from,
+//           hour_to
+//         FROM psicobooking_online_availability 
+//         LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability.psychologist_id
+//         WHERE psy.clerk_id = :user_id
+//         ORDER BY day_of_week, hour_from
+//       `,
+//       args: { user_id: userId }
+//     });
 
-    // Obtener excepciones para todo el mes
-    const { rows: exceptionRows } = await turso.execute({
-      sql: `
-        SELECT 
-          exception_date,
-          hour_from,
-          hour_to,
-          is_available
-        FROM psicobooking_online_availability_exception
-        LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability_exception.psychologist_id
-        WHERE psy.clerk_id = :user_id
-        AND exception_date >= :start_date
-        AND exception_date <= :end_date
-        ORDER BY exception_date, hour_from
-      `,
-      args: {
-        user_id: userId,
-        start_date: startDate,
-        end_date: endDate
-      }
-    })
+//     // Obtener excepciones para todo el mes
+//     const { rows: exceptionRows } = await turso.execute({
+//       sql: `
+//         SELECT 
+//           exception_date,
+//           hour_from,
+//           hour_to,
+//           is_available
+//         FROM psicobooking_online_availability_exception
+//         LEFT JOIN psicobooking_user psy ON psy.id = psicobooking_online_availability_exception.psychologist_id
+//         WHERE psy.clerk_id = :user_id
+//         AND exception_date >= :start_date
+//         AND exception_date <= :end_date
+//         ORDER BY exception_date, hour_from
+//       `,
+//       args: {
+//         user_id: userId,
+//         start_date: startDate,
+//         end_date: endDate
+//       }
+//     })
 
-    // Procesar disponibilidad recurrente
-    const recurringAvailability: RecurringAvailability[] = [];
-    let currentDay: number | null = null;
-    let currentSlots: AvailabilitySlot[] = [];
+//     // Procesar disponibilidad recurrente
+//     const recurringAvailability: RecurringAvailability[] = [];
+//     let currentDay: number | null = null;
+//     let currentSlots: AvailabilitySlot[] = [];
 
-    for (const row of recurringRows) {
-      if (currentDay !== row.day_of_week) {
-        if (currentDay !== null) {
-          recurringAvailability.push({
-            day: currentDay,
-            slots: [...currentSlots]
-          });
-        }
-        currentDay = row.day_of_week as number;
-        currentSlots = [];
-      }
-      currentSlots.push([row.hour_from as string, row.hour_to as string]);
-    }
+//     for (const row of recurringRows) {
+//       if (currentDay !== row.day_of_week) {
+//         if (currentDay !== null) {
+//           recurringAvailability.push({
+//             day: currentDay,
+//             slots: [...currentSlots]
+//           });
+//         }
+//         currentDay = row.day_of_week as number;
+//         currentSlots = [];
+//       }
+//       currentSlots.push([row.hour_from as string, row.hour_to as string]);
+//     }
 
-    if (currentDay !== null && currentSlots.length > 0) {
-      recurringAvailability.push({
-        day: currentDay,
-        slots: currentSlots
-      });
-    }
+//     if (currentDay !== null && currentSlots.length > 0) {
+//       recurringAvailability.push({
+//         day: currentDay,
+//         slots: currentSlots
+//       });
+//     }
 
-    // Procesar excepciones
-    const specificAvailability: SpecificAvailability[] = [];
-    let currentDate: string | null = null;
-    let currentSpecificSlots: AvailabilitySlot[] = [];
+//     // Procesar excepciones
+//     const specificAvailability: SpecificAvailability[] = [];
+//     let currentDate: string | null = null;
+//     let currentSpecificSlots: AvailabilitySlot[] = [];
 
-    for (const row of exceptionRows) {
-      if (currentDate !== row.exception_date) {
-        if (currentDate !== null) {
-          specificAvailability.push({
-            date: currentDate,
-            slots: row.is_available ? [...currentSpecificSlots] : []
-          });
-        }
-        currentDate = row.exception_date as string;
-        currentSpecificSlots = [];
-      }
-      if (row.is_available) {
-        currentSpecificSlots.push([row.hour_from as string, row.hour_to as string]);
-      }
-    }
+//     for (const row of exceptionRows) {
+//       if (currentDate !== row.exception_date) {
+//         if (currentDate !== null) {
+//           specificAvailability.push({
+//             date: currentDate,
+//             slots: row.is_available ? [...currentSpecificSlots] : []
+//           });
+//         }
+//         currentDate = row.exception_date as string;
+//         currentSpecificSlots = [];
+//       }
+//       if (row.is_available) {
+//         currentSpecificSlots.push([row.hour_from as string, row.hour_to as string]);
+//       }
+//     }
 
-    if (currentDate !== null) {
-      specificAvailability.push({
-        date: currentDate,
-        slots: currentSpecificSlots
-      });
-    }
+//     if (currentDate !== null) {
+//       specificAvailability.push({
+//         date: currentDate,
+//         slots: currentSpecificSlots
+//       });
+//     }
 
-    return {
-      data: {
-        recurring: recurringAvailability,
-        specific: specificAvailability
-      }
-    };
+//     return {
+//       data: {
+//         recurring: recurringAvailability,
+//         specific: specificAvailability
+//       }
+//     };
 
-  } catch (error) {
-    console.error(error);
-    return {
-      data: undefined,
-      error: error instanceof Error ? error : new Error('Error inesperado')
-    };
-  }
-}
+//   } catch (error) {
+//     console.error(error);
+//     return {
+//       data: undefined,
+//       error: error instanceof Error ? error : new Error('Error inesperado')
+//     };
+//   }
+// }
 
 export async function saveRecurringAvailability(day: number, startTime: string, endTime: string): Promise<{ data: boolean | undefined, error?: Error }> {
   console.log('save recurring availability')
@@ -635,44 +635,19 @@ export async function saveRecurringAvailability(day: number, startTime: string, 
     const psychologistId = rows[0].id as number
     console.log("psychologistId", psychologistId)
 
-    // Verificar si ya existe disponibilidad para ese día
-    const { rows: existingAvailability } = await turso.execute({
-      sql: `SELECT id FROM psicobooking_online_availability 
-            WHERE psychologist_id = ? AND day_of_week = ?`,
-      args: [psychologistId, day]
+    const { rowsAffected } = await turso.execute({
+      sql: `
+        INSERT INTO psicobooking_availability 
+          (clinic_id, psychologist_id, day_of_week, hour_from, hour_to, is_online) 
+          VALUES (0, :user_id, :day_of_week, :hour_from, :hour_to, true)
+      `,
+      args: {
+        user_id: psychologistId,
+        day_of_week: day,
+        hour_from: startTime,
+        hour_to: endTime
+      }
     })
-
-    let rowsAffected = 0
-
-    if (existingAvailability.length > 0) {
-      // Si existe, actualizar
-      const { rowsAffected: updated } = await turso.execute({
-        sql: `UPDATE psicobooking_online_availability 
-              SET hour_from = :hour_from, hour_to = :hour_to 
-              WHERE psychologist_id = :user_id AND day_of_week = :day_of_week`,
-        args: {
-          user_id: psychologistId,
-          day_of_week: day,
-          hour_from: startTime,
-          hour_to: endTime
-        }
-      })
-      rowsAffected = updated
-    } else {
-      // Si no existe, insertar
-      const { rowsAffected: inserted } = await turso.execute({
-        sql: `INSERT INTO psicobooking_online_availability 
-              (psychologist_id, day_of_week, hour_from, hour_to) 
-              VALUES (:user_id, :day_of_week, :hour_from, :hour_to)`,
-        args: {
-          user_id: psychologistId,
-          day_of_week: day,
-          hour_from: startTime,
-          hour_to: endTime
-        }
-      })
-      rowsAffected = inserted
-    }
 
     if (rowsAffected === 0) {
       return { data: false, error: new Error('No se pudo guardar la disponibilidad') }

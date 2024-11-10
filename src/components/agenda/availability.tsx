@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarRange, Check, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { CalendarRange, Check, ChevronLeft, ChevronRight, Copy, Edit, Pen, Pencil, Plus, Trash, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isBefore, startOfToday, isToday } from 'date-fns'
 import {
@@ -13,17 +13,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
-import { DAYS, MONTHS } from '@/lib/consts'
+import { DAYS_FULL } from '@/lib/consts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { es } from 'date-fns/locale'
-import { useAvailabilityData } from '@/server/queries/queries'
-import { RecurringAvailability, SpecificAvailability } from '@/types/entities'
+// import { useAvailabilityData } from '@/server/queries/queries'
+import { DailyAvailability as AvailabilityType, RecurringAvailability, SpecificAvailability } from '@/types/entities'
 import { Badge } from '../ui/badge'
 import { toast } from 'sonner'
 import { clearSpecificAvailability, deleteRecurringAvailability, saveRecurringAvailability } from '@/server/actions/users'
 import { saveSpecificAvailability } from '@/server/actions/users'
 
 import { useRouter } from 'next/navigation'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
   const hour = Math.floor(i / 2) + 8
@@ -34,7 +37,7 @@ const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
   return hour < 21
 })
 
-export function Availability() {
+export function Availability({ availability }: { availability: AvailabilityType[] }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isOpen, setIsOpen] = useState(false)
@@ -42,9 +45,9 @@ export function Availability() {
   const [recurringTimes, setRecurringTimes] = useState<{ [key: number]: { start: string, end: string } }>({})
   const [recurringDisabledDays, setRecurringDisabledDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
   const [disabledEndTime, setDisabledEndTime] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
-
-  const { data: availabilityData } = useAvailabilityData(format(currentDate, 'yyyy-MM-dd'))
-  const { recurring, specific } = availabilityData?.data || { recurring: [], specific: [] }
+  const [copied, setCopied] = useState(false)
+  // const { data: availabilityData } = useAvailabilityData(format(currentDate, 'yyyy-MM-dd'))
+  // const { recurring, specific } = availabilityData?.data || { recurring: [], specific: [] }
 
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
@@ -58,23 +61,23 @@ export function Availability() {
     setIsOpen(true)
   }
 
-  const getAvailabilityForDate = (date: Date) => {
-    const dateString = format(date, 'yyyy-MM-dd')
-    const dayOfWeek = getDay(date)
+  // const getAvailabilityForDate = (date: Date) => {
+  //   const dateString = format(date, 'yyyy-MM-dd')
+  //   const dayOfWeek = getDay(date)
 
-    // Buscar si hay una disponibilidad específica para esta fecha
-    const specificDay = specific?.find(item => item.date === dateString)
-    if (specificDay !== undefined) {
-      // Si existe una disponibilidad específica y está marcada como no disponible (slots vacíos),
-      // retornamos un array vacío independientemente de la disponibilidad recurrente
-      return specificDay.slots
-    }
+  //   // Buscar si hay una disponibilidad específica para esta fecha
+  //   const specificDay = specific?.find(item => item.date === dateString)
+  //   if (specificDay !== undefined) {
+  //     // Si existe una disponibilidad específica y está marcada como no disponible (slots vacíos),
+  //     // retornamos un array vacío independientemente de la disponibilidad recurrente
+  //     return specificDay.slots
+  //   }
 
-    // Si no hay específica, buscar la disponibilidad recurrente para ese día de la semana
-    const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek
-    const recurringDay = recurring?.find(item => item.day === adjustedDayOfWeek)
-    return recurringDay?.slots || []
-  }
+  //   // Si no hay específica, buscar la disponibilidad recurrente para ese día de la semana
+  //   const adjustedDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek
+  //   const recurringDay = recurring?.find(item => item.day === adjustedDayOfWeek)
+  //   return recurringDay?.slots || []
+  // }
 
   const toggleDay = (day: number) => {
     setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])
@@ -104,8 +107,8 @@ export function Availability() {
   }
 
   const handleEndTimeChange = (time: string, dayIndex: number) => {
-    if (time < (recurringTimes[dayIndex]?.start || '')) {
-      toast.error('La hora de fin no puede ser menor a la hora de inicio')
+    if (time <= (recurringTimes[dayIndex]?.start || '')) {
+      toast.error('La hora de fin no puede ser menor o igual a la hora de inicio')
       return
     }
 
@@ -160,34 +163,35 @@ export function Availability() {
     })
   }
 
-  useEffect(() => {
-    if (recurring?.length) {
-      const initialTimes: { [key: number]: { start: string, end: string } } = {}
+  // useEffect(() => {
+  //   if (recurring?.length) {
+  //     const initialTimes: { [key: number]: { start: string, end: string } } = {}
 
-      recurring.forEach(item => {
-        // Convertir de domingo=0 a lunes=0
-        const adjustedDay = item.day === 0 ? 6 : item.day - 1
+  //     recurring.forEach(item => {
+  //       // Convertir de domingo=0 a lunes=0
+  //       const adjustedDay = item.day === 0 ? 6 : item.day - 1
 
-        if (item.slots?.[0]) {
-          initialTimes[adjustedDay] = {
-            start: item.slots[0][0],
-            end: item.slots[0][1]
-          }
-        }
-      })
+  //       if (item.slots?.[0]) {
+  //         initialTimes[adjustedDay] = {
+  //           start: item.slots[0][0],
+  //           end: item.slots[0][1]
+  //         }
+  //       }
+  //     })
 
-      setRecurringTimes(initialTimes)
-      // Actualizar los días habilitados
-      setRecurringDisabledDays(prev =>
-        prev.filter(day => !initialTimes[day])
-      )
-      // Actualizar los tiempos finales habilitados
-      setDisabledEndTime(prev =>
-        prev.filter(day => !initialTimes[day]?.start)
-      )
-    }
-  }, [recurring])
+  //     setRecurringTimes(initialTimes)
+  //     // Actualizar los días habilitados
+  //     setRecurringDisabledDays(prev =>
+  //       prev.filter(day => !initialTimes[day])
+  //     )
+  //     // Actualizar los tiempos finales habilitados
+  //     setDisabledEndTime(prev =>
+  //       prev.filter(day => !initialTimes[day]?.start)
+  //     )
+  //   }
+  // }, [recurring])
 
+  console.log('availability', availability)
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -196,12 +200,12 @@ export function Availability() {
           <CalendarRange size={16} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="grid grid-cols-1 sm:grid-cols-2 max-w-md sm:max-w-[1150px] px-3 pt-10 sm:p-8">
+      <DialogContent className="grid grid-cols-1 max-w-md sm:max-w-[1170px] px-3 pt-10 sm:p-8">
         <div className="p-1 sm:p-4 rounded-lg">
           <DialogHeader>
             <DialogTitle>Gestor de disponibilidad</DialogTitle>
             <DialogDescription className='pb-6'>Acá puedes ver y modificar tu disponibilidad para los próximos meses.</DialogDescription>
-            <div className="flex flex-row justify-between items-center pb-4">
+            {/* <div className="flex flex-row justify-between items-center pb-4">
               <strong className="font-semibold">{MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}</strong>
               <div className="flex space-x-2">
                 <Button variant="outline" size="icon" onClick={prevMonth}>
@@ -211,9 +215,9 @@ export function Availability() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </div> */}
           </DialogHeader>
-          <div className="grid grid-cols-7 gap-1">
+          {/* <div className="grid grid-cols-7 gap-1">
             {DAYS.map(day => (
               <div key={day} className="text-center text-sm text-muted-foreground lowercase font-normal py-2">
                 {day}
@@ -254,74 +258,92 @@ export function Availability() {
                 </Button>
               )
             })}
-          </div>
-        </div>
-        <div className="flex flex-col items-start gap-12 mt-3">
-          <div className='flex flex-col items-start'>
-            <h3 className="text-lg font-semibold">Disponibilidad Recurrente</h3>
-            <p className='text-sm text-muted-foreground'>Selecciona los días de la semana en los que quieres que estés disponible.</p>
-          </div>
-          <div className='flex flex-col items-start gap-6 w-full'>
+          </div> */}
+          <div className='grid grid-cols-3 col-span-2 gap-x-8 gap-y-6 w-full'>
             {
-              Array.from({ length: 7 }).map((_, index) => {
+              availability.map((availability, index) => {
                 return (
-                  <div key={index} className='flex items-center justify-between gap-7'>
-                    <div className='flex items-center gap-2'>
+                  <div key={index} className='flex flex-col items-start justify-between border p-4 rounded-lg shadow-sm bg-card/15'>
+                    <div className='flex items-center gap-2 w-full'>
                       <Badge
-                        variant="outline"
-                        className='min-w-12 h-full border-primary/60 flex items-center justify-center'
+                        className='min-w-20 bg-gray-700 dark:bg-gray-800 hover:bg-gray-700 dark:hover:bg-gray-800 h-6 flex items-center justify-center'
                       >
-                        {DAYS[index]}
+                        {availability.day_name}
                       </Badge>
-                      <Select
-                        onValueChange={(time) => handleStartTimeChange(time, index)}
-                        value={recurringTimes[index]?.start || ''}
-                      >
-                        <SelectTrigger className="w-36">
-                          <SelectValue placeholder="Hora de inicio" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_SLOTS.map(time => (
-                            <SelectItem key={time} value={time}>{time}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select
-                        onValueChange={(time) => handleEndTimeChange(time, index)}
-                        value={recurringTimes[index]?.end || ''}
-                        disabled={disabledEndTime.includes(index)}
-                      >
-                        <SelectTrigger className="w-36">
-                          <SelectValue placeholder="Hora de fin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_SLOTS.map(time => (
-                            <SelectItem key={time} value={time}>{time}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
-                    <div className='self-end flex items-center gap-1'>
-                      <Button
-                        className='border-primary/30 hover:bg-primary/10'
-                        aria-label="Guardar disponibilidad recurrente"
-                        variant="outline"
-                        size="icon"
-                        disabled={recurringDisabledDays.includes(index)}
-                        onClick={() => handleSaveRecurringAvailability(index)}
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button
+                    <div className='w-full mt-4 flex flex-col items-start gap-2'>
+                      {
+                        availability.availability_slots && availability.availability_slots.length > 0 ?
+                          availability.availability_slots.map((slot, index) => (
+                            <InputTimeSlot
+                              key={index}
+                              startTime={slot.hour_from}
+                              endTime={slot.hour_to}
+                              slotId={slot.id.toString()}
+                            />
+                          )) : <p className='text-start text-sm text-muted-foreground'>No tienes definida ninguna disponibilidad para este día</p>
+                      }
+                    </div>
+                    <div className='mt-6 w-full'>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            className='flex items-center gap-1 w-full bg-secondary/10 border-secondary/60 hover:bg-secondary/20'
+                            aria-label="Guardar disponibilidad recurrente"
+                            variant="outline"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Añadir
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Añade un rango de disponibilidad</DialogTitle>
+                            <DialogDescription>
+                              Selecciona un rango de horas para añadir a tu disponibilidad del día {DAYS_FULL[index]}
+                            </DialogDescription>
+                            <form className='grid grid-cols-2 gap-2 py-4' action={handleSaveRecurringAvailability.bind(null, index)}>
+                              <Select
+                                onValueChange={(time) => handleStartTimeChange(time, index)}
+                                value={recurringTimes[index]?.start || ''}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Hora de inicio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_SLOTS.map(time => (
+                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                onValueChange={(time) => handleEndTimeChange(time, index)}
+                                value={recurringTimes[index]?.end || ''}
+                                disabled={disabledEndTime.includes(index)}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Hora de fin" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_SLOTS.map(time => (
+                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button className='col-span-2 mt-8' type='submit'>Guardar</Button>
+                            </form>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
+                      {/* <Button
                         className='border-red-500/20 hover:bg-red-500/10'
                         aria-label="Limpiar disponibilidad recurrente"
                         variant="outline"
-                        size="icon"
                         disabled={recurringDisabledDays.includes(index)}
                         onClick={() => handleClearRecurringAvailability(index)}
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
+                        Limpiar
+                      </Button> */}
                     </div>
                   </div>
                 )
@@ -330,7 +352,7 @@ export function Availability() {
           </div>
         </div>
       </DialogContent>
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <AvailabilityForm
           open={isOpen}
           onOpenChange={setIsOpen}
@@ -339,7 +361,7 @@ export function Availability() {
           recurring={recurring}
           dateAvailability={getAvailabilityForDate(selectedDate)}
         />
-      </div>
+      </div> */}
     </Dialog>
   )
 }
@@ -452,5 +474,65 @@ function AvailabilityForm({
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function InputTimeSlot({
+  startTime,
+  endTime,
+  slotId,
+}: {
+  startTime: string,
+  endTime: string,
+  slotId: string,
+}) {
+  return (
+    <div className='w-full'>
+      <div className="relative">
+        <Input
+          id="input-53"
+          className="pe-9"
+          type="text"
+          defaultValue={startTime + ' - ' + endTime}
+          readOnly
+        />
+        <div className='absolute inset-y-0 end-0 h-full flex items-center'>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex items-center h-full w-7 justify-center text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed"
+                  aria-label="Editar disponibilidad"
+                >
+                  <div>
+                    <Edit size={16} strokeWidth={1.5} aria-hidden="true" />
+                  </div>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="border border-input bg-popover px-2 py-1 text-xs text-muted-foreground">
+                Editar disponibilidad
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex h-full w-7 items-center justify-center border border-transparent text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed"
+                  aria-label="Eliminar disponibilidad"
+                >
+                  <div>
+                    <Trash size={16} strokeWidth={1.5} aria-hidden="true" />
+                  </div>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="border border-input bg-popover px-2 py-1 text-xs text-muted-foreground">
+                Eliminar disponibilidad
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    </div>
   )
 }

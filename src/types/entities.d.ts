@@ -172,3 +172,17 @@ export interface AvailabilityResponse {
   recurring: RecurringAvailability[];
   specific: SpecificAvailability[];
 }
+
+export interface AvailabilityInterval {
+  id: number;
+  clinic_id: number;
+  psychologist_id: number;
+  hour_from: string;
+  hour_to: string;
+  is_online: number;
+}
+
+export interface DailyAvailability {
+  day_name: string;
+  availability_slots: AvailabilityInterval[];
+}
