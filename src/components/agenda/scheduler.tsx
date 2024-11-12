@@ -16,7 +16,13 @@ import { useUpcomingAppointmentData } from '@/server/queries/queries'
 import { DAYS, MONTHS } from '@/lib/consts'
 import { SchedulerAppointmentsSheet } from './schedulerAppointmentsSheet'
 
-export function Scheduler() {
+interface SchedulerProps {
+  text: 'Agenda rápida' | 'Ver disponibilidad'
+  mode: 'base' | 'availability'
+  onAvailabilityDateClick?: (date: Date) => void
+}
+
+export function Scheduler({ text = 'Agenda rápida', mode = 'base', onAvailabilityDateClick }: SchedulerProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -36,6 +42,13 @@ export function Scheduler() {
 
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+
+    if (mode === 'availability' && !hasAppointments(day)) {
+      onAvailabilityDateClick?.(clickedDate)
+      return
+    }
+
+    // Comportamiento original para modo base
     setSelectedDate(clickedDate)
     setIsOpen(true)
   }
@@ -59,8 +72,8 @@ export function Scheduler() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button aria-label="Ver agenda rápida" variant="outline" className='flex items-center gap-4 text-foreground/80'>
-          <span className="hidden sm:block">Agenda rápida</span>
+        <Button aria-label={text} variant="outline" className='flex items-center gap-4 text-foreground/80'>
+          <span className="hidden sm:block">{text}</span>
           <CalendarSearch size={16} />
         </Button>
       </DialogTrigger>

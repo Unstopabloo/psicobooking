@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment } from "@/types/entities";
-import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability } from "@/types/entities";
+import { appointmentDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -323,5 +323,63 @@ export async function getNextAppointment(): Promise<{ nextAppointment: NextAppoi
   } catch (error) {
     console.error(error)
     return { nextAppointment: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAvailability(): Promise<DailyAvailability[]> {
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        WITH RECURSIVE dias AS (
+          SELECT 1 as day_number, 'Lunes' as day_name
+          UNION ALL SELECT 2, 'Martes'
+          UNION ALL SELECT 3, 'Miércoles'
+          UNION ALL SELECT 4, 'Jueves'
+          UNION ALL SELECT 5, 'Viernes'
+          UNION ALL SELECT 6, 'Sábado'
+          UNION ALL SELECT 7, 'Domingo'
+        )
+        SELECT 
+          d.day_name,
+          NULLIF(GROUP_CONCAT(
+            CASE 
+              WHEN app.id IS NOT NULL THEN
+                json_object(
+                  'id', app.id,
+                  'clinic_id', app.clinic_id,
+                  'psychologist_id', app.psychologist_id,
+                  'hour_from', app.hour_from,
+                  'hour_to', app.hour_to,
+                  'is_online', app.is_online
+                )
+              ELSE NULL 
+            END
+          ), '') as availability_slots
+        FROM dias d
+        LEFT JOIN psicobooking_availability app ON d.day_number = app.day_of_week
+        LEFT JOIN psicobooking_user u ON u.id = app.psychologist_id
+        WHERE u.clerk_id = ? OR app.id IS NULL
+        GROUP BY d.day_number, d.day_name
+        ORDER BY d.day_number
+      `,
+      args: [userId]
+    });
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No availability found')
+      return []
+    }
+
+    const result = availabilityDTO(rows)
+    return result
+  } catch (error) {
+    console.error(error)
+    return []
   }
 }
