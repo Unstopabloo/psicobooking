@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, Clinic, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AvailabilitySlot, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -179,14 +179,11 @@ export const nextAppointmentDTO = (nextAppointment: Row): NextAppointment => {
   }
 }
 
-export const clinicDTO = (clinic: Row[]): Clinic[] => {
-  return clinic.map(clinic => ({
-    id: clinic.id as number,
-    clinic_id: clinic.clinic_id as number,
-    day_of_week: clinic.day_of_week as number,
-    hour_from: clinic.hour_from as string,
-    hour_to: clinic.hour_to as string,
-    name: clinic.name as string,
-    address: clinic.address as string
+export const availabilityDTO = (availability: Row[]): DailyAvailability[] => {
+  return availability.map(ava => ({
+    day_name: ava.day_name as string,
+    availability_slots: ava.availability_slots
+      ? JSON.parse(`[${ava.availability_slots as string}]`)
+      : []
   }))
 }

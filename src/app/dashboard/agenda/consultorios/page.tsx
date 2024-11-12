@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { Container } from "../../_layout-components/container"
 import H1 from "@/components/H1"
-import { Consultorios } from "@/components/agenda/Consultorios"
+// import { Consultorios } from "@/components/agenda/Consultorios"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -44,7 +44,7 @@ export default async function ConsultoriosPage() {
         </header>
         <div className="relative">
           <div className="consultorios-list flex flex-col gap-4 overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-10 pt-3">
-            <Consultorios />
+            {/* <Consultorios /> */}
             <ScrollFade />
             <ScrollFade is_reached_top />
           </div>

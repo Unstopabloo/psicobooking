@@ -182,12 +182,16 @@ export interface AvailabilityResponse {
   specific: SpecificAvailability[];
 }
 
-export interface Clinic {
+export interface AvailabilityInterval {
   id: number;
   clinic_id: number;
-  day_of_week: number;
+  psychologist_id: number;
   hour_from: string;
   hour_to: string;
-  name: string;
-  address: string;
+  is_online: number;
+}
+
+export interface DailyAvailability {
+  day_name: string;
+  availability_slots: AvailabilityInterval[];
 }
