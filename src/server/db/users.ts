@@ -274,6 +274,33 @@ export async function getDashboardPatients(): Promise<{ patients: DashboardPatie
   }
 }
 
+export async function getPatientUserName(patient_id: number) {
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('Unauthorized')
+    return ''
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT first_name FROM psicobooking_user WHERE id = ?`,
+      args: [patient_id]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No user found')
+      return ''
+    }
+
+    const patientName = rows[0]?.first_name
+    return patientName
+  } catch (error) {
+    console.error(error)
+    return ''
+  }
+}
+
 export async function getNextAppointment(): Promise<{ nextAppointment: NextAppointment | undefined, error?: Error }> {
   console.log('getNextAppointment')
 
