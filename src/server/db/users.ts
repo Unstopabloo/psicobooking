@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability } from "@/types/entities";
-import { appointmentDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm } from "@/types/entities";
+import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -408,5 +408,42 @@ export async function getAvailability(): Promise<DailyAvailability[]> {
   } catch (error) {
     console.error(error)
     return []
+  }
+}
+
+export async function getAppointmentsForTranscriptionForm(): Promise<{ data: AppointmentForTranscriptionForm[] | undefined, error?: Error }> {
+  console.log('get appointments for transcription form')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          app.id, 
+          user.first_name || ' ' || user.last_name AS patient, 
+          app.date_from, 
+          app.session_type 
+        FROM psicobooking_appointment app
+        LEFT JOIN psicobooking_user user ON user.id = app.patient_id
+        LEFT JOIN psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE psy.clerk_id = :user_id AND app.state = 'completed'
+        ORDER BY app.date_from DESC;
+      `,
+      args: {
+        user_id: userId
+      }
+    })
+
+    const result = appointmentForTranscriptionFormDTO(rows)
+    return { data: result }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

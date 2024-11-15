@@ -2,12 +2,11 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCalendarScheduler, AppointmentCardWithPatient, AvailabilityResponse, AvailabilitySlot, ClinicalHistory, ContactInfo, PatientTicket, RecurringAvailability, SpecificAvailability } from "@/types/entities";
-import { appointmentCardDTO, appointmentCardWithPatientDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, schedulerAppointmentsDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
+import { AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { appointmentCardDTO, appointmentCardWithPatientDTO, appointmentForTranscriptionFormDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, ClinicSchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
-import { endOfMonth, format, startOfMonth } from "date-fns";
 
 export const updatePatient = authAction
   .schema(PatientSchema)
@@ -720,5 +719,45 @@ export async function saveSpecificAvailability(
   } catch (error) {
     console.error(error)
     return { data: false, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAppointmentsForTranscriptionForm(): Promise<{ data: AppointmentForTranscriptionForm[] | undefined, error?: Error }> {
+  console.log('get appointments for transcription form')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          app.id, 
+          user.first_name || ' ' || user.last_name AS patient, 
+          app.date_from, 
+          app.session_type 
+        FROM psicobooking_appointment app
+        LEFT JOIN psicobooking_user user ON user.id = app.patient_id
+        LEFT JOIN psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE psy.clerk_id = :user_id AND app.state = 'completed'
+        ORDER BY app.date_from DESC;
+      `,
+      args: {
+        user_id: userId
+      }
+    })
+
+    console.log('rows', rows)
+    const res = appointmentForTranscriptionFormDTO(rows)
+    console.log('res', res)
+
+    return { data: res }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
   }
 }

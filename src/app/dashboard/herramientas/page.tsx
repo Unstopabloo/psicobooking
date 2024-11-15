@@ -2,8 +2,8 @@ import H1 from "@/components/H1";
 import { Container } from "../_layout-components/container";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar } from "@/components/Avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TranscripcionCard } from "@/components/transcripciones/transcription-card";
 import { CheckIcon } from "@radix-ui/react-icons";
 import {
   Tooltip,
@@ -11,12 +11,30 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { MessageSquareIcon } from "lucide-react";
 import { MessageIcon } from "@/components/icons";
+import { unstable_cache as cache } from "next/cache";
+import { getTranscriptions } from "@/server/db/transcriptions";
+import { auth } from "@clerk/nextjs/server";
+
+const getTranscriptionsCached = cache(
+  async (userId: string) => getTranscriptions(userId, true),
+  ["transcriptions-herramientas"],
+  {
+    tags: ["transcriptions-herramientas"],
+  }
+);
 
 export default async function HerramientasPage() {
+  const { userId } = auth();
+
+  if (!userId) {
+    return <div>No se pudo obtener el usuario</div>
+  }
+
+  const transcriptions = await getTranscriptionsCached(userId);
+
   return (
-    <Container className="xl:px-10 2xl:px-32">
+    <Container className="xl:px-10 2xl:px-24">
       <header className="pb-10">
         <H1>Herramientas</H1>
         <p className="text-sm text-muted-foreground">Acá podrás ver todas las herramientas disponibles para trabajar con tus pacientes.</p>
@@ -33,13 +51,11 @@ export default async function HerramientasPage() {
             </Button>
           </header>
           <div className="grid grid-cols-2 gap-4 py-6">
-            <TranscripcionCard />
-            <TranscripcionCard />
-            <TranscripcionCard />
-            <TranscripcionCard />
-            <TranscripcionCard />
-            <TranscripcionCard />
-            <TranscripcionCard />
+            {
+              transcriptions.map(transcription => (
+                <TranscripcionCard key={transcription.id} transcription={transcription} />
+              ))
+            }
           </div>
         </section>
 
@@ -78,26 +94,6 @@ export default async function HerramientasPage() {
         </section>
       </div>
     </Container>
-  )
-}
-
-function TranscripcionCard() {
-  return (
-    <Card className="flex flex-col justify-between gap-4 p-4">
-      <CardHeader className="flex items-start gap-3 justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar name="Jaime Chavez" avatarUrl="https://github.com/shadcn.png" />
-          <div>
-            <CardTitle>Jaime Chavez</CardTitle>
-            <CardDescription>Online</CardDescription>
-          </div>
-        </div>
-        <small className="text-muted-foreground text-xs">#{2}</small>
-      </CardHeader>
-      <CardContent className="p-0 w-full text-end">
-        <p className="text-sm text-muted-foreground">28 Ago. 2024</p>
-      </CardContent>
-    </Card>
   )
 }
 

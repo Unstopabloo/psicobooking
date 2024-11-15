@@ -9,6 +9,10 @@ import { CSPostHogProvider } from "./_analytics/provider";
 import Providers from "@/components/providers";
 import ScreenSizeIndicator from "./dashboard/_layout-components/breakpoints";
 
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { psicobookingFileRouter } from "./api/uploadthing/core";
+
 export const metadata: Metadata = {
   title: "Psicobooking",
   description: "Psicobooking",
@@ -23,6 +27,7 @@ export default function RootLayout({
     <ClerkProvider>
       <CSPostHogProvider>
         <Providers>
+          <NextSSRPlugin routerConfig={extractRouterConfig(psicobookingFileRouter)} />
           <html lang="es" className={`${GeistSans.variable}`}>
             <body>
               {children}

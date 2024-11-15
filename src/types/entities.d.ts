@@ -195,3 +195,25 @@ export interface DailyAvailability {
   day_name: string;
   availability_slots: AvailabilityInterval[];
 }
+
+export interface AppointmentForTranscriptionForm {
+  id: number;
+  patient: string;
+  session_type: string;
+  date_from: string;
+}
+
+export interface TranscriptionCard {
+  id: number;
+  appointment_id: number;
+  title: string;
+  is_transcribed: string;
+  patient: string;
+  patient_avatar: string | null;
+  session_type: string;
+  date_from: string;
+}
+
+export interface TranscriptionContent extends Omit<TranscriptionCard, "appointment_id"> {
+  content: string;
+}

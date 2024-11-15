@@ -39,6 +39,24 @@ const ROUTES = [
         href: "/dashboard/pacientes"
       }
     ]
+  },
+  {
+    name: "Herramientas",
+    href: "/dashboard/herramientas",
+    paths: [
+      {
+        name: "Transcripciones",
+        href: "/dashboard/herramientas/transcripciones"
+      },
+      {
+        name: "Notas",
+        href: "/dashboard/herramientas/notas"
+      },
+      {
+        name: "Actividades",
+        href: "/dashboard/herramientas/actividades"
+      }
+    ]
   }
 ]
 

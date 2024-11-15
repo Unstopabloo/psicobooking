@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AvailabilitySlot, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -186,4 +186,39 @@ export const availabilityDTO = (availability: Row[]): DailyAvailability[] => {
       ? JSON.parse(`[${ava.availability_slots as string}]`)
       : []
   }))
+}
+
+export const appointmentForTranscriptionFormDTO = (appointmentForTranscriptionForm: Row[]): AppointmentForTranscriptionForm[] => {
+  return appointmentForTranscriptionForm.map(app => ({
+    id: app.id as number,
+    patient: app.patient as string,
+    date_from: app.date_from as string,
+    session_type: app.session_type as string
+  }))
+}
+
+export const transcriptionCardDTO = (transcription: Row[]): TranscriptionCard[] => {
+  return transcription.map(trans => ({
+    id: trans.id as number,
+    appointment_id: trans.appointment_id as number,
+    title: trans.title as string,
+    is_transcribed: trans.is_transcribed as boolean,
+    patient: trans.patient as string,
+    patient_avatar: trans.patient_avatar as string | null,
+    session_type: trans.session_type as string,
+    date_from: trans.date_from as string
+  }))
+}
+
+export const transcriptionContentDTO = (transcriptionContent: Row): TranscriptionContent => {
+  return {
+    id: transcriptionContent.id as number,
+    title: transcriptionContent.title as string,
+    is_transcribed: transcriptionContent.is_transcribed as boolean,
+    patient: transcriptionContent.patient as string,
+    patient_avatar: transcriptionContent.patient_avatar as string | null,
+    session_type: transcriptionContent.session_type as string,
+    date_from: transcriptionContent.date_from as string,
+    content: transcriptionContent.content as string
+  }
 }

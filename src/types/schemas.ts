@@ -58,3 +58,16 @@ export const ClinicSchema = z.object({
   hour_from: z.string(),
   hour_to: z.string()
 })
+
+export const transcriptionFormSchema = z.object({
+  transcription_title: z.string({
+    required_error: "El título es requerido",
+  }).min(2, {
+    message: "El título debe tener al menos 2 caracteres",
+  }).max(50, {
+    message: "El título debe tener menos de 50 caracteres",
+  }),
+  appointment_id: z.string().optional(),
+  audio_file: z.instanceof(File).optional(),
+  is_transcribed: z.boolean(),
+})
