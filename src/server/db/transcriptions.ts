@@ -67,6 +67,7 @@ export async function getTranscriptionContent(transcriptionId: string, userId: s
           audio.title,
           audio.is_transcribed,
           audio.content,
+          audio.audio_url,
           users.first_name || ' ' || users.last_name as patient,
           users.avatar as patient_avatar,
           appointments.session_type,

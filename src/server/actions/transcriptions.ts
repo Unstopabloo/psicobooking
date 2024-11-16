@@ -1,7 +1,7 @@
 "use server"
 
-import { utapi } from "@/server/ut";
 import { toast } from "sonner";
+import { cloudinaryUtils } from "@/server/cloudinary"
 
 export async function createTranscription(formData: FormData) {
   try {
@@ -12,18 +12,47 @@ export async function createTranscription(formData: FormData) {
 
     const transcriptionTitle = rawTranscriptionTitle?.toString().replace(/\s+/g, '_').toLowerCase()
 
-    if (!audioFile) throw new Error("No se seleccionó ningún archivo")
+    if (!audioFile) throw new Error("No se seleccionó ningún archivo");
 
-    const response = await utapi.uploadFiles(new File([audioFile], `${transcriptionTitle}.mp3`))
+    const audio = new File([audioFile], `${transcriptionTitle}`)
+    const arrayBuffer = await audio.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
 
-    if (!response || response.error) throw new Error("Error al subir archivo, intente nuevamente")
+    const result = await new Promise((resolve, reject) => {
+      cloudinaryUtils.uploader.upload_stream(
+        {
+          resource_type: 'video',
+          folder: 'transcriptions',
+          format: 'mp3',
+          public_id: transcriptionTitle,
+          transformation: [{
+            audio_codec: "mp3",
+            bit_rate: "16k",
+            audio_frequency: "22050",
+            channels: 1,
+            channel_layout: "mono",
+          }],
 
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/audio`, {
+        },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      ).end(buffer)
+    })
+    console.log("result: ", result)
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/audio`, {
       method: "POST",
-      body: JSON.stringify({ file: response.data.url, fileKey: response.data.key, transcriptionTitle, isTranscribed, appointmentId })
+      body: JSON.stringify({
+        transcriptionTitle,
+        isTranscribed,
+        appointmentId,
+        audioUrl: (result as any).url,
+      }),
     })
 
-    return response
+    return { success: true, result }
   } catch (error) {
     toast.error("Error al crear la transcripción, intente nuevamente")
   }

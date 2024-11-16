@@ -34,7 +34,7 @@ export default async function HerramientasPage() {
   const transcriptions = await getTranscriptionsCached(userId);
 
   return (
-    <Container className="xl:px-10 2xl:px-24">
+    <Container className="lg:px-0 xl:px-0 2xl:px-0">
       <header className="pb-10">
         <H1>Herramientas</H1>
         <p className="text-sm text-muted-foreground">Acá podrás ver todas las herramientas disponibles para trabajar con tus pacientes.</p>
@@ -50,7 +50,7 @@ export default async function HerramientasPage() {
               <Link href="/dashboard/herramientas/transcripciones">Todas mis transcripciones</Link>
             </Button>
           </header>
-          <div className="grid grid-cols-2 gap-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
             {
               transcriptions.map(transcription => (
                 <TranscripcionCard key={transcription.id} transcription={transcription} />
@@ -69,7 +69,7 @@ export default async function HerramientasPage() {
               <Link href="/dashboard/herramientas/notas">Todas mis notas</Link>
             </Button>
           </header>
-          <div className="grid grid-cols-3 gap-3 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-6">
             <NoteCard />
             <NoteCard />
             <NoteCard />

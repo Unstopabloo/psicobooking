@@ -39,7 +39,7 @@ import { format } from "date-fns";
 import { useState } from "react";
 import Link from "next/link";
 
-export default function UTButton({ appointments, error }: { appointments: AppointmentForTranscriptionForm[] | undefined, error: Error | undefined }) {
+export function UploadTranscriptionForm({ appointments, error }: { appointments: AppointmentForTranscriptionForm[] | undefined, error: Error | undefined }) {
   const [open, setOpen] = useState(false)
 
   if (error) {
@@ -62,6 +62,11 @@ export default function UTButton({ appointments, error }: { appointments: Appoin
   })
 
   async function onSubmit(data: z.infer<typeof transcriptionFormSchema>) {
+    if (!data.audio_file) {
+      toast.error("No se seleccionó ningún archivo")
+      return
+    }
+
     const formData = new FormData();
     formData.append('transcription_title', data.transcription_title);
     formData.append('is_transcribed', String(data.is_transcribed));
@@ -73,13 +78,18 @@ export default function UTButton({ appointments, error }: { appointments: Appoin
     if (data.audio_file) {
       formData.append('audio_file', data.audio_file);
     }
+
     const response = await createTranscription(formData)
 
-    if (response) {
-      toast.success("Transcripción creada correctamente", {
-        description: "El proceso de transcripción puede durar hasta 5 minutos, por favor espere."
-      })
+    if (!response?.success) {
+      toast.error("Error al subir el audio, intente nuevamente")
+      return
     }
+
+    toast.success("Audio subido correctamente", {
+      description: "El proceso de transcripción puede durar hasta 5 minutos, por favor espere."
+    })
+
     form.reset()
     setOpen(true)
   }
@@ -180,9 +190,9 @@ export default function UTButton({ appointments, error }: { appointments: Appoin
         />
         {
           form.formState.isSubmitting ?
-            <Button type="button" className="w-full" disabled><Loader2 className="w-4 h-4 animate-spin mr-2 duration-500" /> Transformando audio...</Button>
+            <Button type="button" className="w-full" disabled><Loader2 className="w-4 h-4 animate-spin mr-2 duration-500" /> Subiendo audio...</Button>
             :
-            <Button type="submit" className="w-full">Transformar audio</Button>
+            <Button type="submit" className="w-full">Subir audio</Button>
         }
       </form>
       <ContinueModal open={open} setOpen={setOpen} />

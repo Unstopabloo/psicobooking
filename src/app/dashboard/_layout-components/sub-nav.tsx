@@ -89,7 +89,7 @@ export function SubNav() {
   }
 
   return (
-    <nav className="flex items-center justify-end" aria-label="navegacion secundaria">
+    <nav className="hidden md:flex items-center justify-end" aria-label="navegacion secundaria">
       {route.map(route => (
         <ul
           key={route.name}

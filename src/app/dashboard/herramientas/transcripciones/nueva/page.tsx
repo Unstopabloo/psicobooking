@@ -1,6 +1,6 @@
 import { Container } from "@/app/dashboard/_layout-components/container";
 import H1 from "@/components/H1";
-import UTButton from "@/components/uploadthing/upload-button";
+import { UploadTranscriptionForm } from "@/components/uploads/upload-transcription-form";
 import { getAppointmentsForTranscriptionForm } from "@/server/db/users";
 
 export default async function NuevaTranscripcionPage() {
@@ -10,7 +10,7 @@ export default async function NuevaTranscripcionPage() {
     <Container className="flex justify-center">
       <div className="flex flex-col gap-10 items-center max-w-xl">
         <H1 className="text-start w-full">Nueva transcripción</H1>
-        <UTButton appointments={appointments} error={error} />
+        <UploadTranscriptionForm appointments={appointments} error={error} />
       </div>
     </Container>
   )

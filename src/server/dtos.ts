@@ -202,7 +202,7 @@ export const transcriptionCardDTO = (transcription: Row[]): TranscriptionCard[] 
     id: trans.id as number,
     appointment_id: trans.appointment_id as number,
     title: trans.title as string,
-    is_transcribed: trans.is_transcribed as boolean,
+    is_transcribed: trans.is_transcribed as string,
     patient: trans.patient as string,
     patient_avatar: trans.patient_avatar as string | null,
     session_type: trans.session_type as string,
@@ -214,7 +214,8 @@ export const transcriptionContentDTO = (transcriptionContent: Row): Transcriptio
   return {
     id: transcriptionContent.id as number,
     title: transcriptionContent.title as string,
-    is_transcribed: transcriptionContent.is_transcribed as boolean,
+    is_transcribed: transcriptionContent.is_transcribed as string,
+    audio_url: transcriptionContent.audio_url as string,
     patient: transcriptionContent.patient as string,
     patient_avatar: transcriptionContent.patient_avatar as string | null,
     session_type: transcriptionContent.session_type as string,

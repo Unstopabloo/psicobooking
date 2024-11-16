@@ -33,7 +33,7 @@ export function TranscripcionCard({ transcription }: { transcription: Transcript
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger>
-                  <Badge className="text-muted-foreground" variant="outline">{is_transcribed ? "Transcrito" : "Texto plano"}</Badge>
+                  <Badge className="text-muted-foreground" variant="outline">{is_transcribed === 'true' ? "Transcrito" : "Texto plano"}</Badge>
                 </TooltipTrigger>
                 <TooltipContent className="bg-background text-card-foreground border border-input">
                   <p>

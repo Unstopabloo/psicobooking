@@ -216,4 +216,5 @@ export interface TranscriptionCard {
 
 export interface TranscriptionContent extends Omit<TranscriptionCard, "appointment_id"> {
   content: string;
+  audio_url: string;
 }
