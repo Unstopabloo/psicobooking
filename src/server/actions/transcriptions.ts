@@ -2,8 +2,17 @@
 
 import { toast } from "sonner";
 import { cloudinaryUtils } from "@/server/cloudinary"
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export async function createTranscription(formData: FormData) {
+  const { userId } = auth();
+
+  if (!userId) {
+    console.error("No se pudo crear la transcripcion, usuario no autenticado")
+    redirect("/sign-in");
+  }
+
   try {
     const audioFile = formData.get("audio_file")
     const rawTranscriptionTitle = formData.get("transcription_title")
@@ -31,6 +40,7 @@ export async function createTranscription(formData: FormData) {
             audio_frequency: "22050",
             channels: 1,
             channel_layout: "mono",
+            effect: "volume:100"
           }],
 
         },
@@ -40,7 +50,6 @@ export async function createTranscription(formData: FormData) {
         }
       ).end(buffer)
     })
-    console.log("result: ", result)
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/audio`, {
       method: "POST",

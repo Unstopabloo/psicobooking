@@ -47,13 +47,33 @@ export default async function TranscriptionPage({ params }: { params: { transcri
       </header>
       <div className="relative w-full max-w-3xl mx-auto h-[650px]">
         <ScrollArea className="h-full pr-4">
-          <p className="prose pt-10 text-muted-foreground">
-            {transcription?.content}
-          </p>
+          {transcription?.is_transcribed === 'true' ? (
+            <TranscriptionAnalysis transcription={transcription.content} />
+          ) : (
+            <p className="prose py-10 text-muted-foreground">
+              {transcription?.content}
+            </p>
+          )}
         </ScrollArea>
         <div className="absolute left-0 right-0 bottom-0 h-5 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none"></div>
         <div className="absolute left-0 right-0 top-0 h-5 bg-gradient-to-b from-background via-background/80 to-transparent pointer-events-none"></div>
       </div>
     </Container>
+  )
+}
+
+function TranscriptionAnalysis({ transcription }: { transcription: string }) {
+  const transcriptionData = JSON.parse(transcription)
+
+  return (
+    <div className="flex flex-col gap-4 py-10">
+      <p className="prose text-muted-foreground pb-4">{transcriptionData.resumen}</p>
+      {transcriptionData.analisis.map((item: { title: string, content: string }) => (
+        <div key={item.title}>
+          <strong className="text-base text-foreground/90">{item.title}</strong>
+          <p className="prose text-muted-foreground">{item.content}</p>
+        </div>
+      ))}
+    </div>
   )
 }
