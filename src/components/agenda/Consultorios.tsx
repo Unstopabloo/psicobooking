@@ -1,35 +1,40 @@
 "use client"
 
-import Image from "next/image"
-import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "../ui/card"
+// import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "../ui/card"
+// import { Skeleton } from "../ui/skeleton"
 
-export function Consultorios() {
-  return (
-    <>
-      {[1, 2, 3, 4, 5, 6].map((index) => (
-        <button key={index} className="w-full text-left consultorios-card min-w-48">
-          <Card>
-            <CardContent className="p-4">
-              <div className="relative w-full aspect-video overflow-hidden rounded-xl">
-                <Image
-                  src="/og-image.png"
-                  alt="Consultorio"
-                  quality={100}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, 768px"
-                />
-              </div>
-              <CardHeader className="flex-col lg:flex-row items-start gap-y-2 gap-x-6 pt-5">
-                <CardTitle>Nombre consultorio</CardTitle>
-                <p className="text-xs text-muted-foreground">Ju. 3pm - 6pm</p>
-              </CardHeader>
-              <CardDescription className="pt-1">Av. Siempre viva 742</CardDescription>
-            </CardContent>
-          </Card>
-        </button>
-      ))}
+// export function Consultorios() {
 
-    </>
-  )
-}
+//   if (isLoading) return <ConsultoriosSkeleton />
+//   if (error) return <div>Error: {error.message}</div>
+
+//   return (
+//     <>
+//       {data?.map((availability) => {
+//         return (
+//           <button key={availability.id} className="w-full text-left consultorios-card min-w-48">
+//             <Card>
+//               <CardContent className="p-4">
+//                 <CardHeader className="flex-col lg:flex-row items-start gap-y-2 gap-x-6 pt-1">
+//                   <CardTitle>{availability.name}</CardTitle>
+//                   <p className="text-xs text-muted-foreground">{availability.hour_from} - {availability.hour_to}</p>
+//                 </CardHeader>
+//                 <CardDescription className="pt-1">{availability.address}</CardDescription>
+//               </CardContent>
+//             </Card>
+//           </button>
+//         )
+//       })}
+//     </>
+//   )
+// }
+
+// function ConsultoriosSkeleton() {
+//   return (
+//     <div className="w-full min-w-72 flex flex-col gap-y-4">
+//       <Skeleton className="w-full h-24" />
+//       <Skeleton className="w-full h-24" />
+//       <Skeleton className="w-full h-24" />
+//     </div>
+//   )
+// }

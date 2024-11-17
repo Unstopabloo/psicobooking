@@ -43,6 +43,16 @@
 
     --radius: 0.5rem;
     --bigradius: 1.4rem;
+
+
+
+    /* ScheduleX */
+    --sx-color-primary: hsl(var(--primary)) !important;
+    --sx-color-surface-dim: hsla(var(--primary)/ 0.15) !important;
+    --sx-color-surface: hsl(var(--primary)) !important;
+    --sx-color-primary-container: hsla(var(--primary)/ 0.2) !important;
+    --sx-color-background: hsl(var(--background)) !important;
+    --sx-internal-color-text: hsl(var(--foreground)) !important;
   }
 
   .dark {
@@ -81,7 +91,16 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
+
+
+    /* ScheduleX */
+    --sx-color-primary: hsl(var(--primary)) !important;
+    --sx-color-surface-dim: hsla(var(--primary)/ 0.15) !important;
+    --sx-color-surface: hsl(var(--primary)) !important;
+    --sx-color-primary-container: hsla(var(--primary)/ 0.2) !important;
+    --sx-color-background: hsl(var(--background)) !important;
+    --sx-internal-color-text: hsl(var(--foreground)) !important;
   }
 }
 
@@ -230,6 +249,11 @@
   }
 }
 
+.sx-react-calendar-wrapper {
+  width: 100%;
+  height: 800px;
+  max-height: 75vh;
+}
 
 .tippy-content {
   padding: 0 !important;
@@ -243,8 +267,4 @@
   float: left;
   height: 0;
   pointer-events: none;
-}
-
-.field-sizing {
-  field-sizing: content;
 }

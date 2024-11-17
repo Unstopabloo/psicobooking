@@ -1,4 +1,9 @@
-import { Appointment, AppointmentCard, AppointmentCardWithPatient, ClinicalHistory, ContactBase, ContactInfo, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket } from "@/types/entities"
+import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 16).replace('T', ' ');
+}
 
 export const appointmentDTO = (appointments: Row[]): Appointment[] => {
   return appointments.map(app => ({
@@ -133,13 +138,24 @@ export const appointmentCardWithPatientDTO = (appointmentCardWithPatient: Row[])
     psychologist_id: app.psychologist_id as number,
     patient_id: app.patient_id as number,
     avatar: app.avatar as string | null,
-    name: app.name as string | null,
-    date_from: app.date_from as string | null,
-    date_to: app.date_to as string | null,
-    email: app.email as string | null,
-    phone: app.phone as string | null,
-    nationality: app.nationality as string | null,
-    session_type: app.session_type as string
+    name: app.name as string,
+    email: app.email as string,
+    phone: app.phone as string,
+    nationality: app.nationality as string,
+    session_type: app.session_type as string,
+    date_from: app.date_from as string,
+    date_to: app.date_to as string
+  }))
+}
+
+export const schedulerAppointmentsDTO = (schedulerAppointments: Row[]): AppointmentCalendarScheduler[] => {
+  return schedulerAppointments.map(app => ({
+    id: app.id as number,
+    start: formatDate(app.start as string),
+    end: formatDate(app.end as string),
+    people: [app.name as string],
+    location: app.session_type as string,
+    title: `Cita con ${app.name}`
   }))
 }
 
@@ -161,4 +177,69 @@ export const nextAppointmentDTO = (nextAppointment: Row): NextAppointment => {
     name: nextAppointment.name as string,
     email: nextAppointment.email as string
   }
+}
+
+export const availabilityDTO = (availability: Row[]): DailyAvailability[] => {
+  return availability.map(ava => ({
+    day_name: ava.day_name as string,
+    availability_slots: ava.availability_slots
+      ? JSON.parse(`[${ava.availability_slots as string}]`)
+      : []
+  }))
+}
+
+export const appointmentForTranscriptionFormDTO = (appointmentForTranscriptionForm: Row[]): AppointmentForTranscriptionForm[] => {
+  return appointmentForTranscriptionForm.map(app => ({
+    id: app.id as number,
+    patient: app.patient as string,
+    date_from: app.date_from as string,
+    session_type: app.session_type as string
+  }))
+}
+
+export const transcriptionCardDTO = (transcription: Row[]): TranscriptionCard[] => {
+  return transcription.map(trans => ({
+    id: trans.id as number,
+    appointment_id: trans.appointment_id as number,
+    title: trans.title as string,
+    is_transcribed: trans.is_transcribed as string,
+    patient: trans.patient as string,
+    patient_avatar: trans.patient_avatar as string | null,
+    session_type: trans.session_type as string,
+    date_from: trans.date_from as string
+  }))
+}
+
+export const transcriptionContentDTO = (transcriptionContent: Row): TranscriptionContent => {
+  return {
+    id: transcriptionContent.id as number,
+    title: transcriptionContent.title as string,
+    is_transcribed: transcriptionContent.is_transcribed as string,
+    audio_url: transcriptionContent.audio_url as string,
+    patient: transcriptionContent.patient as string,
+    patient_avatar: transcriptionContent.patient_avatar as string | null,
+    session_type: transcriptionContent.session_type as string,
+    date_from: transcriptionContent.date_from as string,
+    content: transcriptionContent.content as string
+  }
+}
+
+export const getPatientsNamesForNoteDTO = (patients: Row[]): { id: number, name: string, avatar: string | null }[] => {
+  return patients.map(patient => ({
+    id: patient.id as number,
+    name: patient.name as string,
+    avatar: patient.avatar as string | null
+  }))
+}
+
+export const getNotesDTO = (notes: Row[]): Note[] => {
+  return notes.map(note => ({
+    id: note.id as number,
+    content: note.content as string,
+    color: note.color as string,
+    created_at: note.created_at as string,
+    patient_name: note.patient_name as string,
+    patient_id: note.patient_id as number,
+    psychologist_id: note.psychologist_id as number
+  }))
 }

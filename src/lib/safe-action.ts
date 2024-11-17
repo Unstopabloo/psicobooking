@@ -22,7 +22,7 @@ export const authAction = actionClient.use(async ({ next }) => {
   const { userId } = auth()
 
   if (!userId) {
-    throw new ActionError("No user found")
+    throw new ActionError("Unauthorized")
   }
 
   return next({ ctx: { userId } })

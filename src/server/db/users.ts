@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment } from "@/types/entities";
-import { appointmentDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote } from "@/types/entities";
+import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -274,6 +274,33 @@ export async function getDashboardPatients(): Promise<{ patients: DashboardPatie
   }
 }
 
+export async function getPatientUserName(patient_id: number) {
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('Unauthorized')
+    return ''
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT first_name FROM psicobooking_user WHERE id = ?`,
+      args: [patient_id]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No user found')
+      return ''
+    }
+
+    const patientName = rows[0]?.first_name
+    return patientName
+  } catch (error) {
+    console.error(error)
+    return ''
+  }
+}
+
 export async function getNextAppointment(): Promise<{ nextAppointment: NextAppointment | undefined, error?: Error }> {
   console.log('getNextAppointment')
 
@@ -323,5 +350,143 @@ export async function getNextAppointment(): Promise<{ nextAppointment: NextAppoi
   } catch (error) {
     console.error(error)
     return { nextAppointment: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getAvailability(): Promise<DailyAvailability[]> {
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        WITH RECURSIVE dias AS (
+          SELECT 1 as day_number, 'Lunes' as day_name
+          UNION ALL SELECT 2, 'Martes'
+          UNION ALL SELECT 3, 'Miércoles'
+          UNION ALL SELECT 4, 'Jueves'
+          UNION ALL SELECT 5, 'Viernes'
+          UNION ALL SELECT 6, 'Sábado'
+          UNION ALL SELECT 7, 'Domingo'
+        )
+        SELECT 
+          d.day_name,
+          NULLIF(GROUP_CONCAT(
+            CASE 
+              WHEN app.id IS NOT NULL THEN
+                json_object(
+                  'id', app.id,
+                  'clinic_id', app.clinic_id,
+                  'psychologist_id', app.psychologist_id,
+                  'hour_from', app.hour_from,
+                  'hour_to', app.hour_to,
+                  'is_online', app.is_online
+                )
+              ELSE NULL 
+            END
+          ), '') as availability_slots
+        FROM dias d
+        LEFT JOIN psicobooking_availability app ON d.day_number = app.day_of_week
+        LEFT JOIN psicobooking_user u ON u.id = app.psychologist_id
+        WHERE u.clerk_id = ? OR app.id IS NULL
+        GROUP BY d.day_number, d.day_name
+        ORDER BY d.day_number
+      `,
+      args: [userId]
+    });
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No availability found')
+      return []
+    }
+
+    const result = availabilityDTO(rows)
+    return result
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+}
+
+export async function getAppointmentsForTranscriptionForm(): Promise<{ data: AppointmentForTranscriptionForm[] | undefined, error?: Error }> {
+  console.log('get appointments for transcription form')
+
+  const { userId } = auth()
+
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          app.id, 
+          user.first_name || ' ' || user.last_name AS patient, 
+          app.date_from, 
+          app.session_type 
+        FROM psicobooking_appointment app
+        LEFT JOIN psicobooking_user user ON user.id = app.patient_id
+        LEFT JOIN psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE psy.clerk_id = :user_id AND app.state = 'completed'
+        ORDER BY app.date_from DESC;
+      `,
+      args: {
+        user_id: userId
+      }
+    })
+
+    const result = appointmentForTranscriptionFormDTO(rows)
+    return { data: result }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getPatientsNamesForNote(): Promise<PatientForNote[] | []> {
+  console.log('getPatientsNamesForNote')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.error('No estas autorizado')
+    return []
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          patient.id, 
+          patient.first_name || ' ' || patient.last_name AS name,
+          patient.avatar
+        FROM 
+          psicobooking_user patient
+        LEFT JOIN
+          psicobooking_user psy ON psy.id = app.psychologist_id
+        LEFT JOIN
+          psicobooking_appointment app ON app.patient_id = patient.id
+        WHERE 
+          psy.clerk_id = ?
+          AND patient.role = 'patient'
+          AND app.psychologist_id = psy.id
+      `,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No patients found')
+      return []
+    }
+
+    const result = getPatientsNamesForNoteDTO(rows)
+    return result
+  } catch (error) {
+    console.error(error)
+    return []
   }
 }

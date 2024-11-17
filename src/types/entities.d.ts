@@ -156,6 +156,15 @@ export interface AppointmentCardWithPatient extends AppointmentCard {
   session_type: string;
 }
 
+export interface AppointmentCalendarScheduler {
+  id: number;
+  title: string;
+  start: string;
+  end: string;
+  people: string[];
+  location: string;
+}
+
 type AvailabilitySlot = [string, string]
 
 export interface RecurringAvailability {
@@ -171,4 +180,57 @@ export interface SpecificAvailability {
 export interface AvailabilityResponse {
   recurring: RecurringAvailability[];
   specific: SpecificAvailability[];
+}
+
+export interface AvailabilityInterval {
+  id: number;
+  clinic_id: number;
+  psychologist_id: number;
+  hour_from: string;
+  hour_to: string;
+  is_online: number;
+}
+
+export interface DailyAvailability {
+  day_name: string;
+  availability_slots: AvailabilityInterval[];
+}
+
+export interface AppointmentForTranscriptionForm {
+  id: number;
+  patient: string;
+  session_type: string;
+  date_from: string;
+}
+
+export interface TranscriptionCard {
+  id: number;
+  appointment_id: number;
+  title: string;
+  is_transcribed: string;
+  patient: string;
+  patient_avatar: string | null;
+  session_type: string;
+  date_from: string;
+}
+
+export interface TranscriptionContent extends Omit<TranscriptionCard, "appointment_id"> {
+  content: string;
+  audio_url: string;
+}
+
+export interface PatientForNote {
+  id: number;
+  name: string;
+  avatar: string | null;
+}
+
+export interface Note {
+  id: number;
+  content: string;
+  color: string;
+  created_at: string;
+  patient_name: string;
+  patient_id: number;
+  psychologist_id: number;
 }
