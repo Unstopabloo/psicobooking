@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils";
 
 export function TranscripcionCard({ transcription }: { transcription: TranscriptionCardType }) {
   const { id, title, is_transcribed, patient, patient_avatar, session_type, date_from } = transcription;
@@ -28,12 +29,12 @@ export function TranscripcionCard({ transcription }: { transcription: Transcript
           <small className="text-muted-foreground text-xs"># {id + 1}</small>
         </CardHeader>
         <CardContent className="p-0 w-full mt-4">
-          <h4 className="text-sm font-medium text-muted-foreground">{title}</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">{title.split("_").join(" ").slice(0, 35)}</h4>
           <div className="flex items-center justify-between gap-2">
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger>
-                  <Badge className="text-muted-foreground" variant="outline">{is_transcribed === 'true' ? "Transcrito" : "Texto plano"}</Badge>
+                  <Badge className={cn("text-muted-foreground border", is_transcribed === 'true' ? "border-primary/70" : "border-border")} variant="outline">{is_transcribed === 'true' ? "Transcrito" : "Texto plano"}</Badge>
                 </TooltipTrigger>
                 <TooltipContent className="bg-background text-card-foreground border border-input">
                   <p>

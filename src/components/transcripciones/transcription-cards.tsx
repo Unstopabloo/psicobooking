@@ -32,7 +32,7 @@ export async function TranscriptionCards() {
 }
 
 export function TranscriptionCardSkeleton() {
-  return <div className="flex flex-col justify-between gap-4 p-4">
+  return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
     <Skeleton className="w-full h-28" />
     <Skeleton className="w-full h-28" />
     <Skeleton className="w-full h-28" />

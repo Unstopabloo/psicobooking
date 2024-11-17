@@ -65,7 +65,7 @@ export function AudioPlayer({ audioUrl }: EnhancedAudioPlayerProps) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-3 w-full max-w-[12rem] bg-card p-3 rounded-xl">
+    <div className="flex items-center justify-center gap-3 w-full md:w-[12rem] bg-card p-3 rounded-xl">
       <audio ref={audioRef}>
         <source src={audioUrl} type="audio/mpeg" />
         Tu navegador no soporta la etiqueta de audio.

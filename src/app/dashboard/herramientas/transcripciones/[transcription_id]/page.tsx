@@ -30,7 +30,7 @@ export default async function TranscriptionPage({ params }: { params: { transcri
 
   return (
     <Container className="flex flex-col items-center">
-      <header className="w-full max-w-3xl flex items-start justify-between pb-12 pt-6">
+      <header className="w-full max-w-3xl flex items-start justify-between flex-wrap gap-y-4 pb-12 pt-6">
         <div className="flex flex-col items-start">
           <H1>{transcription?.title.replaceAll("_", " ").toUpperCase()}</H1>
           <p className="text-sm text-muted-foreground">{format(new Date(transcription?.date_from), "dd 'de' MMMM, yyyy - HH:mm", { locale: es })}</p>
@@ -45,6 +45,7 @@ export default async function TranscriptionPage({ params }: { params: { transcri
         </div>
         <AudioPlayer audioUrl={transcription!.audio_url} />
       </header>
+
       <div className="relative w-full max-w-3xl mx-auto h-[650px]">
         <ScrollArea className="h-full pr-4">
           {transcription?.is_transcribed === 'true' ? (
