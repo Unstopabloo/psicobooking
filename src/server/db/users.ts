@@ -2,8 +2,8 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm } from "@/types/entities";
-import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote } from "@/types/entities";
+import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -445,5 +445,48 @@ export async function getAppointmentsForTranscriptionForm(): Promise<{ data: App
   } catch (error) {
     console.error(error)
     return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getPatientsNamesForNote(): Promise<PatientForNote[] | []> {
+  console.log('getPatientsNamesForNote')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.error('No estas autorizado')
+    return []
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          patient.id, 
+          patient.first_name || ' ' || patient.last_name AS name,
+          patient.avatar
+        FROM 
+          psicobooking_user patient
+        LEFT JOIN
+          psicobooking_user psy ON psy.id = app.psychologist_id
+        LEFT JOIN
+          psicobooking_appointment app ON app.patient_id = patient.id
+        WHERE 
+          psy.clerk_id = ?
+          AND patient.role = 'patient'
+          AND app.psychologist_id = psy.id
+      `,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No patients found')
+      return []
+    }
+
+    const result = getPatientsNamesForNoteDTO(rows)
+    return result
+  } catch (error) {
+    console.error(error)
+    return []
   }
 }

@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -222,4 +222,24 @@ export const transcriptionContentDTO = (transcriptionContent: Row): Transcriptio
     date_from: transcriptionContent.date_from as string,
     content: transcriptionContent.content as string
   }
+}
+
+export const getPatientsNamesForNoteDTO = (patients: Row[]): { id: number, name: string, avatar: string | null }[] => {
+  return patients.map(patient => ({
+    id: patient.id as number,
+    name: patient.name as string,
+    avatar: patient.avatar as string | null
+  }))
+}
+
+export const getNotesDTO = (notes: Row[]): Note[] => {
+  return notes.map(note => ({
+    id: note.id as number,
+    content: note.content as string,
+    color: note.color as string,
+    created_at: note.created_at as string,
+    patient_name: note.patient_name as string,
+    patient_id: note.patient_id as number,
+    psychologist_id: note.psychologist_id as number
+  }))
 }

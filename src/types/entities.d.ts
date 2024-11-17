@@ -218,3 +218,19 @@ export interface TranscriptionContent extends Omit<TranscriptionCard, "appointme
   content: string;
   audio_url: string;
 }
+
+export interface PatientForNote {
+  id: number;
+  name: string;
+  avatar: string | null;
+}
+
+export interface Note {
+  id: number;
+  content: string;
+  color: string;
+  created_at: string;
+  patient_name: string;
+  patient_id: number;
+  psychologist_id: number;
+}
