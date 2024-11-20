@@ -2,37 +2,14 @@ import H1 from "@/components/H1";
 import { Container } from "../_layout-components/container";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TranscripcionCard } from "@/components/transcripciones/transcription-card";
-import { CheckIcon } from "@radix-ui/react-icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { MessageIcon } from "@/components/icons";
-import { unstable_cache as cache } from "next/cache";
-import { getTranscriptions } from "@/server/db/transcriptions";
-import { auth } from "@clerk/nextjs/server";
-
-const getTranscriptionsCached = cache(
-  async (userId: string) => getTranscriptions(userId, true),
-  ["transcriptions-herramientas"],
-  {
-    tags: ["transcriptions-herramientas"],
-  }
-);
+import { DashboardNotes } from "@/components/notas/dashboard-notes";
+import { Suspense } from "react";
+import { NotesSkeleton } from "@/components/notas/notes";
+import { Transcriptions, TranscriptionsSkeleton } from "@/components/transcripciones/transcriptions";
+import { Activities } from "@/components/actividades/activities";
+import { ActivitiesSkeleton } from "@/components/actividades/activities";
 
 export default async function HerramientasPage() {
-  const { userId } = auth();
-
-  if (!userId) {
-    return <div>No se pudo obtener el usuario</div>
-  }
-
-  const transcriptions = await getTranscriptionsCached(userId);
-
   return (
     <Container className="lg:px-0 xl:px-0 2xl:px-0">
       <header className="pb-10">
@@ -51,11 +28,9 @@ export default async function HerramientasPage() {
             </Button>
           </header>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
-            {
-              transcriptions.map(transcription => (
-                <TranscripcionCard key={transcription.id} transcription={transcription} />
-              ))
-            }
+            <Suspense fallback={<TranscriptionsSkeleton limit />}>
+              <Transcriptions limit />
+            </Suspense>
           </div>
         </section>
 
@@ -70,9 +45,9 @@ export default async function HerramientasPage() {
             </Button>
           </header>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-6">
-            <NoteCard />
-            <NoteCard />
-            <NoteCard />
+            <Suspense fallback={<NotesSkeleton is_dashboard />}>
+              <DashboardNotes />
+            </Suspense>
           </div>
         </section>
 
@@ -87,53 +62,12 @@ export default async function HerramientasPage() {
             </Button>
           </header>
           <div className="grid grid-cols-2 gap-3 py-6">
-            <ActivityCard />
-            <ActivityCard />
-            <ActivityCard />
+            <Suspense fallback={<ActivitiesSkeleton limit={4} />}>
+              <Activities limit />
+            </Suspense>
           </div>
         </section>
       </div>
     </Container>
-  )
-}
-
-function NoteCard() {
-  return (
-    <article className="flex flex-col justify-between gap-4 p-4 border border-[#f4a749] bg-[#f4a749]/10 rounded-lg">
-      <p className="text-sm text-foreground/80">Este es un ejemplo de una nota muy larga para que veas como se ve en la pantalla, asi se podra medir el largo de la nota y como este interactua con el resto de la pantalla.</p>
-      <footer className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">28 Ago</p>
-        <p className="text-sm text-muted-foreground text-end">Lusiana V.</p>
-      </footer>
-    </article>
-  )
-}
-
-function ActivityCard() {
-  return (
-    <Card className="flex flex-col justify-between gap-4 p-4">
-      <CardHeader className="flex items-start gap-3 justify-between">
-        <div>
-          <CardTitle>Jaime Chavez</CardTitle>
-        </div>
-        <div className="size-5 bg-primary/10 flex items-center justify-center rounded-full border border-primary">
-          <CheckIcon className="size-4 text-primary" />
-        </div>
-      </CardHeader>
-      <CardContent className="p-0 w-full flex items-end justify-between gap-3">
-        <p className="text-sm text-muted-foreground text-pretty">Esta es la descripción de la actividad, como se ve, es bastante larga... </p>
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger className="flex items-center gap-1">
-              <MessageIcon className="size-4" />
-              <p className="text-sm text-muted-foreground">2</p>
-            </TooltipTrigger>
-            <TooltipContent className="bg-background border border-border shadow-sm">
-              <p className="text-sm text-muted-foreground">Tienes 2 comentarios</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </CardContent>
-    </Card>
   )
 }

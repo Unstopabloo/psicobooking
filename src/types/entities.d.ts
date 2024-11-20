@@ -234,3 +234,26 @@ export interface Note {
   patient_id: number;
   psychologist_id: number;
 }
+
+export interface ActivityWithComments {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  date_from: string;
+  date_to: string;
+  patient_name: string;
+  comments_count: number;
+}
+
+export interface CommentActivity {
+  content: string;
+  published_at: string;
+  author_name: string;
+  author_avatar: string | null;
+}
+
+export interface ActivityWithCommentsAndComments extends ActivityWithComments {
+  comments: CommentActivity[];
+  patient_avatar: string | null;
+}

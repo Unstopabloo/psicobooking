@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -242,4 +242,32 @@ export const getNotesDTO = (notes: Row[]): Note[] => {
     patient_id: note.patient_id as number,
     psychologist_id: note.psychologist_id as number
   }))
+}
+
+export const getActivitiesWithCommentsDTO = (activities: Row[]): ActivityWithComments[] => {
+  return activities.map(act => ({
+    id: act.id as number,
+    title: act.title as string,
+    description: act.description as string,
+    status: act.status as string,
+    date_from: act.date_from as string,
+    date_to: act.date_to as string,
+    patient_name: act.patient_name as string,
+    comments_count: act.comments_count as number
+  }))
+}
+
+export const getActivityByIdDTO = (activity: Row): ActivityWithCommentsAndComments => {
+  return {
+    id: activity.id as number,
+    title: activity.title as string,
+    description: activity.description as string,
+    status: activity.status as string,
+    date_from: activity.date_from as string,
+    date_to: activity.date_to as string,
+    patient_name: activity.patient_name as string,
+    patient_avatar: activity.patient_avatar as string | null,
+    comments_count: activity.comments_count as number,
+    comments: JSON.parse(activity.comments as string) as CommentActivity[]
+  }
 }

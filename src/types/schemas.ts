@@ -71,3 +71,8 @@ export const transcriptionFormSchema = z.object({
   audio_file: z.instanceof(File).optional(),
   is_transcribed: z.boolean(),
 })
+
+export const CommentActivitySchema = z.object({
+  activity_id: z.number(),
+  content: z.string()
+})
