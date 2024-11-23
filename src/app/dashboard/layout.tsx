@@ -3,8 +3,8 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { DesktopNav } from "@/components/layout/Navs";
-import { SignedIn, UserButton } from "@clerk/nextjs";
-
+import { SignedIn } from "@clerk/nextjs";
+import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                     <Link href="/dashboard/perfil">Perfil</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                  <SignOutButton />
                 </DropdownMenuContent>
               </DropdownMenu>
             </SignedIn>
@@ -107,7 +108,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               <div className="sm:hidden">
                 <SignedIn>
-                  <UserButton />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
+                      <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent sideOffset={10} align="start">
+                      <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/perfil">Perfil</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                      <SignOutButton />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </SignedIn>
               </div>
             </div>
