@@ -1,3 +1,5 @@
+import { Option } from "@/components/ui/multiselect";
+
 type State = {
   name: string;
   cities: string[];
@@ -5,6 +7,7 @@ type State = {
 
 type CountryPhoneCode = {
   name: string;
+  flag: string;
   code: string;
   aliases: string[];
   states: State[];
@@ -121,6 +124,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   // América del Norte
   {
     name: 'united states',
+    flag: '🇺🇸',
     code: '+1',
     aliases: ['usa', 'us', 'estados unidos', 'eeuu', 'american', 'americano', 'americana', 'estadounidense'],
     states: [
@@ -328,6 +332,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'canada',
+    flag: '🇨🇦',
     code: '+1',
     aliases: ['ca', 'can', 'canadiense', 'canadian'],
     states: [
@@ -387,6 +392,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'mexico',
+    flag: '🇲🇽',
     code: '+52',
     aliases: ['mx', 'mex', 'méxico', 'mexican', 'mexicano', 'mexicana'],
     states: [
@@ -521,6 +527,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   {
     name: 'costa rica',
     code: '+506',
+    flag: '🇨🇷',
     aliases: ['cr', 'cri', 'costarricense', 'costa rican'],
     states: [
       {
@@ -555,6 +562,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'el salvador',
+    flag: '🇸🇻',
     code: '+503',
     aliases: ['sv', 'slv', 'salvadoreño', 'salvadoreña', 'salvadorian'],
     states: [
@@ -618,6 +626,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'guatemala',
+    flag: '🇬🇹',
     code: '+502',
     aliases: ['gt', 'gtm', 'guatemalteco', 'guatemalteca', 'guatemalan'],
     states: [
@@ -713,6 +722,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'honduras',
+    flag: '🇭🇳',
     code: '+504',
     aliases: ['hn', 'hnd', 'hondureño', 'hondureña', 'honduran'],
     states: [
@@ -792,6 +802,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'panama',
+    flag: '🇵🇦',
     code: '+507',
     aliases: ['pa', 'pan', 'panamá', 'panameño', 'panameña', 'panamanian'],
     states: [
@@ -851,6 +862,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'nicaragua',
+    flag: '🇳🇮',
     code: '+505',
     aliases: ['ni', 'nic', 'nicaragüense', 'nicaraguan'],
     states: [
@@ -928,6 +940,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   // América del Sur
   {
     name: 'argentina',
+    flag: '🇦🇷',
     code: '+54',
     aliases: ['ar', 'arg', 'argentino', 'argentina', 'argentinian'],
     states: [
@@ -1027,6 +1040,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'bolivia',
+    flag: '🇧🇴',
     code: '+591',
     aliases: ['bo', 'bol', 'boliviano', 'boliviana', 'bolivian'],
     states: [
@@ -1070,6 +1084,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'brasil',
+    flag: '🇧🇷',
     code: '+55',
     aliases: ['br', 'bra', 'brasil', 'brasileño', 'brasileña', 'brazilian'],
     states: [
@@ -1185,6 +1200,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'chile',
+    flag: '🇨🇱',
     code: '+56',
     aliases: ['cl', 'chl', 'chileno', 'chilena', 'chilean'],
     states: [
@@ -1256,6 +1272,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'colombia',
+    flag: '🇨🇴',
     code: '+57',
     aliases: ['co', 'col', 'colombiano', 'colombiana', 'colombian'],
     states: [
@@ -1391,6 +1408,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'ecuador',
+    flag: '🇪🇨',
     code: '+593',
     aliases: ['ec', 'ecu', 'ecuatoriano', 'ecuatoriana', 'ecuadorian'],
     states: [
@@ -1494,6 +1512,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'paraguay',
+    flag: '🇵🇾',
     code: '+595',
     aliases: ['py', 'pry', 'paraguayo', 'paraguaya', 'paraguayan'],
     states: [
@@ -1573,6 +1592,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'peru',
+    flag: '🇵🇪',
     code: '+51',
     aliases: ['pe', 'per', 'perú', 'peruano', 'peruana', 'peruvian'],
     states: [
@@ -1680,6 +1700,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'uruguay',
+    flag: '🇺🇾',
     code: '+598',
     aliases: ['uy', 'uruguayo', 'uruguaya'],
     states: [
@@ -1763,6 +1784,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'venezuela',
+    flag: '🇻🇪',
     code: '+58',
     aliases: ['ve', 'ven', 'venezolano', 'venezolana', 'venezuelan'],
     states: [
@@ -1868,6 +1890,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   // Europa
   {
     name: 'españa',
+    flag: '🇪🇸',
     code: '+34',
     aliases: ['es', 'esp', 'españa', 'español', 'española', 'spanish', 'spaniard'],
     states: [
@@ -1977,6 +2000,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   // Asia-Pacífico
   {
     name: 'japon',
+    flag: '🇯🇵',
     code: '+81',
     aliases: ['jp', 'jpn', 'japón', 'japonés', 'japonesa', 'japanese'],
     states: [
@@ -2172,6 +2196,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'corea del sur',
+    flag: '🇰🇷',
     code: '+82',
     aliases: ['kr', 'kor', 'corea del sur', 'coreano', 'coreana', 'korean'],
     states: [
@@ -2247,6 +2272,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'australia',
+    flag: '🇦🇺',
     code: '+61',
     aliases: ['au', 'aus', 'aussie', 'australian'],
     states: [
@@ -2286,6 +2312,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
   },
   {
     name: 'new zealand',
+    flag: '🇳🇿',
     code: '+64',
     aliases: ['nz', 'nzl', 'kiwi', 'neozelandés', 'neozelandesa', 'new zealander'],
     states: [
@@ -2354,6 +2381,99 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
         cities: ['Invercargill', 'Gore', 'Bluff', 'Winton', 'Te Anau']
       }
     ]
+  }
+]
+
+export const SPECIALITIES: Option[] = [
+  {
+    id: "1",
+    label: "Adicciones",
+    value: "Adicciones"
+  },
+  {
+    id: "2",
+    label: "Ansiedad y/o estrés",
+    value: "Ansiedad y/o estrés"
+  },
+  {
+    id: "3",
+    label: "Atención",
+    value: "Atención"
+  },
+  {
+    id: "4",
+    label: "Autoestima",
+    value: "Autoestima"
+  },
+  {
+    id: "5",
+    label: "Crianza",
+    value: "Crianza"
+  },
+  {
+    id: "6",
+    label: "Depresión",
+    value: "Depresión"
+  },
+  {
+    id: "7",
+    label: "Cronicas",
+    value: "Cronicas"
+  },
+  {
+    id: "8",
+    label: "Impuslividad y/o Ira",
+    value: "Impuslividad y/o Ira"
+  },
+  {
+    id: "9",
+    label: "Orientación vocacional",
+    value: "Orientación vocacional"
+  },
+  {
+    id: "10",
+    label: "Problemas alimenticios",
+    value: "Problemas alimenticios"
+  },
+  {
+    id: "11",
+    label: "Problemas de sueño",
+    value: "Problemas de sueño"
+  },
+  {
+    id: "12",
+    label: "Relaciones",
+    value: "Relaciones"
+  },
+  {
+    id: "13",
+    label: "Riesgo suicida",
+    value: "Riesgo suicida"
+  },
+  {
+    id: "14",
+    label: "Sexualidad",
+    value: "Sexualidad"
+  },
+  {
+    id: "15",
+    label: "Terapia de parejas",
+    value: "Terapia de parejas"
+  },
+  {
+    id: "16",
+    label: "TOC",
+    value: "TOC"
+  },
+  {
+    id: "17",
+    label: "Traumas",
+    value: "Traumas"
+  },
+  {
+    id: "18",
+    label: "Trabajo con niños",
+    value: "Trabajo con niños"
   }
 ]
 

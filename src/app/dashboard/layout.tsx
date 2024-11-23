@@ -22,11 +22,23 @@ import {
 import { Bell } from "lucide-react";
 import { ChatAsistant } from "@/components/ai-asistant/ui-chat-asistant";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar } from "@/components/Avatar";
+import { currentUser } from "@clerk/nextjs/server";
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const nonce = headers().get('x-nonce') || ''
+  const user = await currentUser()
 
   return (
     <ThemeProvider
@@ -49,7 +61,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex flex-col items-center gap-8 p-2">
             <ThemeSwitcher />
             <SignedIn>
-              <UserButton />
+              <DropdownMenu>
+                <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
+                  <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent sideOffset={10} align="start">
+                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/perfil">Perfil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SignedIn>
           </div>
         </aside>
@@ -69,7 +93,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Scheduler />
+                    <Scheduler mode="base" text="Agenda rápida" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Mi agenda rápida</p>

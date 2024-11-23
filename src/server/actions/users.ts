@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactInfo, PatientTicket, PsychologistProfile } from "@/types/entities";
 import { appointmentCardDTO, appointmentCardWithPatientDTO, appointmentForTranscriptionFormDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, ClinicSchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
@@ -759,5 +759,84 @@ export async function getAppointmentsForTranscriptionForm(): Promise<{ data: App
   } catch (error) {
     console.error(error)
     return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function updateUserProfile(profile: Omit<PsychologistProfile, "id" | "avatar" | "nationality" | "created_at" | "video_presentation_url">) {
+  console.log('update user profile')
+
+  const { userId } = auth()
+  if (!userId) {
+    throw new Error('No estas autorizado')
+  }
+
+  const { phone, gender, birth_day, country, state, city, street, num_house, specialities, focus } = profile
+  console.log('profile', profile)
+
+  try {
+    const { rows: user } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    if (user[0]?.length === 0 || !user[0]) {
+      console.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    const user_id = user[0].id as number
+    const specialities_ids = specialities?.map((speciality) => speciality.id)
+
+    // Eliminar las especialidades existentes
+    if (specialities_ids && specialities_ids.length > 0) {
+      await turso.execute({
+        sql: `DELETE FROM psicobooking_psychologist_speciality WHERE user_id = :user_id`,
+        args: { user_id }
+      })
+    }
+
+    // Crear el batch de inserciones
+    let batchQueries: {
+      sql: string;
+      args: {
+        user_id: number;
+        speciality_id: string;
+      };
+    }[] = []
+
+    if (specialities_ids && specialities_ids.length > 0) {
+      batchQueries = specialities_ids.map(speciality_id => ({
+        sql: `INSERT INTO psicobooking_psychologist_speciality (user_id, speciality_id) VALUES (:user_id, :speciality_id)`,
+        args: { user_id, speciality_id }
+      }))
+    }
+
+    await turso.batch([
+      {
+        sql: `
+          UPDATE 
+            psicobooking_user 
+          SET 
+            phone = :phone, 
+            gender = :gender, 
+            birth_day = :birth_day, 
+            country = :country, 
+            state = :state, 
+            city = :city, 
+            street = :street, 
+            num_house = :num_house,
+            focus = :focus
+          WHERE id = :user_id
+        `,
+        args: { phone, gender, birth_day, country, state, city, street, num_house, focus, user_id }
+      },
+      ...batchQueries
+    ], "write")
+
+    revalidatePath('/dashboard/perfil')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false }
   }
 }

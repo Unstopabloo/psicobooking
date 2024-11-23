@@ -50,13 +50,14 @@ function applyCsp(request: NextRequest) {
   // format the CSP header
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.posthog.com https://*.sentry.io https://*.clerk.accounts.dev https://definite-lemming-97.clerk.accounts.dev https://challenges.cloudflare.com https://uploadthing.com/ https://sea1.ingest.uploadthing.com/ https://*.uploadthing.com/ https: http: 'unsafe-eval';
-    connect-src 'self' https://definite-lemming-97.clerk.accounts.dev https://*.sentry.io https://uploadthing.com/ https://sea1.ingest.uploadthing.com/ https://*.uploadthing.com/ *.posthog.com ws://127.0.0.1:55568/; 
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://*.posthog.com https://*.sentry.io https://*.clerk.accounts.dev https://definite-lemming-97.clerk.accounts.dev https://challenges.cloudflare.com https: http: 'unsafe-eval';
+    connect-src 'self' https://definite-lemming-97.clerk.accounts.dev https://*.sentry.io *.posthog.com ws://127.0.0.1:55568/ https://res.cloudinary.com/dwv9pebu9/* https://*.cloudinary.com/; 
     img-src 'self' data: blob: https: http: https://img.clerk.com https://*.posthog.com;
-    media-src 'self' blob: https: http: https://*.cloudinary.com http://*.cloudinary.com;
+    media-src 'self' blob: https: http: https://*.cloudinary.com http://*.cloudinary.com https://res.cloudinary.com/dwv9pebu9/* https://*.cloudinary.com/;
     worker-src 'self' blob:;
-    style-src 'self' 'unsafe-inline';
-    frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com https://www.google.com;
+    font-src 'self' data: https: http:;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/css?family=Geist;
+    frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com https://www.google.com https://upload-widget.cloudinary.com/;
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;

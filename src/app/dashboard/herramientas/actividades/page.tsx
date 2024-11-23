@@ -12,7 +12,7 @@ export default async function ActividadesPage() {
   const patients = await getPatientsNamesForNote()
 
   return (
-    <Container className="lg:px-0 xl:px-0 2xl:px-0">
+    <Container className="lg:px-0 xl:px-0 2xl:px-20">
       <header className="flex items-center justify-between pb-10">
         <div>
           <H1>Actividades</H1>

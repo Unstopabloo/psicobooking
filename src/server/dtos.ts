@@ -1,4 +1,4 @@
-import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -269,5 +269,33 @@ export const getActivityByIdDTO = (activity: Row): ActivityWithCommentsAndCommen
     patient_avatar: activity.patient_avatar as string | null,
     comments_count: activity.comments_count as number,
     comments: JSON.parse(activity.comments as string) as CommentActivity[]
+  }
+}
+
+export const psychologistProfileDTO = (psychologistProfile: Row, userSpecialities: Row[]): PsychologistProfile => {
+  return {
+    id: psychologistProfile.id as number,
+    first_name: psychologistProfile.first_name as string,
+    last_name: psychologistProfile.last_name as string,
+    email: psychologistProfile.email as string,
+    avatar: psychologistProfile.avatar as string | null,
+    focus: psychologistProfile.focus as SpecialityName | null,
+    // @ts-ignore
+    specialities: userSpecialities.map(spec => ({
+      id: spec.id as number,
+      name: spec.name as SpecialityName,
+      description: spec.description as string,
+    })),
+    phone: psychologistProfile.phone as string | null,
+    nationality: psychologistProfile.nationality as string | null,
+    gender: psychologistProfile.gender as Gender | null,
+    birth_day: psychologistProfile.birth_day as string | null,
+    country: psychologistProfile.country as string | null,
+    state: psychologistProfile.state as string | null,
+    city: psychologistProfile.city as string | null,
+    street: psychologistProfile.street as string | null,
+    num_house: psychologistProfile.num_house as string | null,
+    created_at: psychologistProfile.created_at as string,
+    video_presentation_url: psychologistProfile.video_presentation_url as string | null
   }
 }

@@ -1,12 +1,40 @@
 import { Roles } from "./global";
 
-type Gender = "male" | "female" | "other";
 type Row = Record<string, unknown>
+type Gender = "male" | "female" | "other";
+type SpecialityName = "Adicciones" | "Ansiedad y/o estrés" | "Atención" | "Autoestima" | "Crianza" | "Depresión" | "Cronicas" | "Impuslividad y/o Ira" | "Orientación vocacional" | "Problemas alimenticios" | "Problemas de sueño" | "Relaciones" | "Riesgo suicida" | "Sexualidad" | "Terapia de parejas" | "TOC" | "Traumas" | "Trabajo con niños"
 
 interface Sessions {
   completed: number;
   scheduled: number;
   cancelled: number;
+}
+
+interface Speciality {
+  id: string;
+  name: SpecialityName;
+  description: string;
+}
+
+export interface PsychologistProfile {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string | null;
+  focus: SpecialityName | null;
+  specialities: Speciality[] | null;
+  phone: string | null;
+  nationality: string | null;
+  gender: Gender | null;
+  birth_day: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  street: string | null;
+  num_house: string | null;
+  video_presentation_url: string | null;
+  created_at: string;
 }
 
 export interface ContactBase {
