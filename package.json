@@ -68,6 +68,8 @@
     "cmdk": "1.0.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "0.33.0",
+    "expry": "^2.0.7",
+    "formity": "^5.0.2",
     "framer-motion": "^11.5.4",
     "geist": "^1.3.0",
     "html-react-parser": "^5.1.18",

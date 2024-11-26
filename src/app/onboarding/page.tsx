@@ -11,11 +11,14 @@ import Image from 'next/image'
 import { onBoarding } from '@/server/actions/onBoarding'
 
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox'
 
 export default function OnboardingComponent() {
+  const url = process.env.NODE_ENV === 'production' ? 'https://www.psicobooking.vercel.app/privacy-policy' : 'http://localhost:3000/privacy-policy'
   const { user } = useUser()
   const router = useRouter()
   const [selectedRole, setSelectedRole] = React.useState<"psychologist" | "patient">("psychologist")
+  const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = React.useState(false)
 
   const handleSubmit = async (formData: FormData) => {
     const res = await onBoarding(formData)
@@ -46,28 +49,58 @@ export default function OnboardingComponent() {
             defaultValue="psychologist"
             onValueChange={(value) => setSelectedRole(value as "psychologist" | "patient")}
           >
-            <div className={`flex items-center cursor-pointer justify-between gap-3 max-w-md border rounded-lg py-4 ps-4 pe-4 md:pe-12 ${selectedRole === "psychologist" ? "border-primary" : "border-border"}`}>
-              <div className='min-w-5'>
-                <RadioGroupItem value="psychologist" id="psychologist" />
+            {/* Radio card #1 */}
+            <div className="relative flex w-full items-start gap-2 rounded-lg border border-input p-4 shadow-sm shadow-black/5 has-[[data-state=checked]]:border-ring">
+              <RadioGroupItem
+                value="psychologist"
+                id="psychologist"
+                aria-describedby="psychologist-description"
+                className="order-1 after:absolute after:inset-0"
+              />
+              <div className="grid grow gap-2">
+                <Label htmlFor="psychologist">
+                  Si{" "}
+                </Label>
+                <p id="psychologist-description" className="text-xs text-muted-foreground">
+                  Quiero registrarme como un profesional de la salud mental
+                </p>
               </div>
-              <Label htmlFor="psychologist" className='text-pretty font-normal cursor-pointer'>
-                <strong className='font-medium'>Si,</strong>
-                <span className='text-foreground/85'> quiero registrarme como un profesional de la salud mental</span>
-              </Label>
             </div>
-            <div className={`flex items-center cursor-pointer justify-between gap-3 border max-w-md rounded-lg py-4 ps-4 pe-4 md:pe-12 ${selectedRole === "patient" ? "border-primary" : "border-border"}`}>
-              <div className='min-w-5'>
-                <RadioGroupItem value="patient" id="patient" />
+            {/* Radio card #2 */}
+            <div className="relative flex w-full items-start gap-2 rounded-lg border border-input p-4 shadow-sm shadow-black/5 has-[[data-state=checked]]:border-ring">
+              <RadioGroupItem
+                value="patient"
+                id="patient"
+                aria-describedby="patient-description"
+                className="order-1 after:absolute after:inset-0"
+              />
+              <div className="grid grow gap-2">
+                <Label htmlFor="patient">
+                  No{" "}
+                </Label>
+                <p id="patient-description" className="text-xs text-muted-foreground">
+                  Quiero registrarme como un usuario de la aplicación
+                </p>
               </div>
-              <Label htmlFor="patient" className='text-pretty font-normal cursor-pointer'>
-                <strong className='font-medium'>No,</strong>
-                <span className='text-foreground/85'> quiero registrarme como un usuario de la aplicación</span>
-              </Label>
             </div>
           </RadioGroup>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={acceptedPrivacyPolicy}
+              onCheckedChange={(checked) => setAcceptedPrivacyPolicy(checked as boolean)}
+              name="privacy-policy"
+              id="privacy-policy"
+            />
+            <Label htmlFor="privacy-policy">
+              Acepto la{" "}
+              <a className="underline" href={url} target="_blank">
+                política de privacidad
+              </a>
+            </Label>
+          </div>
         </div>
 
-        <Button type="submit">Continuar</Button>
+        <Button type="submit" disabled={!acceptedPrivacyPolicy}>Continuar</Button>
       </form>
     </main>
   )

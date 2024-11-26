@@ -3,7 +3,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { DesktopNav } from "@/components/layout/Navs";
-import { SignedIn } from "@clerk/nextjs";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
@@ -61,6 +61,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex flex-col items-center gap-8 p-2">
             <ThemeSwitcher />
             <SignedIn>
+              <UserButton />
               <DropdownMenu>
                 <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
                   <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
@@ -108,6 +109,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               <div className="sm:hidden">
                 <SignedIn>
+                  <UserButton />
                   <DropdownMenu>
                     <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
                       <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />

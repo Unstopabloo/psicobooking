@@ -268,3 +268,9 @@
   height: 0;
   pointer-events: none;
 }
+
+.cl-formButtonPrimary {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: none !important;
+}
