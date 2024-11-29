@@ -37,7 +37,9 @@ export async function getActivities(limit?: boolean) {
       throw new Error("No se encontraron actividades")
     }
 
+    console.log(rows)
     const activities = getActivitiesWithCommentsDTO(rows)
+    console.log(activities)
     return activities
   } catch (error) {
     console.error(error)

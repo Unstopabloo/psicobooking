@@ -55,7 +55,6 @@ export async function updateRole(role: string) {
   }
 
   try {
-    // const res_id = await db.update(users).set({ role }).where(eq(users.clerk_id, userId)).returning({ updatedId: users.id })
     const { rows } = await turso.execute({
       sql: `UPDATE psicobooking_user SET role = ? WHERE clerk_id = ? RETURNING id`,
       args: [role, userId]
@@ -72,7 +71,6 @@ export async function updateRole(role: string) {
     return { error }
   }
 }
-
 
 // =================== Pacientes ===================
 export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Appointment[] | undefined, error?: Error }> {

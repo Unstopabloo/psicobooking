@@ -39,7 +39,7 @@ export function ActivityCard({ activity }: { activity: ActivityWithComments }) {
           </div>
         </CardHeader>
         <CardContent className="p-0 w-full flex items-end justify-between gap-3">
-          <p className="text-sm text-muted-foreground text-pretty">{description.length > 50 ? `${description.substring(0, 50)}...` : description}</p>
+          <p className="text-sm text-muted-foreground text-pretty">{description && description.length > 50 ? `${description.substring(0, 50)}...` : description}</p>
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger className="flex items-center gap-1">

@@ -3,6 +3,7 @@ import { TranscripcionCard } from "./transcription-card";
 import { unstable_cache as cache } from "next/cache";
 import { getTranscriptions } from "@/server/db/transcriptions";
 import { Skeleton } from "../ui/skeleton";
+import { NoData } from "../no-data";
 
 const getTranscriptionsCached = cache(
   async (userId: string) => getTranscriptions(userId, true),
@@ -20,6 +21,18 @@ export async function Transcriptions({ limit = false }: { limit?: boolean }) {
   }
 
   const transcriptions = await getTranscriptionsCached(userId);
+
+  if (limit && transcriptions.length === 0) return <NoData className="col-span-2" title="Aún no tienes transcripciones" description="Si tienes una sesión, puedes crear una transcripción" />
+
+  if (limit && transcriptions.length > 0) return (
+    <>
+      {
+        transcriptions.slice(0, 6).map(transcription => (
+          <TranscripcionCard key={transcription.id} transcription={transcription} />
+        ))
+      }
+    </>
+  )
 
   return (
     <>

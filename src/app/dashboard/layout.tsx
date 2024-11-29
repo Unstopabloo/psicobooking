@@ -61,7 +61,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex flex-col items-center gap-8 p-2">
             <ThemeSwitcher />
             <SignedIn>
-              <UserButton />
               <DropdownMenu>
                 <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
                   <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
@@ -109,7 +108,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               <div className="sm:hidden">
                 <SignedIn>
-                  <UserButton />
                   <DropdownMenu>
                     <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
                       <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />

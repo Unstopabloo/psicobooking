@@ -31,4 +31,4 @@ export const onBoarding = authAction
       console.error(error)
       return { error }
     }
-  }) 
+  })
