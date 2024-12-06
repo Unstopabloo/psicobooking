@@ -28,6 +28,8 @@ import { SentIcon, Tick01Icon } from "@/components/icons";
 
 import React from "react";
 import { TestimonialSlider } from '@/components/TestimonialSlider';
+import { PsychologistProfile } from '@/types/entities';
+import { PsychologistCard } from '@/components/patient/psychologist-card';
 
 export const metadata: Metadata = {
   title: "Psicobooking | Plataforma de psicología médica",
@@ -704,8 +706,6 @@ export default function HomePage() {
             <p className='text-foreground/80'>¿Qué dicen de nosotros?</p>
           </header>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-14'>
-            <PsychologistCard />
-            <PsychologistCard />
             <TestimonialSlider />
           </div>
         </section>
@@ -838,28 +838,4 @@ export default function HomePage() {
       </footer>
     </div>
   );
-}
-
-export const PsychologistCard = () => {
-  return (
-    <article className='relative flex items-end p-4 col-span-1 rounded-3xl overflow-hidden min-h-72'>
-      <Image
-        src={psychologistExample}
-        placeholder='blur'
-        fill
-        style={{ objectFit: 'cover' }}
-        alt="Psicologo de ejemplo"
-        className='absolute inset-0 object-cover w-full h-full'
-      />
-      <div className='flex items-center justify-between p-2 rounded-xl filter bg-primary/40 backdrop-blur-md w-full'>
-        <header className='flex flex-col items-start justify-center'>
-          <h3 className='text-white'>Andrea Coronel</h3>
-          <small className='text-white/70 text-start'>Psicóloga</small>
-        </header>
-        <Button aria-label='Enviar mensaje' size="icon" className='bg-white hover:bg-white/80 flex items-center justify-center gap-2 rounded-lg'>
-          <SentIcon width={16} height={16} color='black' />
-        </Button>
-      </div>
-    </article>
-  )
 }

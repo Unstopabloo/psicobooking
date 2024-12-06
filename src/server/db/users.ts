@@ -3,7 +3,7 @@
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
 import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote } from "@/types/entities";
-import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, psychologistProfileDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, patientDashboardDataDTO, psychologistProfileDTO, singlePatientTicketDTO } from "@/server/dtos";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -550,6 +550,33 @@ export async function getUserProfile() {
 
     const result = psychologistProfileDTO(userProfile, userSpecialities)
     return result
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function getPatientDashboardData() {
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id, first_name, last_name, email, phone, gender, country FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No user found')
+      throw new Error('No user found')
+    }
+
+    const user = patientDashboardDataDTO(rows[0])
+    console.log(user)
+    return user
   } catch (error) {
     console.error(error)
     return null

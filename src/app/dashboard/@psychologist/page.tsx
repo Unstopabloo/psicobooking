@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   ]
 }
 
-export default async function DashboardPage() {
+export default async function Psychologist() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-1 md:gap-x-14 animate-fade-up animate-ease-out animate-duration-500 px-0 lg:px-0 xl:px-10 2xl:px-18">
       <Section

@@ -14,6 +14,15 @@ const coreConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        port: '',
+      },
+    ],
+  },
 
   async rewrites() {
     return [

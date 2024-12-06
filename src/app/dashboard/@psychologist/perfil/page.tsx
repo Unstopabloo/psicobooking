@@ -1,5 +1,5 @@
 import PsychologistCard, { ProfileCardSkeleton } from "@/components/users/profile-card";
-import { Container } from "../_layout-components/container";
+import { Container } from "@/app/dashboard/_layout-components/container";
 import { Suspense } from "react";
 
 export default async function PerfilPage() {

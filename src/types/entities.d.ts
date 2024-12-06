@@ -37,6 +37,19 @@ export interface PsychologistProfile {
   created_at: string;
 }
 
+export interface PsychologistDataSheet {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string | null;
+  focus: SpecialityName | null;
+  video_presentation_url: string | null;
+  specialities: Omit<Speciality, 'id'>[];
+  availability: Omit<AvailabilityInterval, 'id' | 'clinic_id' | 'psychologist_id'>[];
+  appointments: { state: string, date_from: string, date_to: string }[];
+}
+
 export interface ContactBase {
   id: number;
   name: string;
@@ -216,6 +229,7 @@ export interface AvailabilityInterval {
   psychologist_id: number;
   hour_from: string;
   hour_to: string;
+  day_of_week: number;
   is_online: number;
 }
 

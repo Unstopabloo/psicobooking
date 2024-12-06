@@ -1,4 +1,4 @@
-import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -297,5 +297,56 @@ export const psychologistProfileDTO = (psychologistProfile: Row, userSpecialitie
     num_house: psychologistProfile.num_house as string | null,
     created_at: psychologistProfile.created_at as string,
     video_presentation_url: psychologistProfile.video_presentation_url as string | null
+  }
+}
+
+export const patientDashboardDataDTO = (patientDashboardData: Row): Pick<PsychologistProfile, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'gender' | 'country'> => {
+  return {
+    id: patientDashboardData.id as number,
+    first_name: patientDashboardData.first_name as string,
+    last_name: patientDashboardData.last_name as string,
+    email: patientDashboardData.email as string,
+    phone: patientDashboardData.phone as string,
+    gender: patientDashboardData.gender as Gender,
+    country: patientDashboardData.country as string,
+  }
+}
+
+export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url'>[] => {
+  return psychologists.map(psychologist => ({
+    id: psychologist.id as number,
+    first_name: psychologist.first_name as string,
+    last_name: psychologist.last_name as string,
+    email: psychologist.email as string,
+    avatar: psychologist.avatar as string | null,
+    focus: psychologist.focus as SpecialityName | null,
+  }))
+}
+
+export const psychologistByIdDTO = (psychologist: Row, specialities: Row[], availability: Row[], appointments: Row[]): PsychologistDataSheet => {
+  return {
+    id: psychologist.id as number,
+    first_name: psychologist.first_name as string,
+    last_name: psychologist.last_name as string,
+    email: psychologist.email as string,
+    avatar: psychologist.avatar as string | null,
+    focus: psychologist.focus as SpecialityName | null,
+    video_presentation_url: psychologist.video_presentation_url as string | null,
+    specialities: specialities.map(spec => ({
+      id: spec.id as number,
+      name: spec.name as SpecialityName,
+      description: spec.description as string,
+    })),
+    availability: availability.map(ava => ({
+      day_of_week: ava.day_of_week as number,
+      hour_from: ava.hour_from as string,
+      hour_to: ava.hour_to as string,
+      is_online: ava.is_online as number,
+    })),
+    appointments: appointments.map(app => ({
+      state: app.state as string,
+      date_from: app.date_from as string,
+      date_to: app.date_to as string,
+    }))
   }
 }

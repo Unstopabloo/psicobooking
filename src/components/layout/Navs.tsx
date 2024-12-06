@@ -71,7 +71,7 @@ export function NavTracker() {
   );
 }
 
-export function DesktopNav() {
+export function PsychologistNav() {
   return (
     <nav>
       <ul id="desktop-nav" className="relative flex flex-col items-center gap-4 w-9">
@@ -92,6 +92,29 @@ export function DesktopNav() {
         </NavLink>
         <NavLink href="/dashboard/comunidad" description="Comunidad">
           <MessageMultipleIcon height={22} width={22} />
+        </NavLink>
+
+        <NavTracker />
+      </ul>
+    </nav>
+  )
+}
+
+export function PatientNav() {
+  return (
+    <nav>
+      <ul id="desktop-nav" className="relative flex flex-col items-center gap-4 w-9">
+        <NavLink href="/dashboard" description="Dashboard">
+          <Home01Icon height={22} width={22} />
+        </NavLink>
+        <NavLink href="/dashboard/agenda" description="Agenda">
+          <Calendar03Icon height={22} width={22} />
+        </NavLink>
+        <NavLink href="/dashboard/finanzas" description="Finanzas">
+          <DollarSquareIcon height={22} width={22} />
+        </NavLink>
+        <NavLink href="/dashboard/herramientas" description="Herramientas">
+          <StickyNote01Icon height={22} width={22} />
         </NavLink>
 
         <NavTracker />

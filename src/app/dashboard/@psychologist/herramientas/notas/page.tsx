@@ -1,5 +1,5 @@
 import H1 from "@/components/H1";
-import { Container } from "../../_layout-components/container";
+import { Container } from "@/app/dashboard/_layout-components/container";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddNote } from "@/components/notas/add-note";

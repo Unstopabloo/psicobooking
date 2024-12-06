@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentsData, getUpcommingAppointments } from "../actions/users";
+import { getPsychologistById, getPsychologists } from "../actions/psychologist";
 
 export function usePatient(patientId: number) {
   return useQuery({
@@ -58,3 +59,17 @@ export function useUpcomingAppointments(date_from: string) {
 //     refetchOnMount: false,
 //   });
 // }
+
+export function usePsychologists(search: string) {
+  return useQuery({
+    queryKey: ['psychologists', search],
+    queryFn: () => getPsychologists({ search }),
+  });
+}
+
+export function usePsychologistById(id: number) {
+  return useQuery({
+    queryKey: ['psychologist', id],
+    queryFn: () => getPsychologistById(id),
+  });
+}
