@@ -80,7 +80,7 @@ export async function getPsychologistById(id: number) {
       },
       {
         sql: `
-          SELECT id, first_name, last_name, email, avatar, focus, video_presentation_url FROM psicobooking_user WHERE id = ?
+          SELECT id, first_name, last_name, email, avatar, focus, video_presentation_url, price, country FROM psicobooking_user WHERE id = ?
         `,
         args: [id]
       },
@@ -144,6 +144,7 @@ export async function getPsychologistById(id: number) {
     }
 
     const data = psychologistByIdDTO(psychologist, specialities, availability, appointments)
+    console.log('data', data)
     return data
   } catch (error) {
     console.error(error)

@@ -332,6 +332,8 @@ export const psychologistByIdDTO = (psychologist: Row, specialities: Row[], avai
     avatar: psychologist.avatar as string | null,
     focus: psychologist.focus as SpecialityName | null,
     video_presentation_url: psychologist.video_presentation_url as string | null,
+    price: psychologist.price as number,
+    country: psychologist.country as string | null,
     specialities: specialities.map(spec => ({
       id: spec.id as number,
       name: spec.name as SpecialityName,

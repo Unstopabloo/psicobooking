@@ -13,19 +13,22 @@ import { ScrollArea } from "../ui/scroll-area";
 import H1 from "../H1";
 import { PsychologistProfile } from "@/types/entities";
 import { PsychologistAppointmentSheet } from "./psychologist-appointment-sheet";
+import { cn } from "@/lib/utils";
 
 export function SearchFilter({ user }: { user: Pick<PsychologistProfile, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'gender' | 'country'> | null }) {
   const [selectedPsychologist, setSelectedPsychologist] = useState<number | null>(null)
   const [search, setSearch] = useQueryState('search', { defaultValue: '' })
   const debouncedSearch = useDebounce(search)
-
   const { data, isLoading } = usePsychologists(debouncedSearch)
 
   return (
     <section className="py-4 grid grid-cols-2 gap-10">
       <div
         aria-label="Filtro de búsqueda de psicólogos y resultados"
-        className={`animate-fade-left duration-300 flex flex-col gap-10 ${selectedPsychologist ? 'col-span-1' : 'col-span-2'}`}
+        className={cn(
+          "flex flex-col gap-10",
+          selectedPsychologist ? 'col-span-1' : 'col-span-2'
+        )}
       >
         <header className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-4">
@@ -57,7 +60,9 @@ export function SearchFilter({ user }: { user: Pick<PsychologistProfile, 'id' | 
 
         </div>
         <ScrollArea className="h-[525px]">
-          <div className={`grid gap-4 ${selectedPsychologist ? 'grid-cols-3' : 'grid-cols-6'}`}>
+          <div className={
+            cn("grid gap-4", selectedPsychologist ? 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3' : 'grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6')
+          }>
             {
               isLoading
                 ? Array.from({ length: 12 }).map((_, index) => (

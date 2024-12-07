@@ -4,7 +4,7 @@ import { usePsychologistById } from "@/server/queries/queries";
 import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { ChevronLeft, ChevronRight, SquarePlay } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Info, SquarePlay, Trash2 } from "lucide-react";
 import Placeholder from "../../../public/isotipo.webp";
 import { VideoPlayer } from "../cloudinary/video-player";
 import { Badge } from "../ui/badge";
@@ -14,7 +14,12 @@ import { isBefore } from "date-fns";
 import { cn } from "@/lib/utils";
 import { es } from "date-fns/locale";
 import { AvailabilityInterval } from "@/types/entities";
-import { format as formatTZ, toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { createCheckoutSession } from "@/server/actions/stripe";
+import { Skeleton } from "../ui/skeleton";
+import { useMediaQuery } from "@uidotdev/usehooks";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import { countryPhoneCodes } from "@/lib/consts";
 
 export function PsychologistAppointmentSheet({
   selectedPsychologist,
@@ -25,71 +30,249 @@ export function PsychologistAppointmentSheet({
 }) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const { data, isLoading, refetch } = usePsychologistById(selectedPsychologist!)
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const isLargeScreen = useMediaQuery("(width >= 1024px)")
 
   useEffect(() => {
     if (selectedPsychologist) {
       refetch()
+      setIsSheetOpen(true)
     }
   }, [selectedPsychologist])
 
-  console.log(data)
   return (
-    <article className={`flex flex-col gap-4 animate-fade-right duration-300 col-span-1`}>
-      <Card className="flex flex-row items-start gap-4 p-4">
-        <aside>
-          <Image
-            src={data?.avatar || Placeholder}
-            alt={`${data?.first_name} ${data?.last_name}` || ''}
-            width={280}
-            height={450}
-            className="rounded-lg object-cover"
-          />
-        </aside>
-        <div>
-          <CardHeader className="w-full justify-between">
-            <CardTitle>{data?.first_name} {data?.last_name}</CardTitle>
-            {data?.video_presentation_url ? (
-              <PsychologistVideoPresentation name={data?.first_name + ' ' + data?.last_name} publicId={data?.video_presentation_url} />
-            ) : (
-              <Button disabled variant="outline" size="icon">
-                <SquarePlay className="w-4 h-4" />
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="p-0">
-            <section>
-              <h4 className="text-sm font-medium text-foreground/70 py-2">Especialidades</h4>
-              <ul className="flex flex-wrap gap-2"  >
-                {data?.specialities.map((speciality) => (
-                  <li key={speciality.name}>
-                    <Badge variant="outline" className="border-primary text-primary font-normal bg-primary/10">{speciality.name}</Badge>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </CardContent>
-          <CardFooter className="p-0 pt-8 flex flex-col items-start gap-2">
-            <p className="text-sm text-foreground/70"><strong>Precio por sesión:</strong> $130</p>
-            <p className="text-sm text-foreground/70">Agenda 1 hora por cita</p>
-          </CardFooter>
-        </div>
-      </Card>
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <PsychologistAppointmentScheduler psychologistId={selectedPsychologist!} setSelectedDate={setSelectedDate} availability={data?.availability || []} />
-        <PsychologistAppointmentSchedulerDay appointments={data?.appointments || []} psychologistId={selectedPsychologist!} date={selectedDate!} />
-      </div>
-    </article>
+    isLargeScreen ? (
+      isLoading ? (
+        <article className="flex flex-col gap-4 animate-fade-right duration-300 col-span-1">
+          <Skeleton className="w-full h-[250px]" />
+          <Skeleton className="w-full h-[380px]" />
+        </article>
+      ) : (
+        <article className={`flex flex-col gap-4 animate-fade-right duration-300 col-span-1`}>
+          <Card className="flex flex-row items-start gap-4 p-4">
+            <aside>
+              <Image
+                src={data?.avatar || Placeholder}
+                alt={`${data?.first_name} ${data?.last_name}` || ''}
+                width={280}
+                height={450}
+                className="rounded-lg object-cover"
+              />
+            </aside>
+            <div>
+              <CardHeader className="w-full justify-between">
+                <div className="flex flex-col items-start gap-2">
+                  <CardTitle>{data?.first_name} {data?.last_name}</CardTitle>
+                  <p className="text-sm text-foreground">
+                    {data?.country ? countryPhoneCodes.find(country => country.name === data?.country)?.flag + ' ' + data?.country : 'No especificado'}
+                  </p>
+                </div>
+                {data?.video_presentation_url ? (
+                  <PsychologistVideoPresentation name={data?.first_name + ' ' + data?.last_name} publicId={data?.video_presentation_url} />
+                ) : (
+                  <Button disabled variant="outline" size="icon">
+                    <SquarePlay className="w-4 h-4" />
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="p-0">
+                <section>
+                  <h4 className="text-sm font-medium text-foreground/70 py-2">Especialidades</h4>
+                  <ul className="flex flex-wrap gap-2"  >
+                    {data?.specialities.map((speciality) => (
+                      <li key={speciality.name}>
+                        <Badge variant="outline" className="border-primary text-primary font-normal bg-primary/10">{speciality.name}</Badge>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </CardContent>
+              <CardFooter className="p-0 pt-8 flex flex-col items-start gap-2">
+                <div className="flex flex-row items-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip delayDuration={100}>
+                      <TooltipTrigger>
+                        <Info className="w-4 h-4 text-foreground/70" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {
+                          data?.price ? (
+                            <p>El precio es por sesión de 1 hora, en dolares USD.</p>
+                          ) : (
+                            <p>No se ha especificado el precio por sesión.</p>
+                          )
+                        }
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <p className="text-sm text-foreground/70">
+                    <strong>Precio por sesión:</strong> ${data?.price ? data.price + " USD" : "No especificado"}
+                  </p>
+                </div>
+                <p className="text-sm text-foreground/70">
+                  {
+                    data?.price ? (
+                      <>
+                        Agenda 1 hora por cita
+                      </>
+                    ) : (
+                      <>
+                        No se ha especificado el precio por sesión
+                      </>
+                    )
+                  }
+                </p>
+              </CardFooter>
+            </div>
+          </Card>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <PsychologistAppointmentScheduler
+              psychologistId={selectedPsychologist!}
+              setSelectedDate={setSelectedDate}
+              availability={data?.availability || []}
+            />
+            <PsychologistAppointmentSchedulerDay
+              appointments={data?.appointments || []}
+              psychologistId={selectedPsychologist!}
+              psychologistName={data?.first_name + ' ' + data?.last_name}
+              psychologistImage={data?.avatar || ''}
+              date={selectedDate!}
+              price={data?.price}
+              setIsSheetOpen={setIsSheetOpen}
+              setSelectedPsychologist={setSelectedPsychologist}
+            />
+          </div>
+        </article>
+      )
+    ) : (
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent side="right" className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="pb-2">Detalles del Psicólogo</SheetTitle>
+          </SheetHeader>
+          <article className={`flex flex-col gap-4 animate-fade-right duration-300 col-span-1`}>
+            <Card className="flex items-start gap-4 p-4">
+              <div>
+                <CardHeader className="flex items-start gap-4 w-full">
+                  <div>
+                    <Image
+                      src={data?.avatar || Placeholder}
+                      alt={`${data?.first_name} ${data?.last_name}` || ''}
+                      width={70}
+                      height={70}
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col items-start gap-1">
+                      <CardTitle>{data?.first_name} {data?.last_name}</CardTitle>
+                      <p className="text-sm text-foreground">
+                        {data?.country ? countryPhoneCodes.find(country => country.name === data?.country)?.flag + ' ' + data?.country : 'No especificado'}
+                      </p>
+                    </div>
+                    <div className="ml-8">
+                      {data?.video_presentation_url ? (
+                        <PsychologistVideoPresentation name={data?.first_name + ' ' + data?.last_name} publicId={data?.video_presentation_url} />
+                      ) : (
+                        <Button disabled variant="outline" size="icon">
+                          <SquarePlay className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <section className="pt-4">
+                    <h4 className="text-sm font-medium text-foreground/70 py-2">Especialidades</h4>
+                    <ul className="flex flex-wrap gap-2"  >
+                      {data?.specialities.map((speciality) => (
+                        <li key={speciality.name}>
+                          <Badge variant="outline" className="border-primary text-primary font-normal bg-primary/10">{speciality.name}</Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </CardContent>
+                <CardFooter className="p-0 pt-8 flex flex-col items-start gap-2">
+                  <div className="flex flex-row items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger>
+                          <Info className="w-4 h-4 text-foreground/70" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {
+                            data?.price ? (
+                              <p>El precio es por sesión de 1 hora, en dolares USD.</p>
+                            ) : (
+                              <p>No se ha especificado el precio por sesión.</p>
+                            )
+                          }
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <p className="text-sm text-foreground/70">
+                      <strong>Precio por sesión:</strong> ${data?.price ? data.price + " USD" : "No especificado"}
+                    </p>
+                  </div>
+                  <p className="text-sm text-foreground/70">
+                    {
+                      data?.price ? (
+                        <>
+                          Agenda 1 hora por cita
+                        </>
+                      ) : (
+                        <>
+                          No se ha especificado el precio por sesión
+                        </>
+                      )
+                    }
+                  </p>
+                </CardFooter>
+              </div>
+            </Card>
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <PsychologistAppointmentScheduler
+                psychologistId={selectedPsychologist!}
+                setSelectedDate={setSelectedDate}
+                availability={data?.availability || []}
+              />
+              <PsychologistAppointmentSchedulerDay
+                appointments={data?.appointments || []}
+                psychologistId={selectedPsychologist!}
+                psychologistName={data?.first_name + ' ' + data?.last_name}
+                psychologistImage={data?.avatar || ''}
+                date={selectedDate!}
+                price={data?.price}
+                setIsSheetOpen={setIsSheetOpen}
+                setSelectedPsychologist={setSelectedPsychologist}
+              />
+            </div>
+          </article>
+        </SheetContent>
+      </Sheet>
+    )
   )
 }
 
-function PsychologistAppointmentSchedulerDay({
+const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmentSchedulerDay({
   appointments,
   psychologistId,
-  date
+  psychologistName,
+  psychologistImage,
+  date,
+  price,
+  setIsSheetOpen,
+  setSelectedPsychologist
 }: {
   appointments: { state: string, date_from: string, date_to: string }[],
   psychologistId: number,
-  date: Date
+  psychologistName: string,
+  psychologistImage: string,
+  date: Date,
+  price: number | undefined,
+  setIsSheetOpen: (open: boolean) => void,
+  setSelectedPsychologist: (psychologist: number | null) => void
 }) {
   if (!date) return null;
 
@@ -104,13 +287,15 @@ function PsychologistAppointmentSchedulerDay({
     return hour! < 21 && !(hour! === 20 && minutes! > 30);
   });
 
-  const handleClick = (time: string) => {
+  const handleClick = async (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const fullDate = new Date(date);
     fullDate.setUTCHours(hours!, minutes!, 0, 0);
     const utcTimestamp = fullDate.toISOString();
     console.log(`Hora seleccionada (UTC): ${time}`);
     console.log(`ISO timestamp: ${utcTimestamp}`);
+
+    await createCheckoutSession(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!)
   };
 
   const isTimeSlotAvailable = (time: string): boolean => {
@@ -144,25 +329,67 @@ function PsychologistAppointmentSchedulerDay({
           const isAvailable = isTimeSlotAvailable(time);
 
           return (
-            <Button
-              onClick={() => handleClick(time)}
-              key={index}
-              variant="outline"
-              className={cn(
-                "relative flex flex-col items-center justify-center border border-primary text-center hover:shadow-md",
-                !isAvailable && 'bg-card/50 border-primary/40 opacity-10 cursor-not-allowed shadow-none'
-              )}
-              disabled={!isAvailable}
-            >
-              <span>{time} UTC</span>
-              <small className="text-xs text-foreground/50">({localTime} local)</small>
-            </Button>
+            <Dialog key={index}>
+              <DialogTrigger asChild>
+                <Button
+
+                  key={index}
+                  variant="outline"
+                  className={cn(
+                    "relative flex flex-col items-center justify-center border border-primary text-center hover:shadow-md",
+                    !isAvailable && 'bg-card/50 border-primary/40 opacity-10 cursor-not-allowed shadow-none'
+                  )}
+                  disabled={!isAvailable || !price}
+                >
+                  <span>{localTime} local</span>
+                  <small className="text-xs text-foreground/50">({time} UTC)</small>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Estas por agendar una cita con {psychologistName}</DialogTitle>
+                  <DialogDescription>
+                    {(() => {
+                      const [hours, minutes] = time.split(':').map(Number);
+                      const fullDate = new Date(date);
+                      fullDate.setUTCHours(hours!, minutes!, 0, 0);
+
+                      return `Por favor confirma que deseas agendar una cita con ${psychologistName} para ${format(
+                        fullDate,
+                        "EEEE dd 'de' MMMM 'a las' HH:mm 'horas'",
+                        { locale: es }
+                      )}.`;
+                    })()}
+                  </DialogDescription>
+                  <div className="flex flex-col gap-2 pt-10">
+                    <Button variant="default" onClick={() => handleClick(time)}>Confirmar y pagar</Button>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        className="col-span-1 flex gap-2"
+                        variant="outline"
+                        onClick={() => {
+                          setIsSheetOpen(false)
+                          setSelectedPsychologist(null)
+                        }}
+                      >
+                        Cancelar
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" className="col-span-2 flex gap-2">
+                        Confirmar y pagar despues
+                        <Clock className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           );
         })}
       </div>
     </div>
   );
-}
+})
 
 const PsychologistAppointmentScheduler = memo(function PsychologistAppointmentScheduler({
   psychologistId,

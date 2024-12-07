@@ -45,6 +45,8 @@ export interface PsychologistDataSheet {
   avatar: string | null;
   focus: SpecialityName | null;
   video_presentation_url: string | null;
+  price: number;
+  country: string | null;
   specialities: Omit<Speciality, 'id'>[];
   availability: Omit<AvailabilityInterval, 'id' | 'clinic_id' | 'psychologist_id'>[];
   appointments: { state: string, date_from: string, date_to: string }[];

@@ -8,9 +8,8 @@ import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, ClinicSchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
 import { OnBoadingData } from "@/app/onboarding/page";
-import { cloudinaryUtils } from "../cloudinary";
-import fs from "fs";
 import { deleteDocument, uploadDocument } from "@/lib/upload-files";
+import { addHours, formatISO } from "date-fns";
 
 interface OnBoardingDataServer extends Omit<OnBoadingData, 'professional'> {
   professional: {
@@ -965,6 +964,63 @@ export async function enrollNewPsychologist(data: OnBoardingDataServer) {
     console.log('usuario actualizado', Number(rowsAffected))
 
     return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false }
+  }
+}
+
+interface NewAppointmentProps {
+  psychologistId: number
+  selectedDate: string
+}
+
+export async function newAppointment({ psychologistId, selectedDate }: NewAppointmentProps) {
+  console.log('new appointment')
+
+  const { userId } = auth()
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    const patient_id = rows[0]?.id as number
+    console.log('patient_id', patient_id)
+
+    const { lastInsertRowid } = await turso.execute({
+      sql: `
+        INSERT INTO psicobooking_appointment 
+          (patient_id, psychologist_id, date_from, date_to, date_from_old, date_to_old, session_type, state) 
+        VALUES (:patient_id, :psychologist_id, :date_from, :date_to, 1, 1, :session_type, :state)
+      `,
+      args: {
+        patient_id,
+        psychologist_id: psychologistId,
+        date_from: selectedDate,
+        date_to: formatISO(addHours(new Date(selectedDate), 1)),
+        session_type: "online",
+        state: "scheduled"
+      }
+    })
+
+    if (!lastInsertRowid) {
+      console.error('No se pudo crear la cita')
+      throw new Error('No se pudo crear la cita')
+    }
+
+    const appointment_id = Number(lastInsertRowid)
+    return { data: appointment_id }
   } catch (error) {
     console.error(error)
     return { data: false }
