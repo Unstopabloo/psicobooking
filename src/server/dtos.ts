@@ -1,4 +1,4 @@
-import { Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, NextAppointment, Note, PatientTicket, Row, Sessions, SinglePatientTicket, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -242,4 +242,113 @@ export const getNotesDTO = (notes: Row[]): Note[] => {
     patient_id: note.patient_id as number,
     psychologist_id: note.psychologist_id as number
   }))
+}
+
+export const getActivitiesWithCommentsDTO = (activities: Row[]): ActivityWithComments[] => {
+  return activities.map(act => ({
+    id: act.id as number,
+    title: act.title as string,
+    description: act.description as string,
+    status: act.status as string,
+    date_from: act.date_from as string,
+    date_to: act.date_to as string,
+    patient_name: act.patient_name as string,
+    comments_count: act.comments_count as number
+  }))
+}
+
+export const getActivityByIdDTO = (activity: Row): ActivityWithCommentsAndComments => {
+  return {
+    id: activity.id as number,
+    title: activity.title as string,
+    description: activity.description as string,
+    status: activity.status as string,
+    date_from: activity.date_from as string,
+    date_to: activity.date_to as string,
+    patient_name: activity.patient_name as string,
+    patient_avatar: activity.patient_avatar as string | null,
+    comments_count: activity.comments_count as number,
+    comments: JSON.parse(activity.comments as string) as CommentActivity[]
+  }
+}
+
+export const psychologistProfileDTO = (psychologistProfile: Row, userSpecialities: Row[]): PsychologistProfile => {
+  return {
+    id: psychologistProfile.id as number,
+    first_name: psychologistProfile.first_name as string,
+    last_name: psychologistProfile.last_name as string,
+    email: psychologistProfile.email as string,
+    avatar: psychologistProfile.avatar as string | null,
+    focus: psychologistProfile.focus as SpecialityName | null,
+    // @ts-ignore
+    specialities: userSpecialities.map(spec => ({
+      id: spec.id as number,
+      name: spec.name as SpecialityName,
+      description: spec.description as string,
+    })),
+    phone: psychologistProfile.phone as string | null,
+    nationality: psychologistProfile.nationality as string | null,
+    gender: psychologistProfile.gender as Gender | null,
+    birth_day: psychologistProfile.birth_day as string | null,
+    country: psychologistProfile.country as string | null,
+    state: psychologistProfile.state as string | null,
+    city: psychologistProfile.city as string | null,
+    street: psychologistProfile.street as string | null,
+    num_house: psychologistProfile.num_house as string | null,
+    created_at: psychologistProfile.created_at as string,
+    video_presentation_url: psychologistProfile.video_presentation_url as string | null
+  }
+}
+
+export const patientDashboardDataDTO = (patientDashboardData: Row): Pick<PsychologistProfile, 'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'gender' | 'country'> => {
+  return {
+    id: patientDashboardData.id as number,
+    first_name: patientDashboardData.first_name as string,
+    last_name: patientDashboardData.last_name as string,
+    email: patientDashboardData.email as string,
+    phone: patientDashboardData.phone as string,
+    gender: patientDashboardData.gender as Gender,
+    country: patientDashboardData.country as string,
+  }
+}
+
+export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url'>[] => {
+  return psychologists.map(psychologist => ({
+    id: psychologist.id as number,
+    first_name: psychologist.first_name as string,
+    last_name: psychologist.last_name as string,
+    email: psychologist.email as string,
+    avatar: psychologist.avatar as string | null,
+    focus: psychologist.focus as SpecialityName | null,
+  }))
+}
+
+export const psychologistByIdDTO = (psychologist: Row, specialities: Row[], availability: Row[], appointments: Row[]): PsychologistDataSheet => {
+  return {
+    id: psychologist.id as number,
+    first_name: psychologist.first_name as string,
+    last_name: psychologist.last_name as string,
+    email: psychologist.email as string,
+    avatar: psychologist.avatar as string | null,
+    focus: psychologist.focus as SpecialityName | null,
+    video_presentation_url: psychologist.video_presentation_url as string | null,
+    price: psychologist.price as number,
+    country: psychologist.country as string | null,
+    specialities: specialities.map(spec => ({
+      id: spec.id as number,
+      name: spec.name as SpecialityName,
+      description: spec.description as string,
+    })),
+    availability: availability.map(ava => ({
+      day_of_week: ava.day_of_week as number,
+      hour_from: ava.hour_from as string,
+      hour_to: ava.hour_to as string,
+      is_online: ava.is_online as number,
+    })),
+    appointments: appointments.map(app => ({
+      state: app.state as string,
+      date_from: app.date_from as string,
+      date_to: app.date_to as string,
+    }))
+  }
 }

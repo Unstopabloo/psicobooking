@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 
-import { DesktopNav } from "@/components/layout/Navs";
-import { SignedIn, UserButton } from "@clerk/nextjs";
-
+import { PsychologistNav, PatientNav } from "@/components/layout/Navs";
+import { SignedIn } from "@clerk/nextjs";
+import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,25 @@ import {
 import { Bell } from "lucide-react";
 import { ChatAsistant } from "@/components/ai-asistant/ui-chat-asistant";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar } from "@/components/Avatar";
+import { currentUser, auth } from "@clerk/nextjs/server";
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ patient, psychologist }: { patient: React.ReactNode, psychologist: React.ReactNode }) {
   const nonce = headers().get('x-nonce') || ''
+  const user = await currentUser()
+
+  const isPsychologist = auth().sessionClaims?.metadata.role === 'psychologist'
 
   return (
     <ThemeProvider
@@ -43,13 +57,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
             </Link>
 
-            <DesktopNav />
+            {isPsychologist ? <PsychologistNav /> : <PatientNav />}
           </div>
 
           <div className="flex flex-col items-center gap-8 p-2">
             <ThemeSwitcher />
             <SignedIn>
-              <UserButton />
+              <DropdownMenu>
+                <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
+                  <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent sideOffset={10} align="start">
+                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/perfil">Perfil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                  <SignOutButton />
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SignedIn>
           </div>
         </aside>
@@ -69,7 +96,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Scheduler />
+                    <Scheduler mode="base" text="Agenda rápida" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Mi agenda rápida</p>
@@ -83,7 +110,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               <div className="sm:hidden">
                 <SignedIn>
-                  <UserButton />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
+                      <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent sideOffset={10} align="start">
+                      <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/perfil">Perfil</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                      <SignOutButton />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </SignedIn>
               </div>
             </div>
@@ -94,7 +134,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <SubNav />
           </div>
           <main className="relative py-6 px-4 sm:px-12 overflow-auto">
-            {children}
+            {isPsychologist ? psychologist : patient}
             <MobileNav />
           </main>
         </div>

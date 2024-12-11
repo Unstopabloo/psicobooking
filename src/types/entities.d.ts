@@ -1,12 +1,60 @@
 import { Roles } from "./global";
 
-type Gender = "male" | "female" | "other";
 type Row = Record<string, unknown>
+type Gender = "male" | "female" | "other";
+type SpecialityName = "Adicciones" | "Ansiedad y/o estrés" | "Atención" | "Autoestima" | "Crianza" | "Depresión" | "Cronicas" | "Impuslividad y/o Ira" | "Orientación vocacional" | "Problemas alimenticios" | "Problemas de sueño" | "Relaciones" | "Riesgo suicida" | "Sexualidad" | "Terapia de parejas" | "TOC" | "Traumas" | "Trabajo con niños"
 
 interface Sessions {
   completed: number;
   scheduled: number;
   cancelled: number;
+}
+
+interface Speciality {
+  id: string;
+  name: SpecialityName;
+  description: string;
+}
+
+export interface PsychologistProfile {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string | null;
+  focus: SpecialityName | null;
+  specialities: Speciality[] | null;
+  phone: string | null;
+  nationality: string | null;
+  gender: Gender | null;
+  birth_day: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  street: string | null;
+  num_house: string | null;
+  video_presentation_url: string | null;
+  created_at: string;
+}
+
+export interface PsychologistDataSheet {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar: string | null;
+  focus: SpecialityName | null;
+  video_presentation_url: string | null;
+  price: number;
+  country: string | null;
+  specialities: Omit<Speciality, 'id'>[];
+  availability: Omit<AvailabilityInterval, 'id' | 'clinic_id' | 'psychologist_id'>[];
+  appointments: { state: string, date_from: string, date_to: string }[];
+}
+
+export interface NewAppointmentProps {
+  psychologistId: number
+  selectedDate: string
 }
 
 export interface ContactBase {
@@ -188,6 +236,7 @@ export interface AvailabilityInterval {
   psychologist_id: number;
   hour_from: string;
   hour_to: string;
+  day_of_week: number;
   is_online: number;
 }
 
@@ -233,4 +282,27 @@ export interface Note {
   patient_name: string;
   patient_id: number;
   psychologist_id: number;
+}
+
+export interface ActivityWithComments {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  date_from: string;
+  date_to: string;
+  patient_name: string;
+  comments_count: number;
+}
+
+export interface CommentActivity {
+  content: string;
+  published_at: string;
+  author_name: string;
+  author_avatar: string | null;
+}
+
+export interface ActivityWithCommentsAndComments extends ActivityWithComments {
+  comments: CommentActivity[];
+  patient_avatar: string | null;
 }

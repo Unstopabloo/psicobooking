@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { Container } from "../_layout-components/container"
+import { Container } from "@/app/dashboard/_layout-components/container"
 import { TableLoad } from "./_component/table-load"
 import { Suspense } from "react"
 import { TableLoader } from "@/components/table/table-loader"

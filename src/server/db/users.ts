@@ -2,8 +2,10 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote } from "@/types/entities";
-import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote, NewAppointmentProps } from "@/types/entities";
+import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, patientDashboardDataDTO, psychologistProfileDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { addHours } from "date-fns";
+import { formatISO } from "date-fns";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -55,7 +57,6 @@ export async function updateRole(role: string) {
   }
 
   try {
-    // const res_id = await db.update(users).set({ role }).where(eq(users.clerk_id, userId)).returning({ updatedId: users.id })
     const { rows } = await turso.execute({
       sql: `UPDATE psicobooking_user SET role = ? WHERE clerk_id = ? RETURNING id`,
       args: [role, userId]
@@ -72,7 +73,6 @@ export async function updateRole(role: string) {
     return { error }
   }
 }
-
 
 // =================== Pacientes ===================
 export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Appointment[] | undefined, error?: Error }> {
@@ -488,5 +488,151 @@ export async function getPatientsNamesForNote(): Promise<PatientForNote[] | []> 
   } catch (error) {
     console.error(error)
     return []
+  }
+}
+
+export async function getUserProfile() {
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    const resdb = await turso.batch([
+      {
+        sql: `
+        SELECT 
+          psy.id,
+          psy.first_name,
+          psy.last_name,
+          psy.email,
+          psy.avatar,
+          psy.focus,
+          psy.phone,
+          psy.nationality,
+          psy.gender,
+          psy.birth_day,
+          psy.country,
+          psy.state,
+          psy.city,
+          psy.street,
+          psy.num_house,
+          psy.created_at,
+          psy.video_presentation_url
+        FROM 
+          psicobooking_user psy
+        WHERE 
+          clerk_id = ?
+      `,
+        args: [userId]
+      },
+      {
+        sql: `
+          SELECT 
+            spec.id,
+            spec.name,
+            spec.description
+          FROM psicobooking_psychologist_speciality psyspeciality
+          LEFT JOIN psicobooking_user psy ON psy.id = psyspeciality.user_id
+          LEFT JOIN psicobooking_speciality spec ON spec.id = psyspeciality.speciality_id
+          WHERE psy.clerk_id = ? AND spec.id = psyspeciality.speciality_id
+        `,
+        args: [userId]
+      }
+    ], "read")
+
+    if (!resdb[0]?.rows[0] || !resdb[1]?.rows) {
+      console.error('No user found')
+      throw new Error('No data found')
+    }
+
+    const userProfile = resdb[0].rows[0]
+    const userSpecialities = resdb[1].rows
+
+    const result = psychologistProfileDTO(userProfile, userSpecialities)
+    return result
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function getPatientDashboardData() {
+  const { userId } = auth()
+
+  if (!userId) {
+    throw new Error('Unauthorized')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id, first_name, last_name, email, phone, gender, country FROM psicobooking_user WHERE clerk_id = ?`,
+      args: [userId]
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.log('No user found')
+      throw new Error('No user found')
+    }
+
+    const user = patientDashboardDataDTO(rows[0])
+    console.log(user)
+    return user
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+
+export async function newAppointment({ psychologistId, selectedDate }: NewAppointmentProps) {
+  console.log('new appointment')
+
+  const { userId } = auth()
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    const patient_id = rows[0]?.id as number
+    console.log('patient_id', patient_id)
+
+    const { lastInsertRowid } = await turso.execute({
+      sql: `
+        INSERT INTO psicobooking_appointment 
+          (patient_id, psychologist_id, date_from, date_to, date_from_old, date_to_old, session_type, state) 
+        VALUES (:patient_id, :psychologist_id, :date_from, :date_to, 1, 1, :session_type, :state)
+      `,
+      args: {
+        patient_id,
+        psychologist_id: psychologistId,
+        date_from: selectedDate,
+        date_to: formatISO(addHours(new Date(selectedDate), 1)),
+        session_type: "online",
+        state: "scheduled"
+      }
+    })
+
+    if (!lastInsertRowid) {
+      console.error('No se pudo crear la cita')
+      throw new Error('No se pudo crear la cita')
+    }
+
+    const appointment_id = Number(lastInsertRowid)
+    return { data: appointment_id }
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }

@@ -30,7 +30,7 @@ export default function ScreenSizeIndicator() {
   }
 
   return (
-    <div className="fixed bottom-10 left-10 rounded-full p-3 size-12 flex items-center justify-center bg-card text-foreground border border-border shadow-lg">
+    <div className="fixed bottom-10 right-10 rounded-full p-3 size-12 flex items-center justify-center bg-card text-foreground border border-border shadow-lg">
       <span className="text-xs font-semibold">{breakpoint}</span>
     </div>
   )

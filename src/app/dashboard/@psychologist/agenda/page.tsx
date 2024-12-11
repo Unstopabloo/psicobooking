@@ -1,7 +1,7 @@
 import { TooltipProvider, TooltipTrigger, TooltipContent, Tooltip } from "@/components/ui/tooltip";
 import { AgendaList } from "@/components/agenda/AgendaList";
 import { Metadata } from "next";
-import { Container } from "../_layout-components/container";
+import { Container } from "@/app/dashboard/_layout-components/container";
 import H1 from "@/components/H1";
 import { Availability } from "@/components/agenda/availability";
 import { getAvailability } from "@/server/db/users";

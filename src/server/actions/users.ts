@@ -1,12 +1,25 @@
 "use server"
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { turso } from "@/server/db";
-import { AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactInfo, PatientTicket } from "@/types/entities";
+import { AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, ContactInfo, PatientTicket, PsychologistProfile } from "@/types/entities";
 import { appointmentCardDTO, appointmentCardWithPatientDTO, appointmentForTranscriptionFormDTO, clinicalHistoryDTO, contactDTO, PatientTicketDTO, singleClinicalHistoryDTO, upcomingAppointmentDTO } from "../dtos";
 import { authAction } from "@/lib/safe-action";
 import { ClinicalHistorySchema, ClinicSchema, PatientSchema, TreatmentSchema } from "@/types/schemas";
 import { revalidatePath } from "next/cache";
+import { OnBoadingData } from "@/app/onboarding/page";
+import { deleteDocument, uploadDocument } from "@/lib/upload-files";
+import { addHours, formatISO } from "date-fns";
+
+interface OnBoardingDataServer extends Omit<OnBoadingData, 'professional'> {
+  professional: {
+    studyHouse: string;
+    studyYear: string;
+    studyBranch: string;
+    document: string | null;
+    recommendationLetter: string | null;
+  }
+}
 
 export const updatePatient = authAction
   .schema(PatientSchema)
@@ -759,5 +772,200 @@ export async function getAppointmentsForTranscriptionForm(): Promise<{ data: App
   } catch (error) {
     console.error(error)
     return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function updateUserProfile(profile: Omit<PsychologistProfile, "id" | "avatar" | "nationality" | "created_at" | "video_presentation_url">) {
+  console.log('update user profile')
+
+  const { userId } = auth()
+  if (!userId) {
+    throw new Error('No estas autorizado')
+  }
+
+  const { phone, gender, birth_day, country, state, city, street, num_house, specialities, focus } = profile
+  console.log('profile', profile)
+
+  try {
+    const { rows: user } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    if (user[0]?.length === 0 || !user[0]) {
+      console.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    const user_id = user[0].id as number
+    const specialities_ids = specialities?.map((speciality) => speciality.id)
+
+    // Eliminar las especialidades existentes
+    if (specialities_ids && specialities_ids.length > 0) {
+      await turso.execute({
+        sql: `DELETE FROM psicobooking_psychologist_speciality WHERE user_id = :user_id`,
+        args: { user_id }
+      })
+    }
+
+    // Crear el batch de inserciones
+    let batchQueries: {
+      sql: string;
+      args: {
+        user_id: number;
+        speciality_id: string;
+      };
+    }[] = []
+
+    if (specialities_ids && specialities_ids.length > 0) {
+      batchQueries = specialities_ids.map(speciality_id => ({
+        sql: `INSERT INTO psicobooking_psychologist_speciality (user_id, speciality_id) VALUES (:user_id, :speciality_id)`,
+        args: { user_id, speciality_id }
+      }))
+    }
+
+    await turso.batch([
+      {
+        sql: `
+          UPDATE 
+            psicobooking_user 
+          SET 
+            phone = :phone, 
+            gender = :gender, 
+            birth_day = :birth_day, 
+            country = :country, 
+            state = :state, 
+            city = :city, 
+            street = :street, 
+            num_house = :num_house,
+            focus = :focus
+          WHERE id = :user_id
+        `,
+        args: { phone, gender, birth_day, country, state, city, street, num_house, focus, user_id }
+      },
+      ...batchQueries
+    ], "write")
+
+    revalidatePath('/dashboard/perfil')
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false }
+  }
+}
+
+export async function enrollNewPsychologist(data: OnBoardingDataServer) {
+  console.log('enroll new psychologist')
+  const { userId } = auth()
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+  console.log('data', data)
+
+  try {
+    let study_certificate_url: string | null | undefined
+    let study_certificate_public_id: string | null | undefined
+    let recommendation_letter_url: string | null | undefined
+    let recommendation_letter_public_id: string | null | undefined
+
+    // subir certificado de estudios
+    if (data.professional.document) {
+      const result = await uploadDocument(
+        data.professional.document,
+        data.personal.name + "-" + data.personal.lastname + "-certificado-de-estudios",
+        "certificados-de-estudios"
+      )
+      const { url, public_id } = result || {}
+      if (!url || !public_id) {
+        throw new Error('No se pudo subir el certificado de estudios')
+      }
+
+      study_certificate_url = url
+      study_certificate_public_id = public_id
+    }
+
+    // subir carta de recomendaciones
+    if (data.professional.recommendationLetter) {
+      const result = await uploadDocument(
+        data.professional.recommendationLetter,
+        data.personal.name + "-" + data.personal.lastname + "-carta-de-recomendacion",
+        "carta-de-recomendaciones"
+      )
+      const { url, public_id } = result || {}
+      if (!url || !public_id) {
+        throw new Error('No se pudo subir la carta de recomendaciones')
+      }
+
+      recommendation_letter_url = url
+      recommendation_letter_public_id = public_id
+    }
+
+    const { rowsAffected } = await turso.execute({
+      sql: `
+          UPDATE psicobooking_user 
+          SET role = :role, 
+              first_name = :first_name,
+              last_name = :last_name,
+              email = :email,
+              focus = :focus,
+              phone = :phone,
+              country = :country,
+              dni = :dni,
+              study_house = :study_house,
+              study_year = :study_year,
+              study_certificate = :study_certificate,
+              recommendation_letter = :recommendation_letter,
+              conduct_record = :conduct_record,
+              conduct_record_detail = :conduct_record_detail,
+              consent = :consent,
+              occupation = 'psychologist'
+          WHERE clerk_id = :user_id 
+          RETURNING id
+        `,
+      args: {
+        role: data.firstStep.role,
+        user_id: userId,
+        first_name: data.personal.name,
+        last_name: data.personal.lastname,
+        email: data.personal.email,
+        focus: data.professional.studyBranch,
+        phone: data.personal.phone,
+        country: data.personal.country,
+        dni: data.personal.dni,
+        study_house: data.professional.studyHouse,
+        study_year: data.professional.studyYear,
+        study_certificate: study_certificate_url!,
+        recommendation_letter: recommendation_letter_url || null,
+        conduct_record: data.conduct.conductRecord,
+        conduct_record_detail: data.conduct.conductRecordDetails || '',
+        consent: data.conduct.consent
+      }
+    })
+
+    if (rowsAffected === 0 || !rowsAffected) {
+      console.error('No se pudo actualizar el usuario')
+      if (study_certificate_public_id) {
+        await deleteDocument(study_certificate_public_id)
+      }
+      if (recommendation_letter_public_id) {
+        await deleteDocument(recommendation_letter_public_id)
+      }
+      throw new Error('No se pudo actualizar el usuario')
+    }
+
+    await clerkClient().users.updateUser(userId, {
+      publicMetadata: {
+        onboardingComplete: true,
+        role: data.firstStep.role,
+      }
+    })
+
+    console.log('usuario actualizado', Number(rowsAffected))
+
+    return { data: true }
+  } catch (error) {
+    console.error(error)
+    return { data: false }
   }
 }

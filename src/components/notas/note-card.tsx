@@ -106,7 +106,7 @@ export function NoteCard({ note, patients }: { note: Note, patients: PatientForN
       <DialogTrigger asChild>
         <article
           style={{ borderColor: color, backgroundColor: `${color}1a` }}
-          className={`flex flex-col justify-between gap-4 p-4 border rounded-lg cursor-pointer`}
+          className={`flex flex-col justify-between gap-4 p-4 border rounded-lg cursor-pointer min-h-[170px]`}
         >
           <p className="text-sm text-foreground/80">{content.slice(0, 100)}...</p>
           <footer className="flex items-center justify-between">

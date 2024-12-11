@@ -71,3 +71,27 @@ export const transcriptionFormSchema = z.object({
   audio_file: z.instanceof(File).optional(),
   is_transcribed: z.boolean(),
 })
+
+export const CommentActivitySchema = z.object({
+  activity_id: z.number(),
+  content: z.string()
+})
+
+export const EditProfileSchema = z.object({
+  first_name: z.string().min(2).max(50).optional(),
+  last_name: z.string().min(2).max(50).optional(),
+  email: z.string().email({ message: "email invalido" }).optional(),
+  phone: z.string().optional(),
+  gender: z.string().optional(),
+  birth_day: z.date().optional(),
+  country: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  street: z.string().optional(),
+  num_house: z.string().optional(),
+  focus: z.string().optional(),
+  specialities: z.array(z.object({
+    label: z.string(),
+    value: z.string()
+  })).optional()
+})
