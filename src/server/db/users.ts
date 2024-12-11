@@ -2,8 +2,10 @@
 
 import { turso } from ".";
 import { auth } from "@clerk/nextjs/server";
-import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote } from "@/types/entities";
+import { UserBase, Appointment, SinglePatientTicket, DashboardAppointment, DashboardPatient, NextAppointment, DailyAvailability, AppointmentForTranscriptionForm, PatientForNote, NewAppointmentProps } from "@/types/entities";
 import { appointmentDTO, appointmentForTranscriptionFormDTO, availabilityDTO, dashboardAppointmentDTO, dashboardPatientDTO, getPatientsNamesForNoteDTO, nextAppointmentDTO, patientDashboardDataDTO, psychologistProfileDTO, singlePatientTicketDTO } from "@/server/dtos";
+import { addHours } from "date-fns";
+import { formatISO } from "date-fns";
 
 export async function userExists(id: string): Promise<Boolean> {
   const { rows } = await turso.execute({
@@ -580,5 +582,57 @@ export async function getPatientDashboardData() {
   } catch (error) {
     console.error(error)
     return null
+  }
+}
+
+export async function newAppointment({ psychologistId, selectedDate }: NewAppointmentProps) {
+  console.log('new appointment')
+
+  const { userId } = auth()
+  if (!userId) {
+    console.error('No estas autorizado')
+    throw new Error('No estas autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    if (rows[0]?.length === 0 || !rows[0]) {
+      console.error('No se encontró el usuario')
+      throw new Error('No se encontró el usuario')
+    }
+
+    const patient_id = rows[0]?.id as number
+    console.log('patient_id', patient_id)
+
+    const { lastInsertRowid } = await turso.execute({
+      sql: `
+        INSERT INTO psicobooking_appointment 
+          (patient_id, psychologist_id, date_from, date_to, date_from_old, date_to_old, session_type, state) 
+        VALUES (:patient_id, :psychologist_id, :date_from, :date_to, 1, 1, :session_type, :state)
+      `,
+      args: {
+        patient_id,
+        psychologist_id: psychologistId,
+        date_from: selectedDate,
+        date_to: formatISO(addHours(new Date(selectedDate), 1)),
+        session_type: "online",
+        state: "scheduled"
+      }
+    })
+
+    if (!lastInsertRowid) {
+      console.error('No se pudo crear la cita')
+      throw new Error('No se pudo crear la cita')
+    }
+
+    const appointment_id = Number(lastInsertRowid)
+    return { data: appointment_id }
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }

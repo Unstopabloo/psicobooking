@@ -5,13 +5,20 @@ import { es } from "date-fns/locale";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 import { auth } from "@clerk/nextjs/server";
-import { newAppointment } from "./users";
+import { newAppointment } from "../db/users";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-11-20.acacia',
 });
 
-export async function createCheckoutSession(psychologistId: number, psychologistName: string, psychologistImage: string, time: string, price: number) {
+export async function createCheckoutSession(
+  psychologistId: number,
+  psychologistName: string,
+  psychologistImage: string,
+  time: string,
+  price: number,
+  isPayedInmediately: boolean
+) {
   console.log('createCheckoutSession', psychologistId, psychologistName, psychologistImage, time, price)
 
   const { userId } = auth();
@@ -24,6 +31,18 @@ export async function createCheckoutSession(psychologistId: number, psychologist
   if (!psychologistName || !psychologistImage || !time || !price) {
     console.error('Missing required fields')
     return { error: "Missing required fields" };
+  }
+
+  if (!isPayedInmediately) {
+    console.log('redirecting to checkout')
+
+    // guardar appointment
+    await newAppointment({
+      psychologistId: psychologistId,
+      selectedDate: time
+    })
+
+    redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`)
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -52,8 +71,6 @@ export async function createCheckoutSession(psychologistId: number, psychologist
     locale: 'es',
     mode: "payment",
   });
-
-  console.log(session);
 
   if (!session.url) {
     console.error('No se pudo crear la sesión de Stripe')

@@ -20,6 +20,7 @@ import { Skeleton } from "../ui/skeleton";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { countryPhoneCodes } from "@/lib/consts";
+import { useRouter } from 'next/navigation'
 
 export function PsychologistAppointmentSheet({
   selectedPsychologist,
@@ -275,6 +276,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
   setSelectedPsychologist: (psychologist: number | null) => void
 }) {
   if (!date) return null;
+  const router = useRouter()
 
   // Generamos slots desde 8:00 UTC hasta 20:30 UTC
   const UTC_TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
@@ -287,7 +289,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
     return hour! < 21 && !(hour! === 20 && minutes! > 30);
   });
 
-  const handleClick = async (time: string) => {
+  const handleClick = async (time: string, isPayedInmediately: boolean) => {
     const [hours, minutes] = time.split(':').map(Number);
     const fullDate = new Date(date);
     fullDate.setUTCHours(hours!, minutes!, 0, 0);
@@ -295,13 +297,24 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
     console.log(`Hora seleccionada (UTC): ${time}`);
     console.log(`ISO timestamp: ${utcTimestamp}`);
 
-    await createCheckoutSession(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!)
+    await createCheckoutSession(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!, isPayedInmediately)
+
+    if (!isPayedInmediately) {
+      console.log('Refreshing...')
+      window.location.reload()
+    }
   };
 
   const isTimeSlotAvailable = (time: string): boolean => {
     const [hours, minutes] = time.split(':').map(Number);
     const slotDate = new Date(date);
     slotDate.setUTCHours(hours!, minutes!, 0, 0);
+
+    // Verificar si el slot es en el pasado
+    const now = new Date();
+    if (isToday(slotDate) && isBefore(slotDate, now)) {
+      return false;
+    }
 
     return !appointments.some(appointment => {
       const appointmentStart = new Date(appointment.date_from);
@@ -316,11 +329,11 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
     <div className="flex flex-col items-start gap-2">
       <div className="flex flex-col items-start justify-between w-full">
         <h4 className="text-sm font-medium text-foreground py-2">
-          {format(date, 'EEEE, d MMMM yyyy', { locale: es })} (Horarios en UTC)
+          {format(date, 'EEEE, d MMMM yyyy', { locale: es })}
         </h4>
         <p className="text-sm text-foreground/70">Selecciona un horario para agendar tu cita</p>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {UTC_TIME_SLOTS.map((time, index) => {
           const [hours, minutes] = time.split(':').map(Number);
           const utcDate = new Date();
@@ -341,8 +354,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
                   )}
                   disabled={!isAvailable || !price}
                 >
-                  <span>{localTime} local</span>
-                  <small className="text-xs text-foreground/50">({time} UTC)</small>
+                  <span>{localTime}</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -362,7 +374,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
                     })()}
                   </DialogDescription>
                   <div className="flex flex-col gap-2 pt-10">
-                    <Button variant="default" onClick={() => handleClick(time)}>Confirmar y pagar</Button>
+                    <Button variant="default" onClick={() => handleClick(time, true)}>Confirmar y pagar</Button>
                     <div className="grid grid-cols-3 gap-2">
                       <Button
                         className="col-span-1 flex gap-2"
@@ -375,7 +387,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
                         Cancelar
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" className="col-span-2 flex gap-2">
+                      <Button onClick={() => handleClick(time, false)} variant="outline" className="col-span-2 flex gap-2">
                         Confirmar y pagar despues
                         <Clock className="w-4 h-4" />
                       </Button>
@@ -401,6 +413,7 @@ const PsychologistAppointmentScheduler = memo(function PsychologistAppointmentSc
   availability: Omit<AvailabilityInterval, "id" | "clinic_id" | "psychologist_id">[]
 }) {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [selected, setSelected] = useState<Date | null>()
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
 
@@ -459,10 +472,14 @@ const PsychologistAppointmentScheduler = memo(function PsychologistAppointmentSc
               className={cn(
                 `relative text-center py-4 sm:py-6 hover:shadow-md`,
                 isCurrentDay && 'border-primary',
-                (!isAvailable || isPastDay) && 'bg-card/70 opacity-50 cursor-not-allowed shadow-none'
+                (!isAvailable || isPastDay || isCurrentDay) && 'bg-card/70 opacity-50 cursor-not-allowed shadow-none',
+                selected?.getDate() === day && selected?.getMonth() === currentDate.getMonth() && 'bg-primary/60 text-primary-foreground hover:bg-primary/60 hover:text-primary-foreground'
               )}
-              disabled={isPastDay || !isAvailable}
-              onClick={() => setSelectedDate(dateToCheck)}
+              disabled={isPastDay || !isAvailable || isCurrentDay}
+              onClick={() => {
+                setSelected(dateToCheck);
+                setSelectedDate(dateToCheck);
+              }}
             >
               {day}
             </Button>

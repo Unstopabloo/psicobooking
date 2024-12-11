@@ -1,8 +1,6 @@
-import { newAppointment } from "@/server/actions/users";
+import { savePayment } from "@/server/db/payments";
+import { newAppointment } from "@/server/db/users";
 import { auth } from "@clerk/nextjs/server";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -10,7 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export async function GET(request: NextRequest) {
   console.log('GET /stripe/checkout')
-  const sessionId = request.nextUrl.searchParams.get('session_id')
   const { userId } = auth()
 
   if (!userId) {
@@ -18,9 +15,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
   }
 
+  const sessionId = request.nextUrl.searchParams.get('session_id')
+
   if (!sessionId) {
-    console.error('Missing required fields')
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    console.log('redirecting to dashboard')
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`)
   }
 
   try {
@@ -42,11 +41,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // TODO: guardar appointment
-    await newAppointment({
+    // guardar appointment
+    const { data: appointmentId } = await newAppointment({
       psychologistId: parseInt(paymentIntent.metadata.psychologistId),
       selectedDate: paymentIntent.metadata.time
     })
+
+    // guardar payment
+    await savePayment({
+      appointment_id: appointmentId,
+      payment_id: paymentIntent.id,
+      psychologist_id: parseInt(paymentIntent.metadata.psychologistId),
+      session_type: paymentIntent.metadata.sessionType || 'online',
+      price: paymentIntent.amount,
+      payment_date: paymentIntent.metadata.time
+    })
+
+    // TODO: enviar email de confirmación
 
 
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/`)
@@ -59,7 +70,7 @@ export async function GET(request: NextRequest) {
 /*
 
 {
-    id: 'cs_test_a1xic9447Kqn9Bcf6iW7MaiXrPMbQIaHgRhs2Bqcb8AKWiosnyrs4qf9ta',
+    id: 'cs_test_a1iQyKNIAHpkpGncBK6aauUYV4OhBc53AODVxVQUVrghjSmJQKKtghxiOJ',
     object: 'checkout.session',
     adaptive_pricing: { enabled: false },
     after_expiration: null,
@@ -73,7 +84,7 @@ export async function GET(request: NextRequest) {
     client_secret: null,
     consent: null,
     consent_collection: null,
-    created: 1733533860,
+    created: 1733612738,
     currency: 'usd',
     currency_conversion: null,
     custom_fields: [],
@@ -101,7 +112,7 @@ export async function GET(request: NextRequest) {
       tax_ids: []
     },
     customer_email: null,
-    expires_at: 1733620260,
+    expires_at: 1733699138,
     invoice: null,
     invoice_creation: {
       enabled: false,
@@ -120,7 +131,7 @@ export async function GET(request: NextRequest) {
     metadata: {},
     mode: 'payment',
     payment_intent: {
-      id: 'pi_3QTCYEENGCSQ2wwB1PW6ItQf',
+      id: 'pi_3QTX4OENGCSQ2wwB0RYop5SU',
       object: 'payment_intent',
       amount: 2000,
       amount_capturable: 0,
@@ -132,25 +143,20 @@ export async function GET(request: NextRequest) {
       canceled_at: null,
       cancellation_reason: null,
       capture_method: 'automatic_async',
-      client_secret: 'pi_3QTCYEENGCSQ2wwB1PW6ItQf_secret_pWJxwy0uevdaMWS9Rsc2gzrPT',
+      client_secret: 'pi_3QTX4OENGCSQ2wwB0RYop5SU_secret_5PPH9td46y4GZztmHi8C1qOfl',
       confirmation_method: 'automatic',
-      created: 1733533878,
+      created: 1733612752,
       currency: 'usd',
       customer: null,
       description: null,
       invoice: null,
       last_payment_error: null,
-      latest_charge: 'ch_3QTCYEENGCSQ2wwB12Y1gGTo',
+      latest_charge: 'ch_3QTX4OENGCSQ2wwB0KRs4OCt',
       livemode: false,
-      metadata: {
-        psychologistImage: 
-          'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18ybjRQamN2dE04ZjhFajE4bjN2dU5ueGREZXoifQ',
-        psychologistName: 'Pablo Oyarce Ramirez',
-        time: '2024-12-08T08:00:00.000Z'
-      },
+      metadata: { psychologistId: '28', time: '2024-12-12T14:30:00.000Z' },
       next_action: null,
       on_behalf_of: null,
-      payment_method: 'pm_1QTCYDENGCSQ2wwBPYTQpZsk',
+      payment_method: 'pm_1QTX4NENGCSQ2wwBJC35aeqS',
       payment_method_configuration_details: null,
       payment_method_options: {
         card: {

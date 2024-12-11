@@ -52,6 +52,11 @@ export interface PsychologistDataSheet {
   appointments: { state: string, date_from: string, date_to: string }[];
 }
 
+export interface NewAppointmentProps {
+  psychologistId: number
+  selectedDate: string
+}
+
 export interface ContactBase {
   id: number;
   name: string;
