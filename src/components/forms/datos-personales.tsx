@@ -41,7 +41,7 @@ export function DatosPersonalesForm({ patient }: { patient: SinglePatientTicket 
       first_name: patient.first_name,
       last_name: patient.last_name,
       email: patient.email,
-      phone: parseInt(patient.phone ?? ''),
+      phone: patient.phone ?? undefined,
       gender: patient.gender ?? undefined,
       birth_day: patient.birth_day ? new Date(patient.birth_day) : undefined,
       ocupation: patient.ocupation ?? undefined,
@@ -53,16 +53,12 @@ export function DatosPersonalesForm({ patient }: { patient: SinglePatientTicket 
   })
 
   async function onSubmit(data: z.infer<typeof PatientSchema>) {
-    const res = await updatePatient(data)
 
-    if (res?.data?.error) {
-      toast.error("Hubo un error al actualizar los datos", { description: JSON.stringify(res?.data?.error) })
-      return
-    }
-
-    toast.success("Datos actualizados: ", {
-      description: JSON.stringify(res?.data?.data),
-      action: <Button onClick={() => {
+    toast.promise(updatePatient(data), {
+      loading: "Actualizando datos...",
+      success: "Datos actualizados: ",
+      error: "Hubo un error al actualizar los datos",
+      action: <Button variant="ghost" onClick={() => {
         window.location.reload()
       }}>Actualizar</Button>
     })

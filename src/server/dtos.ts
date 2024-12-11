@@ -296,7 +296,8 @@ export const psychologistProfileDTO = (psychologistProfile: Row, userSpecialitie
     street: psychologistProfile.street as string | null,
     num_house: psychologistProfile.num_house as string | null,
     created_at: psychologistProfile.created_at as string,
-    video_presentation_url: psychologistProfile.video_presentation_url as string | null
+    video_presentation_url: psychologistProfile.video_presentation_url as string | null,
+    price: psychologistProfile.price as number | null
   }
 }
 
@@ -312,7 +313,7 @@ export const patientDashboardDataDTO = (patientDashboardData: Row): Pick<Psychol
   }
 }
 
-export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url'>[] => {
+export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url' | 'price'>[] => {
   return psychologists.map(psychologist => ({
     id: psychologist.id as number,
     first_name: psychologist.first_name as string,

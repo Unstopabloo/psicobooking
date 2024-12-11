@@ -126,7 +126,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'united states',
     flag: '🇺🇸',
     code: '+1',
-    aliases: ['usa', 'us', 'estados unidos', 'eeuu', 'american', 'americano', 'americana', 'estadounidense'],
+    aliases: ['Americano', 'Americana'],
     states: [
       {
         name: 'alabama',
@@ -334,7 +334,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'canada',
     flag: '🇨🇦',
     code: '+1',
-    aliases: ['ca', 'can', 'canadiense', 'canadian'],
+    aliases: ['Canadiense', 'Canadiana'],
     states: [
       {
         name: 'alberta',
@@ -394,7 +394,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'mexico',
     flag: '🇲🇽',
     code: '+52',
-    aliases: ['mx', 'mex', 'méxico', 'mexican', 'mexicano', 'mexicana'],
+    aliases: ['Mexicano', 'Mexicana'],
     states: [
       {
         name: 'aguascalientes',
@@ -528,7 +528,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'costa rica',
     code: '+506',
     flag: '🇨🇷',
-    aliases: ['cr', 'cri', 'costarricense', 'costa rican'],
+    aliases: ['Costarricense', 'Costarricana'],
     states: [
       {
         name: 'san josé',
@@ -564,7 +564,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'el salvador',
     flag: '🇸🇻',
     code: '+503',
-    aliases: ['sv', 'slv', 'salvadoreño', 'salvadoreña', 'salvadorian'],
+    aliases: ['Salvadoreño', 'Salvadoreña'],
     states: [
       {
         name: 'ahuachapán',
@@ -628,7 +628,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'guatemala',
     flag: '🇬🇹',
     code: '+502',
-    aliases: ['gt', 'gtm', 'guatemalteco', 'guatemalteca', 'guatemalan'],
+    aliases: ['Guatemalteco', 'Guatemalteca'],
     states: [
       {
         name: 'alta verapaz',
@@ -724,7 +724,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'honduras',
     flag: '🇭🇳',
     code: '+504',
-    aliases: ['hn', 'hnd', 'hondureño', 'hondureña', 'honduran'],
+    aliases: ['Hondureño', 'Hondureña'],
     states: [
       {
         name: 'atlántida',
@@ -804,7 +804,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'panama',
     flag: '🇵🇦',
     code: '+507',
-    aliases: ['pa', 'pan', 'panamá', 'panameño', 'panameña', 'panamanian'],
+    aliases: ['Panameño', 'Panameña'],
     states: [
       {
         name: 'bocas del toro',
@@ -864,7 +864,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'nicaragua',
     flag: '🇳🇮',
     code: '+505',
-    aliases: ['ni', 'nic', 'nicaragüense', 'nicaraguan'],
+    aliases: ['Nicaragüense', 'Nicaragüana'],
     states: [
       {
         name: 'boaco',
@@ -942,7 +942,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'argentina',
     flag: '🇦🇷',
     code: '+54',
-    aliases: ['ar', 'arg', 'argentino', 'argentina', 'argentinian'],
+    aliases: ['Argentino', 'Argentina'],
     states: [
       {
         name: 'buenos aires',
@@ -1042,7 +1042,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'bolivia',
     flag: '🇧🇴',
     code: '+591',
-    aliases: ['bo', 'bol', 'boliviano', 'boliviana', 'bolivian'],
+    aliases: ['Boliviano', 'Boliviana'],
     states: [
       {
         name: 'la paz',
@@ -1086,7 +1086,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'brasil',
     flag: '🇧🇷',
     code: '+55',
-    aliases: ['br', 'bra', 'brasil', 'brasileño', 'brasileña', 'brazilian'],
+    aliases: ['Brasileño', 'Brasileña'],
     states: [
       {
         name: 'acre',
@@ -1202,7 +1202,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'chile',
     flag: '🇨🇱',
     code: '+56',
-    aliases: ['cl', 'chl', 'chileno', 'chilena', 'chilean'],
+    aliases: ['Chileno', 'Chilena'],
     states: [
       {
         name: 'arica y parinacota',
@@ -1274,7 +1274,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'colombia',
     flag: '🇨🇴',
     code: '+57',
-    aliases: ['co', 'col', 'colombiano', 'colombiana', 'colombian'],
+    aliases: ['Colombiano', 'Colombiana'],
     states: [
       {
         name: 'amazonas',
@@ -1410,7 +1410,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'ecuador',
     flag: '🇪🇨',
     code: '+593',
-    aliases: ['ec', 'ecu', 'ecuatoriano', 'ecuatoriana', 'ecuadorian'],
+    aliases: ['Ecuatoriano', 'Ecuatoriana'],
     states: [
       {
         name: 'azuay',
@@ -1514,7 +1514,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'paraguay',
     flag: '🇵🇾',
     code: '+595',
-    aliases: ['py', 'pry', 'paraguayo', 'paraguaya', 'paraguayan'],
+    aliases: ['Paraguayo', 'Paraguaya'],
     states: [
       {
         name: 'asunción',
@@ -1594,7 +1594,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'peru',
     flag: '🇵🇪',
     code: '+51',
-    aliases: ['pe', 'per', 'perú', 'peruano', 'peruana', 'peruvian'],
+    aliases: ['Peruano', 'Peruana'],
     states: [
       {
         name: 'amazonas',
@@ -1702,7 +1702,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'uruguay',
     flag: '🇺🇾',
     code: '+598',
-    aliases: ['uy', 'uruguayo', 'uruguaya'],
+    aliases: ['Uruguayo', 'Uruguaya'],
     states: [
       {
         name: 'montevideo',
@@ -1786,7 +1786,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'venezuela',
     flag: '🇻🇪',
     code: '+58',
-    aliases: ['ve', 'ven', 'venezolano', 'venezolana', 'venezuelan'],
+    aliases: ['Venezolano', 'Venezolana'],
     states: [
       {
         name: 'amazonas',
@@ -1892,7 +1892,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'españa',
     flag: '🇪🇸',
     code: '+34',
-    aliases: ['es', 'esp', 'españa', 'español', 'española', 'spanish', 'spaniard'],
+    aliases: ['Español', 'Española'],
     states: [
       {
         name: 'andalucía',
@@ -2002,7 +2002,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'japon',
     flag: '🇯🇵',
     code: '+81',
-    aliases: ['jp', 'jpn', 'japón', 'japonés', 'japonesa', 'japanese'],
+    aliases: ['Japónes', 'Japonesa'],
     states: [
       {
         name: 'Hokkaido',
@@ -2198,7 +2198,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'corea del sur',
     flag: '🇰🇷',
     code: '+82',
-    aliases: ['kr', 'kor', 'corea del sur', 'coreano', 'coreana', 'korean'],
+    aliases: ['Coreano', 'Coreana'],
     states: [
       {
         name: 'Seoul',
@@ -2274,7 +2274,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'australia',
     flag: '🇦🇺',
     code: '+61',
-    aliases: ['au', 'aus', 'aussie', 'australian'],
+    aliases: ['Australiano', 'Australiana'],
     states: [
       {
         name: 'new south wales',
@@ -2314,7 +2314,7 @@ export const countryPhoneCodes: CountryPhoneCode[] = [
     name: 'new zealand',
     flag: '🇳🇿',
     code: '+64',
-    aliases: ['nz', 'nzl', 'kiwi', 'neozelandés', 'neozelandesa', 'new zealander'],
+    aliases: ['Neozelandés', 'Neozelandesa'],
     states: [
       {
         name: 'northland',

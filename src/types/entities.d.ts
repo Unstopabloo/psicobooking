@@ -35,6 +35,7 @@ export interface PsychologistProfile {
   num_house: string | null;
   video_presentation_url: string | null;
   created_at: string;
+  price: number | null;
 }
 
 export interface PsychologistDataSheet {

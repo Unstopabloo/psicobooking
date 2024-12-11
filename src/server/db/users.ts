@@ -113,6 +113,8 @@ export async function getPatientsWithAppointments(): Promise<{ patientsWithAppoi
             WHERE
               u.role = 'patient'
               AND a.psychologist_id = ?
+            GROUP BY
+              u.id
             ORDER BY
               a.date_from
           `,
@@ -519,7 +521,8 @@ export async function getUserProfile() {
           psy.street,
           psy.num_house,
           psy.created_at,
-          psy.video_presentation_url
+          psy.video_presentation_url,
+          psy.price
         FROM 
           psicobooking_user psy
         WHERE 
@@ -551,6 +554,7 @@ export async function getUserProfile() {
     const userSpecialities = resdb[1].rows
 
     const result = psychologistProfileDTO(userProfile, userSpecialities)
+    console.log("result", result)
     return result
   } catch (error) {
     console.error(error)
