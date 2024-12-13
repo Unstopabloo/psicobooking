@@ -38,6 +38,13 @@ export interface PsychologistProfile {
   price: number | null;
 }
 
+export interface Payment {
+  id: number;
+  month: string;
+  ingresos: number;
+  citas: number;
+}
+
 export interface PsychologistDataSheet {
   id: number;
   first_name: string;

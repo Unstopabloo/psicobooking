@@ -1,4 +1,4 @@
-import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, Payment, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -352,4 +352,13 @@ export const psychologistByIdDTO = (psychologist: Row, specialities: Row[], avai
       date_to: app.date_to as string,
     }))
   }
+}
+
+export const paymentsDTO = (payments: Row[]): Payment[] => {
+  return payments.map(payment => ({
+    id: payment.id as number,
+    month: payment.month as string,
+    ingresos: payment.ingresos as number,
+    citas: payment.citas as number
+  }))
 }
