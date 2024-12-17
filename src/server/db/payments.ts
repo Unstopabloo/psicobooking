@@ -12,20 +12,31 @@ interface SavePaymentProps {
   session_type: string
   price: number
   payment_date: string
+  user_id: string
 }
 
-export async function savePayment({ psychologist_id, appointment_id, payment_id, session_type, price, payment_date }: SavePaymentProps) {
+export async function savePayment({ psychologist_id, appointment_id, payment_id, session_type, price, payment_date, user_id }: SavePaymentProps) {
   console.log('savePayment')
-  const { userId } = auth()
-  if (!userId) {
+
+  if (!user_id) {
     console.error('No estas autorizado')
     throw new Error('No estas autorizado')
   }
 
   try {
+    const { rows: verifyPayment } = await turso.execute({
+      sql: `SELECT id FROM psicobooking_payment WHERE payment_id = :payment_id`,
+      args: { payment_id: payment_id }
+    })
+
+    if (verifyPayment[0]?.length === 0 || !verifyPayment[0]) {
+      console.error('El pago ya existe')
+      throw new Error('El pago ya existe')
+    }
+
     const { rows } = await turso.execute({
       sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
-      args: { user_id: userId }
+      args: { user_id: user_id }
     })
 
     if (rows[0]?.length === 0 || !rows[0]) {
@@ -38,9 +49,9 @@ export async function savePayment({ psychologist_id, appointment_id, payment_id,
     const { lastInsertRowid } = await turso.execute({
       sql: `
         INSERT INTO psicobooking_payment 
-          (patient_id, psychologist_id, appointment_id, payment_id, session_type, price, payment_date) 
+          (patient_id, psychologist_id, appointment_id, payment_id, session_type, price, payment_date, creation_date) 
         VALUES 
-          (:patient_id, :psychologist_id, :appointment_id, :payment_id, :session_type, :price, :payment_date)
+          (:patient_id, :psychologist_id, :appointment_id, :payment_id, :session_type, :price, :payment_date, :creation_date)
       `,
       args: {
         patient_id: patientId,
@@ -49,7 +60,8 @@ export async function savePayment({ psychologist_id, appointment_id, payment_id,
         payment_id,
         session_type,
         price,
-        payment_date
+        payment_date,
+        creation_date: new Date().toISOString()
       }
     })
 

@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { SentIcon } from "@/components/icons";
 
 interface PsychologistCardProps {
-  psychologist: Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url'>
+  psychologist: Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url' | 'price'>
   selectedPsychologist: number | null
   setSelectedPsychologist: (psychologistId: number) => void
 }

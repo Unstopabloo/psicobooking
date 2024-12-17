@@ -63,6 +63,7 @@ export interface PsychologistDataSheet {
 export interface NewAppointmentProps {
   psychologistId: number
   selectedDate: string
+  user_id: string
 }
 
 export interface ContactBase {
