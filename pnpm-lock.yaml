@@ -185,6 +185,9 @@ importers:
       lucide-react:
         specifier: ^0.439.0
         version: 0.439.0(react@18.3.1)
+      mercadopago:
+        specifier: ^2.1.0
+        version: 2.1.0
       next:
         specifier: ^14.2.4
         version: 14.2.8(@babel/core@7.25.2)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4102,6 +4105,9 @@ packages:
 
   mdurl@2.0.0:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
+
+  mercadopago@2.1.0:
+    resolution: {integrity: sha512-3Kx5AAPWEPnO9aSHhbAYPIYpKjM2QtyUJ/mEuBA0AeD19Mt8KViAN3vKqaZCxtEFgeiw+388m0HeBTOEGxU/7w==}
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
@@ -9458,6 +9464,13 @@ snapshots:
   mdn-data@2.0.30: {}
 
   mdurl@2.0.0: {}
+
+  mercadopago@2.1.0:
+    dependencies:
+      node-fetch: 2.7.0
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - encoding
 
   merge-stream@2.0.0: {}
 

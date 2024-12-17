@@ -45,11 +45,7 @@ export async function getPsychologists({ search }: GetPsychologistsParams) {
       rows = defaultRes
     }
 
-    console.log('rows', rows)
-
     const psychologists = psychologistsDTO(rows)
-
-    console.log(psychologists)
     return psychologists
   } catch (error) {
     console.error(error)

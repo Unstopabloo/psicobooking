@@ -21,6 +21,7 @@ import { useMediaQuery } from "@uidotdev/usehooks";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { countryPhoneCodes } from "@/lib/consts";
 import { useRouter } from 'next/navigation'
+import { appointmentMercadoPago } from "@/server/actions/appointments";
 
 export function PsychologistAppointmentSheet({
   selectedPsychologist,
@@ -297,7 +298,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
     console.log(`Hora seleccionada (UTC): ${time}`);
     console.log(`ISO timestamp: ${utcTimestamp}`);
 
-    await createCheckoutSession(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!, isPayedInmediately)
+    await appointmentMercadoPago(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!, isPayedInmediately, 'online')
 
     if (!isPayedInmediately) {
       console.log('Refreshing...')

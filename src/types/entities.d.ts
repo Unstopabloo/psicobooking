@@ -35,6 +35,14 @@ export interface PsychologistProfile {
   num_house: string | null;
   video_presentation_url: string | null;
   created_at: string;
+  price: number | null;
+}
+
+export interface Payment {
+  id: number;
+  month: string;
+  ingresos: number;
+  citas: number;
 }
 
 export interface PsychologistDataSheet {
@@ -55,6 +63,7 @@ export interface PsychologistDataSheet {
 export interface NewAppointmentProps {
   psychologistId: number
   selectedDate: string
+  user_id: string
 }
 
 export interface ContactBase {

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { cloudinaryUtils } from "@/server/cloudinary"
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { NEXT_PUBLIC_API_URL } from "@/lib/env";
 
 export async function createTranscription(formData: FormData) {
   const { userId } = auth();
@@ -51,7 +52,7 @@ export async function createTranscription(formData: FormData) {
       ).end(buffer)
     })
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/workflow/audio`, {
+    fetch(`${NEXT_PUBLIC_API_URL}/workflow/audio`, {
       method: "POST",
       body: JSON.stringify({
         transcriptionTitle,

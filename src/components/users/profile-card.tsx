@@ -48,6 +48,10 @@ export default async function PsychologistCard() {
                 <span className="font-medium">Fecha de nacimiento:</span>
                 {userProfile.birth_day || 'No especificada'}
               </p>
+              <p className="flex items-center gap-1 justify-between max-w-[85%] text-muted-foreground [&>span]:text-foreground/95">
+                <span className="font-medium">Precio por sesión:</span>
+                {userProfile.price ? `$${userProfile.price}` : 'No especificada'}
+              </p>
             </div>
             <div>
               <h3 className="font-medium mb-2">Ubicación</h3>

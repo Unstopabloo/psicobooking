@@ -16,7 +16,8 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form"
 import {
   Select,
@@ -43,6 +44,7 @@ import MultipleSelector, { Option } from "@/components/ui/multiselect";
 import { SPECIALITIES } from "@/lib/consts";
 import { Label } from "../ui/label"
 import { updateUserProfile } from "@/server/actions/users"
+import { toast } from 'sonner';
 
 export function EditProfileForm({ profile, specialities }: { profile: PsychologistProfile, specialities: string[] }) {
   const [isCountrySelected, setIsCountrySelected] = useState<string | null>(null)
@@ -72,7 +74,8 @@ export function EditProfileForm({ profile, specialities }: { profile: Psychologi
         label: speciality.label,
         value: speciality.value,
         id: speciality.id
-      }))
+      })),
+      price: profile.price ? profile.price.toString() : undefined
     },
   })
 
@@ -95,10 +98,15 @@ export function EditProfileForm({ profile, specialities }: { profile: Psychologi
         id: speciality.id,
         name: speciality.label as SpecialityName,
         description: ""
-      }))
+      })),
+      price: values.price ? parseInt(values.price) : null
     }
 
-    await updateUserProfile(profile)
+    toast.promise(updateUserProfile(profile), {
+      loading: "Actualizando perfil...",
+      success: "Perfil actualizado correctamente",
+      error: "Error al actualizar el perfil"
+    })
   }
 
   let countries = []
@@ -172,6 +180,7 @@ export function EditProfileForm({ profile, specialities }: { profile: Psychologi
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Teléfono</FormLabel>
+                    <FormMessage />
                     <FormControl>
                       <Input placeholder="1234567890" {...field} />
                     </FormControl>
@@ -242,6 +251,21 @@ export function EditProfileForm({ profile, specialities }: { profile: Psychologi
                         )
                       }
                     </Popover>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Precio por sesión</FormLabel>
+                    <FormControl>
+                      <Input placeholder="20" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      El precio por sesión en USD.
+                    </FormDescription>
                   </FormItem>
                 )}
               />

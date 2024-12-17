@@ -73,7 +73,6 @@ export async function updateRole(role: string) {
     return { error }
   }
 }
-
 // =================== Pacientes ===================
 export async function getPatientsWithAppointments(): Promise<{ patientsWithAppointments: Appointment[] | undefined, error?: Error }> {
   const { userId } = auth()
@@ -113,6 +112,8 @@ export async function getPatientsWithAppointments(): Promise<{ patientsWithAppoi
             WHERE
               u.role = 'patient'
               AND a.psychologist_id = ?
+            GROUP BY
+              u.id
             ORDER BY
               a.date_from
           `,
@@ -519,7 +520,8 @@ export async function getUserProfile() {
           psy.street,
           psy.num_house,
           psy.created_at,
-          psy.video_presentation_url
+          psy.video_presentation_url,
+          psy.price
         FROM 
           psicobooking_user psy
         WHERE 
@@ -551,6 +553,7 @@ export async function getUserProfile() {
     const userSpecialities = resdb[1].rows
 
     const result = psychologistProfileDTO(userProfile, userSpecialities)
+    console.log("result", result)
     return result
   } catch (error) {
     console.error(error)
@@ -585,11 +588,10 @@ export async function getPatientDashboardData() {
   }
 }
 
-export async function newAppointment({ psychologistId, selectedDate }: NewAppointmentProps) {
+export async function newAppointment({ psychologistId, selectedDate, user_id }: NewAppointmentProps) {
   console.log('new appointment')
 
-  const { userId } = auth()
-  if (!userId) {
+  if (!user_id) {
     console.error('No estas autorizado')
     throw new Error('No estas autorizado')
   }
@@ -597,7 +599,7 @@ export async function newAppointment({ psychologistId, selectedDate }: NewAppoin
   try {
     const { rows } = await turso.execute({
       sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
-      args: { user_id: userId }
+      args: { user_id: user_id }
     })
 
     if (rows[0]?.length === 0 || !rows[0]) {
@@ -623,6 +625,8 @@ export async function newAppointment({ psychologistId, selectedDate }: NewAppoin
         state: "scheduled"
       }
     })
+
+    console.log('lastInsertRowid', Number(lastInsertRowid))
 
     if (!lastInsertRowid) {
       console.error('No se pudo crear la cita')

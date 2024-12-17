@@ -4,6 +4,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { uploadVideo } from '@/server/actions/cloudinary';
+import { NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET } from '@/lib/env';
 
 export function CloudinaryUploadButton() {
   const handleSuccess = async (result: any) => {
@@ -18,7 +19,7 @@ export function CloudinaryUploadButton() {
 
   return (
     <CldUploadWidget
-      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+      uploadPreset={NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!}
       options={{
         resourceType: 'video',
         sources: ['local'],

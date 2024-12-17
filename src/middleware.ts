@@ -13,7 +13,7 @@ const isPublicRoute = createRouteMatcher([
   '/ingest/e/',
   '/monitoring',
   '/api/workflow/audio',
-  '/api/stripe/checkout',
+  '/api/mercadopago/pagos',
 ])
 
 export default clerkMiddleware((auth, req: NextRequest) => {

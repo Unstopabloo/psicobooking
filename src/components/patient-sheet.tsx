@@ -103,7 +103,7 @@ export function PatientSheet({
               <SheetDescription className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
                   <div>
-                    <Avatar avatarUrl={data.patientTicket.avatar ?? undefined} name={data.patientTicket.name ?? undefined} />
+                    <Avatar avatarUrl={data.patientTicket.avatar ?? null} name={data.patientTicket.name ?? null} />
                   </div>
                   <div className="flex flex-col">
                     <strong className="font-semibold text-foreground/90">{data.patientTicket.name}</strong>
