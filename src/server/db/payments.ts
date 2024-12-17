@@ -1,7 +1,6 @@
 "server-only"
 
 import { turso } from "@/server/db";
-import { Row } from "@/types/entities";
 import { auth } from "@clerk/nextjs/server";
 import { paymentsDTO } from "../dtos";
 
@@ -29,7 +28,7 @@ export async function savePayment({ psychologist_id, appointment_id, payment_id,
       args: { payment_id: payment_id }
     })
 
-    if (verifyPayment[0]?.length === 0 || !verifyPayment[0]) {
+    if (verifyPayment[0]?.length! > 0 && verifyPayment[0]) {
       console.error('El pago ya existe')
       throw new Error('El pago ya existe')
     }
@@ -60,7 +59,7 @@ export async function savePayment({ psychologist_id, appointment_id, payment_id,
         payment_id,
         session_type,
         price,
-        payment_date,
+        payment_date: new Date(payment_date).toISOString(),
         creation_date: new Date().toISOString()
       }
     })

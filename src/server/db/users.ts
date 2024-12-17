@@ -595,7 +595,6 @@ export async function newAppointment({ psychologistId, selectedDate, user_id }: 
     console.error('No estas autorizado')
     throw new Error('No estas autorizado')
   }
-  console.log('user_id', user_id)
 
   try {
     const { rows } = await turso.execute({
