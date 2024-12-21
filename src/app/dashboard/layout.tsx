@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { ChatAsistant } from "@/components/ai-asistant/ui-chat-asistant";
 
 import {
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar } from "@/components/Avatar";
 import { currentUser, auth } from "@clerk/nextjs/server";
+import { api } from "@/lib/mercado-pago";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -69,11 +71,18 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
                 </DropdownMenuTrigger>
                 <DropdownMenuContent sideOffset={10} align="start">
                   <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard/perfil">Perfil</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
+                      Suscripción
+                      <Badge className="border-secondary bg-secondary/10 text-secondary" variant="outline">
+                        Free
+                      </Badge>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <SignOutButton />
                 </DropdownMenuContent>
               </DropdownMenu>

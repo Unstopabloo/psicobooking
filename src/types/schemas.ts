@@ -8,7 +8,9 @@ export const PatientSchema = z.object({
     message: "Minimo 2 caracteres.",
   }),
   email: z.string({ required_error: "El email es requerido." }).email({ message: "email invalido" }),
-  phone: z.number().optional(),
+  phone: z.string({ invalid_type_error: "Reintenta." })
+    .regex(/^\d{9}$/, { message: "El teléfono debe tener exactamente 9 dígitos" })
+    .optional(),
   gender: z.string({ required_error: "Selecciona tu sexo." }).refine((gender) => {
     return ['male', 'female', 'other'].includes(gender.toLowerCase().trim())
   }).optional(),
@@ -81,7 +83,9 @@ export const EditProfileSchema = z.object({
   first_name: z.string().min(2).max(50).optional(),
   last_name: z.string().min(2).max(50).optional(),
   email: z.string().email({ message: "email invalido" }).optional(),
-  phone: z.string().optional(),
+  phone: z.string({ invalid_type_error: "Reintenta." })
+    .regex(/^\d{9}$/, { message: "El teléfono debe tener exactamente 9 dígitos" })
+    .optional(),
   gender: z.string().optional(),
   birth_day: z.date().optional(),
   country: z.string().optional(),
@@ -93,5 +97,9 @@ export const EditProfileSchema = z.object({
   specialities: z.array(z.object({
     label: z.string(),
     value: z.string()
-  })).optional()
+  })).optional(),
+  price: z.string({ invalid_type_error: "El precio debe ser un número." })
+    .regex(/^\d+$/, { message: "El precio solo debe contener números" })
+    .max(3, { message: "El precio debe tener maximo 3 dígitos" })
+    .optional(),
 })

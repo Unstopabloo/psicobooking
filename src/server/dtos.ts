@@ -1,4 +1,4 @@
-import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
+import { ActivityWithComments, ActivityWithCommentsAndComments, Appointment, AppointmentCalendarScheduler, AppointmentCard, AppointmentCardWithPatient, AppointmentForTranscriptionForm, Benefit, ClinicalHistory, CommentActivity, ContactBase, ContactInfo, DailyAvailability, DashboardAppointment, DashboardPatient, Gender, NextAppointment, Note, PatientTicket, Payment, PaymentState, PsychologistDataSheet, PsychologistProfile, Row, Sessions, SinglePatientTicket, Speciality, SpecialityName, TranscriptionCard, TranscriptionContent } from "@/types/entities"
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -296,7 +296,8 @@ export const psychologistProfileDTO = (psychologistProfile: Row, userSpecialitie
     street: psychologistProfile.street as string | null,
     num_house: psychologistProfile.num_house as string | null,
     created_at: psychologistProfile.created_at as string,
-    video_presentation_url: psychologistProfile.video_presentation_url as string | null
+    video_presentation_url: psychologistProfile.video_presentation_url as string | null,
+    price: psychologistProfile.price as number | null
   }
 }
 
@@ -312,7 +313,7 @@ export const patientDashboardDataDTO = (patientDashboardData: Row): Pick<Psychol
   }
 }
 
-export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url'>[] => {
+export const psychologistsDTO = (psychologists: Row[]): Omit<PsychologistProfile, 'specialities' | 'created_at' | 'phone' | 'nationality' | 'gender' | 'birth_day' | 'country' | 'state' | 'city' | 'street' | 'num_house' | 'video_presentation_url' | 'price'>[] => {
   return psychologists.map(psychologist => ({
     id: psychologist.id as number,
     first_name: psychologist.first_name as string,
@@ -351,4 +352,32 @@ export const psychologistByIdDTO = (psychologist: Row, specialities: Row[], avai
       date_to: app.date_to as string,
     }))
   }
+}
+
+export const paymentsDTO = (payments: Row[]): Payment[] => {
+  return payments.map(payment => ({
+    id: payment.id as number,
+    month: payment.month as string,
+    ingresos: payment.ingresos as number,
+    citas: payment.citas as number
+  }))
+}
+
+export const paymentsStateDTO = (paymentsState: Row[]): PaymentState[] => {
+  return paymentsState.map(payment => ({
+    state: payment.state as "scheduled" | "cancelled" | "completed",
+    count: payment.count as number
+  }))
+}
+
+export const benefitsDTO = (benefits: Row[]): Benefit[] => {
+  return benefits.map(benefit => ({
+    id: benefit.id as number,
+    min_months: benefit.min_months as number,
+    benefit_description: benefit.benefit_description as string,
+    discount_percentage: benefit.discount_percentage as number,
+    image_url: benefit.image_url as string,
+    title: benefit.title as string,
+    code: benefit.code as string
+  }))
 }

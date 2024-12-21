@@ -21,6 +21,11 @@ const coreConfig = {
         hostname: 'img.clerk.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+      },
     ],
   },
 

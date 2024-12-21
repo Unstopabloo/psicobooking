@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
+import { api } from "./lib/mercado-pago";
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isPublicRoute = createRouteMatcher([
@@ -13,8 +14,48 @@ const isPublicRoute = createRouteMatcher([
   '/ingest/e/',
   '/monitoring',
   '/api/workflow/audio',
-  '/api/stripe/checkout',
+  '/api/mercadopago/pagos',
 ])
+
+// Definimos las rutas exactas que son públicas para usuarios con suscripción
+const publicSuscriptionPaths = new Set([
+  '/dashboard',
+  '/dashboard/profile',
+  '/dashboard/suscripcion',
+  '/',
+  '/sign-up/:path*',
+  '/sign-in/:path*',
+  '/sign-in',
+  '/sign-up',
+  '/api/wh/sync',
+  '/privacy-policy',
+  '/ingest/e/',
+  '/monitoring',
+  '/api/workflow/audio',
+  '/api/mercadopago/pagos'
+]);
+
+// Función helper para verificar si una ruta está en las rutas públicas
+function isPublicSubscriptionPath(pathname: string): boolean {
+  return publicSuscriptionPaths.has(pathname);
+}
+
+async function checkSubscription(req: NextRequest) {
+  const subscriptionId = req.cookies.get('mp_preapproval_id')?.value;
+  console.log("subscriptionId", subscriptionId)
+
+  if (!subscriptionId) {
+    return false;
+  }
+
+  try {
+    const suscription = await api.user.getSuscription(subscriptionId)
+    return suscription.status === 'authorized';
+  } catch (error) {
+    console.error('Error verificando suscripción:', error);
+    return false;
+  }
+}
 
 export default clerkMiddleware((auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = auth()
@@ -44,9 +85,26 @@ export default clerkMiddleware((auth, req: NextRequest) => {
     return NextResponse.redirect(onboardingUrl)
   }
 
+  // Verificación de suscripción para psicólogos
+  if (
+    userId &&
+    !isPublicRoute(req) &&
+    sessionClaims?.metadata?.role === 'psychologist' &&
+    !isPublicSubscriptionPath(req.nextUrl.pathname)
+  ) {
+    console.log("checking subscription")
+    return checkSubscription(req).then(isSubscribed => {
+      if (!isSubscribed) {
+        // Redirigir a la página de pricing o suscripción
+        const pricingUrl = new URL('/dashboard/suscripcion', req.url)
+        return NextResponse.redirect(pricingUrl)
+      }
+      return response
+    })
+  }
+
   // If the user is logged in and the route is protected, let them view.
   if (userId && !isPublicRoute(req)) return response
-
   return response
 })
 
@@ -72,7 +130,7 @@ function applyCsp(request: NextRequest) {
     media-src 'self' blob: https: http: https://*.cloudinary.com http://*.cloudinary.com https://res.cloudinary.com/dwv9pebu9/* https://*.cloudinary.com/;
     worker-src 'self' blob:;
     font-src 'self' data: https: http:;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/css?family=Geist;
+    style-src 'self' 'unsafe-inline' http: https://fonts.googleapis.com/css?family=Geist;
     frame-src 'self' https://challenges.cloudflare.com https://*.posthog.com https://www.google.com https://upload-widget.cloudinary.com/;
     form-action 'self';
     frame-ancestors 'none';

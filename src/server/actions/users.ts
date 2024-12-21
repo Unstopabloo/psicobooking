@@ -10,6 +10,8 @@ import { revalidatePath } from "next/cache";
 import { OnBoadingData } from "@/app/onboarding/page";
 import { deleteDocument, uploadDocument } from "@/lib/upload-files";
 import { addHours, formatISO } from "date-fns";
+import { getCountryPhoneCode } from "@/lib/get-country-code";
+import { countryPhoneCodes } from "@/lib/consts";
 
 interface OnBoardingDataServer extends Omit<OnBoadingData, 'professional'> {
   professional: {
@@ -24,9 +26,26 @@ interface OnBoardingDataServer extends Omit<OnBoadingData, 'professional'> {
 export const updatePatient = authAction
   .schema(PatientSchema)
   .action(async ({ parsedInput }) => {
+    console.log("parsedInput", parsedInput)
     try {
       const { rows, rowsAffected } = await turso.execute({
-        sql: `UPDATE psicobooking_user SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, gender = :gender, birth_day = :birth_day, occupation = :occupation, country = :country, state = :state, city = :city, street = :street, num_house = :num_house WHERE email = :email RETURNING *`,
+        sql: `
+          UPDATE psicobooking_user SET 
+            first_name = :first_name, 
+            last_name = :last_name, 
+            email = :email, 
+            phone = :phone, 
+            gender = :gender, 
+            birth_day = :birth_day, 
+            occupation = :occupation,
+            nationality = :nationality,
+            country = :country, 
+            state = :state, 
+            city = :city, 
+            street = :street, 
+            num_house = :num_house 
+          WHERE email = :email 
+          RETURNING *`,
         args: {
           first_name: parsedInput.first_name,
           last_name: parsedInput.last_name,
@@ -35,6 +54,7 @@ export const updatePatient = authAction
           gender: parsedInput.gender ?? null,
           birth_day: parsedInput.birth_day ? new Date(parsedInput.birth_day).toISOString() : null,
           occupation: parsedInput.ocupation ?? null,
+          nationality: countryPhoneCodes.find(country => country.name === parsedInput.country)?.aliases[parsedInput ? parsedInput.gender === 'male' ? 0 : 1 : 0] ?? null,
           country: parsedInput.country ?? null,
           state: parsedInput.state ?? null,
           city: parsedInput.city ?? null,
@@ -50,6 +70,7 @@ export const updatePatient = authAction
 
       // Asegúrate de que el objeto devuelto sea un objeto plano
       const plainUser = JSON.parse(JSON.stringify(rows[0]))
+      console.log("plainUser", plainUser)
       return { data: plainUser }
     } catch (error) {
       console.error(error)
@@ -783,7 +804,7 @@ export async function updateUserProfile(profile: Omit<PsychologistProfile, "id" 
     throw new Error('No estas autorizado')
   }
 
-  const { phone, gender, birth_day, country, state, city, street, num_house, specialities, focus } = profile
+  const { phone, gender, birth_day, country, state, city, street, num_house, specialities, focus, price } = profile
   console.log('profile', profile)
 
   try {
@@ -838,10 +859,11 @@ export async function updateUserProfile(profile: Omit<PsychologistProfile, "id" 
             city = :city, 
             street = :street, 
             num_house = :num_house,
-            focus = :focus
+            focus = :focus,
+            price = :price
           WHERE id = :user_id
         `,
-        args: { phone, gender, birth_day, country, state, city, street, num_house, focus, user_id }
+        args: { phone, gender, birth_day, country, state, city, street, num_house, focus, price, user_id }
       },
       ...batchQueries
     ], "write")

@@ -1,6 +1,8 @@
 import { countryPhoneCodes } from "./consts";
 
 export function getCountryPhoneCode(country: string): string | null {
+  if (!country) return null
+
   const normalizedInput = country.toLowerCase().trim();
 
   // Búsqueda directa
