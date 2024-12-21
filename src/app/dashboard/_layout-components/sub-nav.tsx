@@ -30,6 +30,17 @@ const agendaRoutes = [
   }
 ]
 
+const finanzasRoutes = [
+  {
+    name: "Finanzas",
+    href: "/dashboard/finanzas"
+  },
+  {
+    name: "Beneficios",
+    href: "/dashboard/finanzas/beneficios"
+  }
+]
+
 export function SubNav() {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
@@ -85,6 +96,25 @@ export function SubNav() {
     return (
       <nav className="hidden md:flex items-center justify-end" aria-label="navegacion secundaria">
         {agendaRoutes.map(route => (
+          <ul
+            key={route.name}
+            className="flex items-center justify-end"
+          >
+            <Link
+              key={Math.random()}
+              href={route.href}
+              className={cn(`rounded-none h-full py-2 px-4 text-sm flex items-center justify-center`, isActive(route.href) && 'cursor-default events-none bg-background')}
+            >
+              {route.name}
+            </Link>
+          </ul>
+        ))}
+      </nav>
+    )
+  } else if (pathname.includes('/dashboard/finanzas')) {
+    return (
+      <nav className="hidden md:flex items-center justify-end" aria-label="navegacion secundaria">
+        {finanzasRoutes.map(route => (
           <ul
             key={route.name}
             className="flex items-center justify-end"

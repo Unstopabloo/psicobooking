@@ -3,7 +3,8 @@ import { Container } from "../../_layout-components/container";
 import { Metadata } from "next";
 import { MainChart } from "@/components/charts/main-chart";
 import { getPayments } from "@/server/db/payments";
-import { PieChartComponent } from "@/components/charts/pie-chart";
+import { PieChartLoader, PieChartSkeleton } from "@/components/charts/pie-chart.loader";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Finanzas | Psicobooking",
@@ -33,7 +34,9 @@ export default async function FinanzasPage() {
       </header>
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <MainChart payments={payments} crecimientoIngresos={crecimientoIngresos} />
-        <PieChartComponent />
+        <Suspense fallback={<PieChartSkeleton />}>
+          <PieChartLoader />
+        </Suspense>
       </section>
     </Container>
   )

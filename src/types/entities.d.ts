@@ -315,3 +315,18 @@ export interface ActivityWithCommentsAndComments extends ActivityWithComments {
   comments: CommentActivity[];
   patient_avatar: string | null;
 }
+
+export interface PaymentState {
+  state: "scheduled" | "cancelled" | "completed";
+  count: number;
+}
+
+export interface Benefit {
+  id: number;
+  min_months: number;
+  benefit_description: string;
+  discount_percentage: number;
+  image_url: string;
+  title: string;
+  code: string;
+}

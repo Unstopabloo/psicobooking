@@ -1,10 +1,10 @@
-import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
+import { MercadoPagoConfig, Payment, Preference, PreApproval, PreApprovalPlan } from "mercadopago";
 import { MP_ACCESS_TOKEN, MP_APP_URL } from "@/lib/env";
 import { newAppointment } from "@/server/db/users";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { savePayment } from "@/server/db/payments";
+import { savePayment, saveSubscriptionPending } from "@/server/db/payments";
 
 export const mercadopago = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN! });
 
@@ -95,9 +95,94 @@ export const api = {
       }
     }
   },
+  user: {
+    async suscribe(email: string) {
+      console.log('suscribe')
+
+      try {
+        const { userId } = auth();
+        if (!userId) {
+          console.error('User not authenticated')
+          throw new Error('User not authenticated')
+        }
+
+        console.log("url", `${MP_APP_URL!}/dashboard`)
+        console.log("email", email)
+        const existingSubscriptions = await this.getSuscriptionByEmail(email);
+
+        if (existingSubscriptions && existingSubscriptions.length > 0) {
+          console.log('El usuario ya tiene una suscripción activa')
+          throw new Error('El usuario ya tiene una suscripción activa')
+        }
+
+        const suscription = await new PreApproval(mercadopago).create({
+          body: {
+            back_url: `${MP_APP_URL!}/dashboard`,
+            reason: "Suscripción a Psicobooking",
+            auto_recurring: {
+              frequency: 1,
+              frequency_type: "months",
+              transaction_amount: 2000,
+              currency_id: "CLP",
+            },
+            payer_email: email,
+            status: "pending"
+          }
+        });
+        console.log('suscription', suscription)
+
+        await saveSubscriptionPending(suscription.id!, userId)
+
+        return suscription.init_point!;
+      } catch (error) {
+        console.error('Error al suscribir:', error)
+        throw new Error('Error al suscribir')
+      }
+    },
+    async getSuscriptionByEmail(email: string) {
+      try {
+        const suscriptions = await new PreApproval(mercadopago).search({
+          options: {
+            status: 'authorized',
+            payer_email: email
+          }
+        });
+        return suscriptions.results;
+      } catch (error) {
+        console.error('Error al buscar suscripciones:', error)
+        return [];
+      }
+    },
+    async getSuscription(id: string) {
+      console.log('getSuscription')
+
+      const { userId } = auth();
+      if (!userId) {
+        console.error('User not authenticated')
+        throw new Error('User not authenticated')
+      }
+
+      const suscription = await new PreApproval(mercadopago).get({ id })
+      console.log("suscription", suscription)
+
+      return suscription
+    },
+    async cancelSuscription(id: string) {
+      console.log('cancelSuscription')
+
+      const cancelledSuscription = await new PreApproval(mercadopago).update({
+        id: id,
+        body: {
+          status: "cancelled"
+        }
+      })
+
+      return cancelledSuscription.init_point!
+    }
+  }
 };
 
-
+// 178c94e58f6c405698025d0686302939
 // {
 //   accounts_info: null,
 //   additional_info: {
@@ -252,4 +337,48 @@ export const api = {
 //       'content-encoding': [ 'gzip' ]
 //     }
 //   }
+// }
+
+
+
+// {
+//   "id": "2c938084726fca480172750000000000",
+//   "version": 0,
+//   "application_id": 1234567812345678,
+//   "collector_id": 100200300,
+//   "preapproval_plan_id": "2c938084726fca480172750000000000",
+//   "reason": "Yoga classes.",
+//   "external_reference": 23546246234,
+//   "back_url": "https://www.mercadopago.com.ar",
+//   "init_point": "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_id=2c938084726fca480172750000000000",
+//   "auto_recurring": {
+//     "frequency": 1,
+//     "frequency_type": "months",
+//     "start_date": "2020-06-02T13:07:14.260Z",
+//     "end_date": "2022-07-20T15:59:52.581Z",
+//     "currency_id": "ARS",
+//     "transaction_amount": 10,
+//     "free_trial": {
+//       "frequency": 1,
+//       "frequency_type": "months"
+//     }
+//   },
+//   "first_invoice_offset": 7,
+//   "payer_id": 123123123,
+//   "card_id": 123123123,
+//   "payment_method_id": "account_money",
+//   "next_payment_date": "2022-01-01T11:12:25.892-04:00",
+//   "date_created": "2022-01-01T11:12:25.892-04:00",
+//   "last_modified": "2022-01-01T11:12:25.892-04:00",
+//   "summarized": {
+//     "quotas": 6,
+//     "charged_quantity": 3,
+//     "charged_amount": 1000,
+//     "pending_charge_quantity": 1,
+//     "pending_charge_amount": 200,
+//     "last_charged_date": "2022-01-01T11:12:25.892-04:00",
+//     "last_charged_amount": 100,
+//     "semaphore": "green"
+//   },
+//   "status": "pending"
 // }
