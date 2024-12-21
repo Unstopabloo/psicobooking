@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
 import { api } from "./lib/mercado-pago";
+import { getSuscription } from "./server/db/payments";
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isPublicRoute = createRouteMatcher([
@@ -40,24 +41,22 @@ function isPublicSubscriptionPath(pathname: string): boolean {
   return publicSuscriptionPaths.has(pathname);
 }
 
-async function checkSubscription(req: NextRequest) {
-  const subscriptionId = req.cookies.get('mp_preapproval_id')?.value;
-  console.log("subscriptionId", subscriptionId)
-
-  if (!subscriptionId) {
+async function checkSubscription(userId: string) {
+  if (!userId) {
     return false;
   }
 
   try {
-    const suscription = await api.user.getSuscription(subscriptionId)
-    return suscription.status === 'authorized';
+    const suscripcion = await getSuscription(userId);
+    console.log('suscripcion checkSubscription middleware', suscripcion)
+    return suscripcion?.status === 'authorized';
   } catch (error) {
     console.error('Error verificando suscripción:', error);
     return false;
   }
 }
 
-export default clerkMiddleware((auth, req: NextRequest) => {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = auth()
 
   // Apply CSP headers
@@ -92,15 +91,14 @@ export default clerkMiddleware((auth, req: NextRequest) => {
     sessionClaims?.metadata?.role === 'psychologist' &&
     !isPublicSubscriptionPath(req.nextUrl.pathname)
   ) {
-    console.log("checking subscription")
-    return checkSubscription(req).then(isSubscribed => {
-      if (!isSubscribed) {
-        // Redirigir a la página de pricing o suscripción
-        const pricingUrl = new URL('/dashboard/suscripcion', req.url)
-        return NextResponse.redirect(pricingUrl)
-      }
-      return response
-    })
+    console.log("Verificando suscripción...");
+    const isSubscribed = await checkSubscription(userId);
+    if (!isSubscribed) {
+      // Redirigir a la página de suscripción
+      const pricingUrl = new URL('/dashboard/suscripcion', req.url);
+      return NextResponse.redirect(pricingUrl);
+    }
+    return response;
   }
 
   // If the user is logged in and the route is protected, let them view.

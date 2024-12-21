@@ -317,3 +317,36 @@ export async function saveSubscriptionAuthorized(subscription: string, suscripti
   }
 
 }
+
+export async function getSuscription(userId: string) {
+  if (!userId) {
+    console.error('No estás autorizado')
+    throw new Error('No estás autorizado')
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT suscription_id, status FROM psicobooking_suscription WHERE psychologist_id = :user_id`,
+      args: { user_id: userId }
+    })
+
+    console.log('rows suscripcion', rows)
+
+    if (rows[0]?.length! === 0 || !rows[0]) {
+      console.error('No se encontró la suscripción')
+      throw new Error('No se encontró la suscripción')
+    }
+
+    const suscription = {
+      id: rows[0].suscription_id as string,
+      status: rows[0].status as string
+    }
+
+    console.log('suscription getSuscription', suscription)
+
+    return suscription
+  } catch (error) {
+    console.error('Error al obtener la suscripción', error)
+    throw new Error('Error al obtener la suscripción')
+  }
+}

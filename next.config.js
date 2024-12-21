@@ -5,9 +5,9 @@
 
 /** @type {import("next").NextConfig} */
 const coreConfig = {
-  compiler: {
-    removeConsole: env.NODE_ENV === 'production' ? true : false,
-  },
+  // compiler: {
+  //   removeConsole: env.NODE_ENV === 'production' ? true : false,
+  // },
   typescript: {
     ignoreBuildErrors: true,
   },

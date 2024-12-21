@@ -27,16 +27,7 @@ export async function POST(request: Request) {
         return new Response('Subscription Error', { status: 400 })
       }
 
-      cookies().set('mp_preapproval_id', preapproval.id!, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 60 * 60 * 24 * 40,
-        sameSite: "strict"
-      })
-      console.log("preapproval", preapproval)
-
       await saveSubscriptionAuthorized(preapproval.id, preapproval.date_created!)
-
       return new Response('Subscription authorized', { status: 200 })
     }
 
