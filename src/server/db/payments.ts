@@ -326,7 +326,15 @@ export async function getSuscription(userId: string) {
 
   try {
     const { rows } = await turso.execute({
-      sql: `SELECT suscription_id, status FROM psicobooking_suscription WHERE psychologist_id = :user_id`,
+      sql: `
+        SELECT 
+          suscription_id, 
+          status,
+          psychologist_id
+        FROM psicobooking_suscription
+        LEFT JOIN psicobooking_user ON psicobooking_suscription.psychologist_id = psicobooking_user.id
+        WHERE psicobooking_user.clerk_id = :user_id
+      `,
       args: { user_id: userId }
     })
 
