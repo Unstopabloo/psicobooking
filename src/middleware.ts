@@ -48,6 +48,7 @@ async function checkSubscription(userId: string) {
 
   try {
     const suscripcion = await getSuscription(userId);
+    console.log('suscripcion checkSubscription middleware', suscripcion)
     return suscripcion?.status === 'authorized';
   } catch (error) {
     console.error('Error verificando suscripción:', error);

@@ -330,7 +330,7 @@ export async function getSuscription(userId: string) {
       args: { user_id: userId }
     })
 
-    console.log('rows', rows)
+    console.log('rows suscripcion', rows)
 
     if (rows[0]?.length! === 0 || !rows[0]) {
       console.error('No se encontró la suscripción')
@@ -342,7 +342,7 @@ export async function getSuscription(userId: string) {
       status: rows[0].status as string
     }
 
-    console.log('suscription', suscription)
+    console.log('suscription getSuscription', suscription)
 
     return suscription
   } catch (error) {
