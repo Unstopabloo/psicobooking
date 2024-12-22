@@ -4,7 +4,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { uploadVideo } from '@/server/actions/cloudinary';
-import { NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET } from '@/lib/env';
+import { NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET } from '@/lib/env.client';
 
 export function CloudinaryUploadButton() {
   const handleSuccess = async (result: any) => {

@@ -340,14 +340,9 @@ export async function getSuscription(userId: string) {
 
     console.log('rows suscripcion', rows)
 
-    if (rows[0]?.length! === 0 || !rows[0]) {
-      console.error('No se encontró la suscripción')
-      throw new Error('No se encontró la suscripción')
-    }
-
     const suscription = {
-      id: rows[0].suscription_id as string,
-      status: rows[0].status as string
+      id: rows[0]?.suscription_id as string,
+      status: rows[0]?.status as string
     }
 
     console.log('suscription getSuscription', suscription)

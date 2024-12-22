@@ -377,7 +377,7 @@ export async function getAvailability(): Promise<DailyAvailability[]> {
           d.day_name,
           NULLIF(GROUP_CONCAT(
             CASE 
-              WHEN app.id IS NOT NULL THEN
+              WHEN app.id IS NOT NULL AND u.clerk_id = ? THEN
                 json_object(
                   'id', app.id,
                   'clinic_id', app.clinic_id,
@@ -392,12 +392,12 @@ export async function getAvailability(): Promise<DailyAvailability[]> {
         FROM dias d
         LEFT JOIN psicobooking_availability app ON d.day_number = app.day_of_week
         LEFT JOIN psicobooking_user u ON u.id = app.psychologist_id
-        WHERE u.clerk_id = ? OR app.id IS NULL
         GROUP BY d.day_number, d.day_name
-        ORDER BY d.day_number
+        ORDER BY d.day_number;
       `,
       args: [userId]
     });
+    console.log('rows availability', rows)
 
     if (rows[0]?.length === 0 || !rows[0]) {
       console.log('No availability found')
@@ -405,6 +405,7 @@ export async function getAvailability(): Promise<DailyAvailability[]> {
     }
 
     const result = availabilityDTO(rows)
+    console.log('result availability', result)
     return result
   } catch (error) {
     console.error(error)
@@ -590,6 +591,10 @@ export async function getPatientDashboardData() {
 
 export async function newAppointment({ psychologistId, selectedDate, user_id }: NewAppointmentProps) {
   console.log('new appointment')
+
+  console.log('psychologistId', psychologistId)
+  console.log('selectedDate', selectedDate)
+  console.log('user_id', user_id)
 
   if (!user_id) {
     console.error('No estas autorizado')

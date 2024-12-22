@@ -33,7 +33,7 @@ const publicSuscriptionPaths = new Set([
   '/ingest/e/',
   '/monitoring',
   '/api/workflow/audio',
-  '/api/mercadopago/pagos'
+  '/api/mercadopago/pagos',
 ]);
 
 // Función helper para verificar si una ruta está en las rutas públicas

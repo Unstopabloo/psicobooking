@@ -4,7 +4,7 @@ import { useAuth, useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 import { useEffect } from 'react'
-import { NEXT_PUBLIC_POSTHOG_KEY } from "@/lib/env"
+import { NEXT_PUBLIC_POSTHOG_KEY } from "@/lib/env.client"
 
 if (typeof window !== 'undefined') {
   posthog.init(NEXT_PUBLIC_POSTHOG_KEY!, {
