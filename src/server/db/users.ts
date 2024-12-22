@@ -21,6 +21,7 @@ export async function userExists(id: string): Promise<Boolean> {
 }
 
 export async function createUser(data: UserBase) {
+  console.log('createUser', data)
   try {
     const { rows } = await turso.execute({
       sql: `INSERT INTO psicobooking_user (clerk_id, first_name, last_name, email, avatar, role) VALUES (:clerk_id, :first_name, :last_name, :email, :avatar, :role) RETURNING id`,
