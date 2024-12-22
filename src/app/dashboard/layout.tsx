@@ -34,6 +34,8 @@ import {
 import { Avatar } from "@/components/Avatar";
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { api } from "@/lib/mercado-pago";
+import { getSuscription } from "@/server/db/payments";
+import { NotificationFeed } from "@/components/notifications/notification-feed";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -43,6 +45,7 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
   const user = await currentUser()
 
   const isPsychologist = auth().sessionClaims?.metadata.role === 'psychologist'
+  const suscription = await getSuscription(user!.id)
 
   return (
     <ThemeProvider
@@ -74,14 +77,18 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard/perfil">Perfil</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
-                      Suscripción
-                      <Badge className="border-secondary bg-secondary/10 text-secondary" variant="outline">
-                        Free
-                      </Badge>
-                    </Link>
-                  </DropdownMenuItem>
+                  {
+                    isPsychologist && (
+                      <DropdownMenuItem asChild>
+                        <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
+                          Suscripción
+                          <Badge className={`border-secondary bg-secondary/10 text-secondary ${suscription?.status === 'authorized' ? 'border-primary bg-primary/10 text-primary' : 'border-green-500 bg-green-500/10 text-green-500'}`} variant="outline">
+                            {suscription?.status === 'authorized' ? 'Pro' : 'Free'}
+                          </Badge>
+                        </Link>
+                      </DropdownMenuItem>
+                    )
+                  }
                   <DropdownMenuSeparator />
                   <SignOutButton />
                 </DropdownMenuContent>
@@ -113,9 +120,10 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
                 </Tooltip>
               </TooltipProvider>
 
-              <Button aria-label="Ver notificaciones" variant="outline" className="flex items-center gap-2 text-foreground/80">
+              {/* <Button aria-label="Ver notificaciones" variant="outline" className="flex items-center gap-2 text-foreground/80">
                 <span className="hidden sm:block">Notificaciones</span> <Bell size={16} />
-              </Button>
+              </Button> */}
+              <NotificationFeed />
 
               <div className="sm:hidden">
                 <SignedIn>
@@ -129,7 +137,19 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard/perfil">Perfil</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem disabled>Suscripción</DropdownMenuItem>
+                      {
+                        isPsychologist && (
+                          <DropdownMenuItem asChild>
+                            <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
+                              Suscripción
+                              <Badge className={`border-secondary bg-secondary/10 text-secondary ${suscription?.status === 'authorized' ? 'border-primary bg-primary/10 text-primary' : 'border-green-500 bg-green-500/10 text-green-500'}`} variant="outline">
+                                {suscription?.status === 'authorized' ? 'Pro' : 'Free'}
+                              </Badge>
+                            </Link>
+                          </DropdownMenuItem>
+                        )
+                      }
+                      <DropdownMenuSeparator />
                       <SignOutButton />
                     </DropdownMenuContent>
                   </DropdownMenu>

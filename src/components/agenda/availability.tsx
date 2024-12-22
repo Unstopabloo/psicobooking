@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarRange, ChevronLeft, ChevronRight, Plus, Trash } from 'lucide-react'
+import { CalendarRange, Plus, Trash } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay, isToday, isBefore, startOfToday } from 'date-fns'
+import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay } from 'date-fns'
 import {
   Dialog,
   DialogContent,
@@ -12,20 +12,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { DAYS, DAYS_FULL, MONTHS } from '@/lib/consts'
+import { DAYS_FULL } from '@/lib/consts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { es } from 'date-fns/locale'
-import { DailyAvailability as AvailabilityType, RecurringAvailability, SpecificAvailability } from '@/types/entities'
+import { DailyAvailability as AvailabilityType } from '@/types/entities'
 import { Badge } from '../ui/badge'
 import { toast } from 'sonner'
 import { deleteAvailability, saveAvailability } from '@/server/actions/users'
-import { saveSpecificAvailability } from '@/server/actions/users'
 
-import { useRouter } from 'next/navigation'
 import { Input } from '../ui/input'
-import { Label } from '../ui/label'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { cn } from '@/lib/utils'
 import { Scheduler } from './scheduler'
 
 import {
@@ -36,8 +32,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 
 
@@ -51,6 +46,8 @@ const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
 })
 
 export function Availability({ availability }: { availability: AvailabilityType[] }) {
+  console.log('availability', availability)
+
   const [currentDate, setCurrentDate] = useState(new Date())
   const [recurringTimes, setRecurringTimes] = useState<{ [key: number]: { start: string, end: string } }>({})
   const [recurringDisabledDays, setRecurringDisabledDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])

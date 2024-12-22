@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { cloudinaryUtils } from "@/server/cloudinary"
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import { NEXT_PUBLIC_API_URL } from "@/lib/env.client";
 
 export async function createTranscription(formData: FormData) {
   const { userId } = auth();
