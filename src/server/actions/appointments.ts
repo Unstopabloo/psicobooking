@@ -1,10 +1,10 @@
 "use server"
 
-import { api } from "@/lib/mercado-pago";
+import { api } from "@/lib/payments/lemonsqueezy";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-export async function appointmentMercadoPago(
+export async function appointmentLemonSqueezy(
   psychologistId: number,
   psychologistName: string,
   psychologistImage: string,

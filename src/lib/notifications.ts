@@ -1,6 +1,6 @@
 import { Knock } from "@knocklabs/node";
 import { KNOCK_SECRET_KEY } from "./env";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 const knock = new Knock(KNOCK_SECRET_KEY!);
 

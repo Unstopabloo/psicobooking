@@ -2,8 +2,8 @@
 
 import { turso } from "@/server/db";
 import { auth } from "@clerk/nextjs/server";
-import { paymentsDTO, paymentsStateDTO } from "../dtos";
-import { PaymentState, Row } from "@/types/entities";
+import { paymentsDTO } from "../dtos";
+import { Row } from "@/types/entities";
 
 interface SavePaymentProps {
   psychologist_id: number

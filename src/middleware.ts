@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
-import { api } from "./lib/mercado-pago";
+import { api } from "./lib/payments/lemonsqueezy";
 import { getSuscription } from "./server/db/payments";
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
@@ -16,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   '/monitoring',
   '/api/workflow/audio',
   '/api/mercadopago/pagos',
+  '/api/lemon/checkout',
 ])
 
 // Definimos las rutas exactas que son públicas para usuarios con suscripción
@@ -34,6 +35,7 @@ const publicSuscriptionPaths = new Set([
   '/monitoring',
   '/api/workflow/audio',
   '/api/mercadopago/pagos',
+  '/api/lemon/checkout',
 ]);
 
 // Función helper para verificar si una ruta está en las rutas públicas

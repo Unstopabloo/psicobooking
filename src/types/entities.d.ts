@@ -1,6 +1,6 @@
 import { Roles } from "./global";
 
-type Row = Record<string, unknown>
+export type Row = Record<string, unknown>
 type Gender = "male" | "female" | "other";
 type SpecialityName = "Adicciones" | "Ansiedad y/o estrés" | "Atención" | "Autoestima" | "Crianza" | "Depresión" | "Cronicas" | "Impuslividad y/o Ira" | "Orientación vocacional" | "Problemas alimenticios" | "Problemas de sueño" | "Relaciones" | "Riesgo suicida" | "Sexualidad" | "Terapia de parejas" | "TOC" | "Traumas" | "Trabajo con niños"
 
@@ -330,3 +330,77 @@ export interface Benefit {
   title: string;
   code: string;
 }
+
+interface LemonWebhookResponse {
+  meta: {
+    test_mode: boolean;
+    event_name: string;
+    custom_data: {
+      price: string;
+      user_id: string;
+      session_type: string;
+      utc_timestamp: string;
+      psychologist_id: string;
+      psychologist_name: string;
+      psychologist_image: string;
+    };
+    webhook_id: string;
+  };
+  data: {
+    type: string;
+    id: string;
+    attributes: {
+      store_id: number;
+      customer_id: number;
+      identifier: string;
+      order_number: number;
+      user_name: string;
+      user_email: string;
+      currency: string;
+      currency_rate: string;
+      tax_name: string;
+      tax_rate: number;
+      tax_inclusive: boolean;
+      status: string;
+      status_formatted: string;
+      refunded: boolean;
+      refunded_at: null | string;
+      subtotal: number;
+      discount_total: number;
+      tax: number;
+      setup_fee: number;
+      total: number;
+      refunded_amount: number;
+      subtotal_usd: number;
+      discount_total_usd: number;
+      tax_usd: number;
+      setup_fee_usd: number;
+      total_usd: number;
+      refunded_amount_usd: number;
+      subtotal_formatted: string;
+      discount_total_formatted: string;
+      tax_formatted: string;
+      setup_fee_formatted: string;
+      total_formatted: string;
+      refunded_amount_formatted: string;
+      first_order_item: unknown; // Puedes definir este tipo si necesitas acceder a sus propiedades
+      urls: unknown; // Puedes definir este tipo si necesitas acceder a sus propiedades
+      created_at: string;
+      updated_at: string;
+      test_mode: boolean;
+    };
+    relationships: {
+      store: unknown;
+      customer: unknown;
+      'order-items': unknown;
+      subscriptions: unknown;
+      'license-keys': unknown;
+      'discount-redemptions': unknown;
+    };
+    links: {
+      self: string;
+    };
+  };
+}
+
+export type { LemonWebhookResponse };

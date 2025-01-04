@@ -6,6 +6,7 @@ import OpenAI from "openai"
 import { openai as openaiSDK } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
+import { sendOnTranscriptReadyInappNotification } from "@/lib/notifications";
 
 const openai = new OpenAI();
 
@@ -89,6 +90,10 @@ export const { POST } = serve(
       } catch (error) {
         console.error("Error al guardar la transcripcion: ", error)
       }
+    })
+
+    await context.run("notificar-transcript-ready", async () => {
+      await sendOnTranscriptReadyInappNotification(transcriptionTitle)
     })
   }
 )
