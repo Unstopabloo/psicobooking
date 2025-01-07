@@ -2,8 +2,9 @@ import { newAppointment } from "@/server/db/users";
 import { redirect } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NEXT_PUBLIC_BASE_URL } from "@/lib/env.client";
-import { LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_VARIANT_ID, LEMONSQUEEZY_API_KEY } from "@/lib/env";
-import { type NewCheckout, type Checkout, createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
+import { LEMONSQUEEZY_STORE_ID, LEMONSQUEEZY_VARIANT_ID, LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_SUBSCRIPTION_PRODUCT_ID } from "@/lib/env";
+import { type NewCheckout, type Subscription } from '@lemonsqueezy/lemonsqueezy.js';
+import { createCheckout, listSubscriptions, cancelSubscription } from '@lemonsqueezy/lemonsqueezy.js';
 import { lemonSqueezySetup } from "@lemonsqueezy/lemonsqueezy.js";
 import { format } from "date-fns";
 
@@ -77,96 +78,84 @@ export const api = {
       console.log('data', data)
       return data?.data.attributes.url;
     },
+  },
+  user: {
+    async suscribe() {
+      console.log('suscribe')
+
+      try {
+        const user = await currentUser();
+        if (!user) {
+          console.error('User not authenticated')
+          throw new Error('User not authenticated')
+        }
+        const email = user.emailAddresses[0]?.emailAddress!
+
+        const existingSubscriptions = await this.getSuscriptionByEmail(email);
+        if (existingSubscriptions && existingSubscriptions.data.length > 0 && existingSubscriptions.data[0]?.attributes.status !== 'cancelled') {
+          console.log('El usuario ya tiene una suscripción activa')
+          throw new Error('El usuario ya tiene una suscripción activa')
+        }
+
+        console.log("email", email)
+
+        const suscription: NewCheckout = {
+          productOptions: {
+            name: `Suscripción mensual a Psicobooking`,
+            description: `Suscripción mensual a Psicobooking`,
+            media: [],
+            redirectUrl: `${NEXT_PUBLIC_BASE_URL}/dashboard`,
+            receiptThankYouNote: 'Gracias por suscribirte a Psicobooking'
+          },
+          checkoutData: {
+            email,
+            name: `${user?.firstName} ${user?.lastName}`,
+            custom: {
+              user_id: user.id,
+            }
+          },
+        };
+        const { statusCode, error, data } = await createCheckout(LEMONSQUEEZY_STORE_ID!, LEMONSQUEEZY_SUBSCRIPTION_PRODUCT_ID!, suscription);
+        if (error) {
+          console.error('Error creating checkout', error)
+          throw new Error('Error creating checkout')
+        }
+
+        console.log('statusCode', statusCode)
+        console.log('data', data)
+        return data?.data.attributes.url;
+      } catch (error) {
+        throw new Error('Error al suscribir')
+      }
+    },
+    async getSuscriptionByEmail(email: string) {
+      const { data, error } = await listSubscriptions({
+        filter: {
+          userEmail: email
+        }
+      });
+
+      if (error) {
+        console.error('Error al obtener las suscripciones:', error)
+        throw new Error('Error al obtener las suscripciones')
+      }
+
+      console.log('existing subscriptions', data.data[0]?.attributes)
+      return data;
+    },
+    async cancelSuscription(id: string) {
+      const { data, error } = await cancelSubscription(id);
+      if (error) {
+        console.error('Error al cancelar la suscripción:', error)
+        throw new Error('Error al cancelar la suscripción')
+      }
+
+
+      return data;
+    }
   }
 }
-//     async addPayment(id: string): Promise<void> {
-//       console.log('addPayment')
 
-//       const payment = await new Payment(mercadopago).get({ id })
-
-//       if (payment.status === 'approved') {
-//         console.log('payment approved')
-//         console.log('payment', payment)
-
-
-//         const appointment = await newAppointment({
-//           psychologistId: payment.metadata.psychologist_id,
-//           selectedDate: payment.metadata.utc_timestamp,
-//           user_id: payment.metadata.user_id
-//         })
-
-//         await savePayment({
-//           psychologist_id: payment.metadata.psychologist_id,
-//           appointment_id: appointment.data,
-//           payment_id: payment.id!.toString(),
-//           session_type: payment.metadata.session_type,
-//           price: payment.metadata.price,
-//           payment_date: payment.date_approved!,
-//           user_id: payment.metadata.user_id
-//         }),
-
-//           revalidatePath('/dashboard')
-//       }
-//     }
-//   },
-//   user: {
-//     async suscribe(email: string) {
-//       console.log('suscribe')
-
-//       try {
-//         const { userId } = auth();
-//         if (!userId) {
-//           console.error('User not authenticated')
-//           throw new Error('User not authenticated')
-//         }
-
-//         console.log("url", `${MP_APP_URL!}/dashboard`)
-//         console.log("email", email)
-//         const existingSubscriptions = await this.getSuscriptionByEmail(email);
-
-//         if (existingSubscriptions && existingSubscriptions.length > 0) {
-//           console.log('El usuario ya tiene una suscripción activa')
-//           throw new Error('El usuario ya tiene una suscripción activa')
-//         }
-
-//         const suscription = await new PreApproval(mercadopago).create({
-//           body: {
-//             back_url: `${MP_APP_URL!}/dashboard`,
-//             reason: "Suscripción a Psicobooking",
-//             auto_recurring: {
-//               frequency: 1,
-//               frequency_type: "months",
-//               transaction_amount: 2000,
-//               currency_id: "CLP",
-//             },
-//             payer_email: email,
-//             status: "pending"
-//           }
-//         });
-//         console.log('suscription', suscription)
-
-//         await saveSubscriptionPending(suscription.id!, userId)
-
-//         return suscription.init_point!;
-//       } catch (error) {
-//         console.error('Error al suscribir:', error)
-//         throw new Error('Error al suscribir')
-//       }
-//     },
-//     async getSuscriptionByEmail(email: string) {
-//       try {
-//         const suscriptions = await new PreApproval(mercadopago).search({
-//           options: {
-//             status: 'authorized',
-//             payer_email: email
-//           }
-//         });
-//         return suscriptions.results;
-//       } catch (error) {
-//         console.error('Error al buscar suscripciones:', error)
-//         return [];
-//       }
-//     },
 //     async getSuscription(id: string) {
 //       console.log('getSuscription')
 

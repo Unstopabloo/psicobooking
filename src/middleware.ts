@@ -20,43 +20,43 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 // Definimos las rutas exactas que son públicas para usuarios con suscripción
-const publicSuscriptionPaths = new Set([
-  '/dashboard',
-  '/dashboard/profile',
-  '/dashboard/suscripcion',
-  '/',
-  '/sign-up/:path*',
-  '/sign-in/:path*',
-  '/sign-in',
-  '/sign-up',
-  '/api/wh/sync',
-  '/privacy-policy',
-  '/ingest/e/',
-  '/monitoring',
-  '/api/workflow/audio',
-  '/api/mercadopago/pagos',
-  '/api/lemon/checkout',
-]);
+// const publicSuscriptionPaths = new Set([
+//   '/dashboard',
+//   '/dashboard/profile',
+//   '/dashboard/suscripcion',
+//   '/',
+//   '/sign-up/:path*',
+//   '/sign-in/:path*',
+//   '/sign-in',
+//   '/sign-up',
+//   '/api/wh/sync',
+//   '/privacy-policy',
+//   '/ingest/e/',
+//   '/monitoring',
+//   '/api/workflow/audio',
+//   '/api/mercadopago/pagos',
+//   '/api/lemon/checkout',
+// ]);
 
 // Función helper para verificar si una ruta está en las rutas públicas
-function isPublicSubscriptionPath(pathname: string): boolean {
-  return publicSuscriptionPaths.has(pathname);
-}
+// function isPublicSubscriptionPath(pathname: string): boolean {
+//   return publicSuscriptionPaths.has(pathname);
+// }
 
-async function checkSubscription(userId: string) {
-  if (!userId) {
-    return false;
-  }
+// async function checkSubscription(userId: string) {
+//   if (!userId) {
+//     return false;
+//   }
 
-  try {
-    const suscripcion = await getSuscription(userId);
-    console.log('suscripcion checkSubscription middleware', suscripcion)
-    return suscripcion?.status === 'authorized';
-  } catch (error) {
-    console.error('Error verificando suscripción:', error);
-    return false;
-  }
-}
+//   try {
+//     const suscripcion = await getSuscription(userId);
+//     console.log('suscripcion checkSubscription middleware', suscripcion)
+//     return suscripcion?.status === 'authorized';
+//   } catch (error) {
+//     console.error('Error verificando suscripción:', error);
+//     return false;
+//   }
+// }
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims, redirectToSignIn } = auth()
@@ -87,21 +87,21 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // Verificación de suscripción para psicólogos
-  if (
-    userId &&
-    !isPublicRoute(req) &&
-    sessionClaims?.metadata?.role === 'psychologist' &&
-    !isPublicSubscriptionPath(req.nextUrl.pathname)
-  ) {
-    console.log("Verificando suscripción...");
-    const isSubscribed = await checkSubscription(userId);
-    if (!isSubscribed) {
-      // Redirigir a la página de suscripción
-      const pricingUrl = new URL('/dashboard/suscripcion', req.url);
-      return NextResponse.redirect(pricingUrl);
-    }
-    return response;
-  }
+  // if (
+  //   userId &&
+  //   !isPublicRoute(req) &&
+  //   sessionClaims?.metadata?.role === 'psychologist' &&
+  //   !isPublicSubscriptionPath(req.nextUrl.pathname)
+  // ) {
+  //   console.log("Verificando suscripción...");
+  //   const isSubscribed = await checkSubscription(userId);
+  //   if (!isSubscribed) {
+  //     // Redirigir a la página de suscripción
+  //     const pricingUrl = new URL('/dashboard/suscripcion', req.url);
+  //     return NextResponse.redirect(pricingUrl);
+  //   }
+  //   return response;
+  // }
 
   // If the user is logged in and the route is protected, let them view.
   if (userId && !isPublicRoute(req)) return response

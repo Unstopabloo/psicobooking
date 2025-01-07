@@ -700,16 +700,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
-          <header className='flex flex-col items-center text-center gap-3'>
-            <h2 className="font-normal text-balance text-2xl">Reseñas</h2>
-            <p className='text-foreground/80'>¿Qué dicen de nosotros?</p>
-          </header>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-14'>
-            <TestimonialSlider />
-          </div>
-        </section>
-
         <section>
           <div className="relative container mx-auto px-4 lg:px-6 xl:px-28 2xl:px-52 my-36">
             <div className="absolute inset-0 -z-30 opacity-55">

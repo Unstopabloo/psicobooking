@@ -388,6 +388,7 @@ interface LemonWebhookResponse {
       created_at: string;
       updated_at: string;
       test_mode: boolean;
+      renews_at: string;
     };
     relationships: {
       store: unknown;

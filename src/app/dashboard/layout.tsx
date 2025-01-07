@@ -2,12 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 
-import { PsychologistNav, PatientNav } from "@/components/layout/Navs";
-import { SignedIn } from "@clerk/nextjs";
-import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeProvider } from "@/components/theme-switcher/theme-provider";
 import { ThemeSwitcher } from "@/components/theme-switcher/Switcher";
-import { Button } from "@/components/ui/button";
 import { BreadCrumb } from "./_layout-components/breadcrumb";
 import { SubNav } from "./_layout-components/sub-nav";
 import { MobileNav } from "./_layout-components/mobile-nav";
@@ -19,33 +15,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Bell } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { ChatAsistant } from "@/components/ai-asistant/ui-chat-asistant";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar } from "@/components/Avatar";
-import { currentUser, auth } from "@clerk/nextjs/server";
-import { api } from "@/lib/mercado-pago";
-import { getSuscription } from "@/server/db/payments";
+import { auth } from "@clerk/nextjs/server";
 import { NotificationFeed } from "@/components/notifications/notification-feed";
+import { DynamicNav, UserProfile, UserProfileMobile } from "./_layout-components/user-profile";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function DashboardLayout({ patient, psychologist }: { patient: React.ReactNode, psychologist: React.ReactNode }) {
   const nonce = headers().get('x-nonce') || ''
-  const user = await currentUser()
-
   const isPsychologist = auth().sessionClaims?.metadata.role === 'psychologist'
-  const suscription = await getSuscription(user!.id)
 
   return (
     <ThemeProvider
@@ -62,38 +43,12 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
               <Image src="/isotipo.webp" alt="logo psicobooking" width={60} height={60} />
             </Link>
 
-            {isPsychologist ? <PsychologistNav /> : <PatientNav />}
+            <DynamicNav />
           </div>
 
           <div className="flex flex-col items-center gap-8 p-2">
             <ThemeSwitcher />
-            <SignedIn>
-              <DropdownMenu>
-                <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
-                  <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent sideOffset={10} align="start">
-                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/perfil">Perfil</Link>
-                  </DropdownMenuItem>
-                  {
-                    isPsychologist && (
-                      <DropdownMenuItem asChild>
-                        <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
-                          Suscripción
-                          <Badge className={`border-secondary bg-secondary/10 text-secondary ${suscription?.status === 'authorized' ? 'border-primary bg-primary/10 text-primary' : 'border-green-500 bg-green-500/10 text-green-500'}`} variant="outline">
-                            {suscription?.status === 'authorized' ? 'Pro' : 'Free'}
-                          </Badge>
-                        </Link>
-                      </DropdownMenuItem>
-                    )
-                  }
-                  <DropdownMenuSeparator />
-                  <SignOutButton />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SignedIn>
+            <UserProfileMobile />
           </div>
         </aside>
         <div className="flex flex-col flex-1 overflow-hidden h-screen">
@@ -124,37 +79,7 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
                 <span className="hidden sm:block">Notificaciones</span> <Bell size={16} />
               </Button> */}
               <NotificationFeed />
-
-              <div className="sm:hidden">
-                <SignedIn>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger aria-label="Menú de usuario" className="rounded-full">
-                      <Avatar name={user!.firstName} avatarUrl={user!.imageUrl} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent sideOffset={10} align="start">
-                      <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard/perfil">Perfil</Link>
-                      </DropdownMenuItem>
-                      {
-                        isPsychologist && (
-                          <DropdownMenuItem asChild>
-                            <Link className="flex items-center gap-2" href="/dashboard/suscripcion">
-                              Suscripción
-                              <Badge className={`border-secondary bg-secondary/10 text-secondary ${suscription?.status === 'authorized' ? 'border-primary bg-primary/10 text-primary' : 'border-green-500 bg-green-500/10 text-green-500'}`} variant="outline">
-                                {suscription?.status === 'authorized' ? 'Pro' : 'Free'}
-                              </Badge>
-                            </Link>
-                          </DropdownMenuItem>
-                        )
-                      }
-                      <DropdownMenuSeparator />
-                      <SignOutButton />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SignedIn>
-              </div>
+              <UserProfile />
             </div>
           </header>
 
