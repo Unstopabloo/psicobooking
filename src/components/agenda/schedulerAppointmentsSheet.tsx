@@ -1,29 +1,33 @@
 import { format } from "date-fns";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { es } from "date-fns/locale";
-import { useUpcomingAppointments } from "@/server/queries/queries";
+import { useUpcomingAppointments, useUpcomingAppointmentsPatient } from "@/server/queries/queries";
 import { toast } from "sonner";
-import { AppointmentCard, AppointmentCardWithPatient } from "@/types/entities";
+import { AppointmentCardWithPatient } from "@/types/entities";
 import { Avatar } from "../Avatar";
 import { calculateDuration } from "@/lib/calculate-duration";
 import { Button } from "../ui/button";
-import { BellElectricIcon, BellPlus, MessageCircleIcon } from "lucide-react";
+import { BellPlus, MessageCircleIcon } from "lucide-react";
 import { getCountryPhoneCode } from "@/lib/get-country-code";
+import { cn } from "@/lib/utils";
 
 interface SchedulerAppointmentsSheetProps {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
   selectedDate: Date | null
   currentDate: Date
+  isPatient?: boolean
 }
 
 export function SchedulerAppointmentsSheet({
   isOpen,
   setIsOpen,
   selectedDate,
-  currentDate
+  currentDate,
+  isPatient = false
 }: SchedulerAppointmentsSheetProps) {
-  const { data: UPCOMING_APPOINTMENTS, isLoading, error } = useUpcomingAppointments(format(selectedDate!, 'yyyy-MM-dd'))
+  const { data: UPCOMING_APPOINTMENTS, isLoading, error } = isPatient ? useUpcomingAppointmentsPatient(format(selectedDate!, 'yyyy-MM-dd')) : useUpcomingAppointments(format(selectedDate!, 'yyyy-MM-dd'))
+  console.log('UPCOMING_APPOINTMENTS', UPCOMING_APPOINTMENTS?.appointments)
 
   if (error) {
     toast.error("Hubo un error al cargar los eventos")
@@ -41,7 +45,7 @@ export function SchedulerAppointmentsSheet({
           {
             isLoading ? (
               <p>Cargando...</p>
-            ) : selectedDate && (
+            ) : selectedDate && UPCOMING_APPOINTMENTS?.appointments && UPCOMING_APPOINTMENTS?.appointments?.length > 0 ? (
               <>
                 <h3 className="font-semibold text-foreground/90 mb-8">Citas:</h3>
                 <div className="flex flex-col gap-8">
@@ -52,6 +56,8 @@ export function SchedulerAppointmentsSheet({
                   }
                 </div>
               </>
+            ) : (
+              <p>No hay citas para este día</p>
             )
           }
         </div>
@@ -61,9 +67,11 @@ export function SchedulerAppointmentsSheet({
 }
 
 function Appointment({
-  appointment
+  appointment,
+  isPatient = false
 }: {
   appointment: AppointmentCardWithPatient
+  isPatient?: boolean
 }) {
   return (
     <article className="flex flex-col items-start justify-between gap-6 p-3 shadow-sm rounded-lg hover:shadow-md hover:bg-card/10 transition-shadow duration-400">
@@ -90,13 +98,17 @@ function Appointment({
         </p>
       </div>
 
-      <footer className="grid grid-cols-2 gap-4 w-full">
+      <footer className={cn("grid grid-cols-2 gap-4 w-full", !isPatient && 'grid-cols-1')}>
         <Button variant="outline" size="sm" className="gap-2 text-foreground/85 hover:text-foreground hover:border-primary/80 transition-colors duration-400">
           Chat con {appointment.name?.split(' ')[0]} <MessageCircleIcon className="size-4" />
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 text-foreground/85 hover:text-foreground hover:border-primary/80 transition-colors duration-400">
-          Recordar cita <BellPlus className="size-4" />
-        </Button>
+        {
+          isPatient && (
+            <Button variant="outline" size="sm" className="gap-2 text-foreground/85 hover:text-foreground hover:border-primary/80 transition-colors duration-400">
+              Recordar cita <BellPlus className="size-4" />
+            </Button>
+          )
+        }
       </footer>
     </article>
   )

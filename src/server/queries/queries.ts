@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query";
-import { getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentsData, getUpcommingAppointments } from "../actions/users";
+import { getClinicalHistory, getContactInfo, getPatientTicket, getUpcomingAppointmentsData, getUpcomingAppointmentsDataPatient, getUpcommingAppointments, getUpcommingAppointmentsPatient } from "../actions/users";
 import { getPsychologistById, getPsychologists } from "../actions/psychologist";
 
 export function usePatient(patientId: number) {
@@ -43,6 +43,15 @@ export function useUpcomingAppointmentData(date_from: string) {
   });
 }
 
+export function useUpcomingAppointmentsDataPatient(date_from: string) {
+  return useQuery({
+    queryKey: ['upcoming-appointments-patient', date_from],
+    queryFn: () => getUpcomingAppointmentsDataPatient(date_from),
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useUpcomingAppointments(date_from: string) {
   return useQuery({
     queryKey: ['upcoming-appointments', date_from],
@@ -52,13 +61,14 @@ export function useUpcomingAppointments(date_from: string) {
   });
 }
 
-// export function useAvailabilityData(date_from: string) {
-//   return useQuery({
-//     queryKey: ['availability-data', date_from],
-//     queryFn: () => getAvailabilityData(date_from),
-//     refetchOnMount: false,
-//   });
-// }
+export function useUpcomingAppointmentsPatient(date_from: string) {
+  return useQuery({
+    queryKey: ['upcoming-appointments-patient', date_from],
+    queryFn: () => getUpcommingAppointmentsPatient(date_from),
+    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 export function usePsychologists(search: string) {
   return useQuery({

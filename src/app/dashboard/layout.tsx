@@ -67,7 +67,7 @@ export default async function DashboardLayout({ patient, psychologist }: { patie
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Scheduler mode="base" text="Agenda rápida" />
+                    <Scheduler isPatient={!isPsychologist} mode="base" text="Agenda rápida" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Mi agenda rápida</p>

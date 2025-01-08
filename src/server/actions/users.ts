@@ -417,6 +417,7 @@ export async function getClinicalHistory(id: number): Promise<{ clinicalHistory:
 }
 
 export async function getAppointmentsByDate(date_from?: string, date_to?: string): Promise<string> {
+  console.log('get appointments by date')
   const { userId } = auth()
 
   if (!userId) {
@@ -443,6 +444,62 @@ export async function getAppointmentsByDate(date_from?: string, date_to?: string
         psicobooking_user psy ON psy.id = app.psychologist_id
       WHERE
         psy.clerk_id = :user_id
+    `
+
+    const args: Record<string, string> = { user_id: userId }
+
+    if (date_from && date_to) {
+      sql += ` AND date(substr(app.date_from, 1, 10)) >= date(:date_from) AND date(substr(app.date_to, 1, 10)) <= date(:date_to)`
+      args.date_from = date_from
+      args.date_to = date_to
+    }
+
+    sql += ` ORDER BY app.date_from`
+
+    const { rows } = await turso.execute({ sql, args })
+
+    if (rows.length === 0) {
+      const response = JSON.stringify({ appointments: undefined, error: 'No hay citas para esta fecha' })
+      return response
+    }
+
+    revalidatePath('/agenda')
+    const response = JSON.stringify({ appointments: appointmentCardDTO(rows) })
+    return response
+  } catch (error) {
+    console.error(error)
+    const response = JSON.stringify({ appointments: [], error: error instanceof Error ? error : new Error('Error inesperado') })
+    return response
+  }
+}
+
+export async function getAppointmentsByDatePatient(date_from?: string, date_to?: string): Promise<string> {
+  console.log('get appointments by date patient')
+  const { userId } = auth()
+  if (!userId) {
+    console.log('No user found')
+    const response = JSON.stringify({ appointments: undefined, error: 'No estas autorizado' })
+    return response
+  }
+
+  try {
+    let sql = `
+      SELECT
+        app.id,
+        app.psychologist_id,
+        app.patient_id,
+        psy.avatar,
+        psy.first_name || ' ' || psy.last_name AS name,
+        app.date_from,
+        app.date_to
+      FROM
+        psicobooking_appointment app
+      LEFT JOIN 
+        psicobooking_user pa ON pa.id = app.patient_id
+      LEFT JOIN 
+        psicobooking_user psy ON psy.id = app.psychologist_id
+      WHERE
+        pa.clerk_id = :user_id
     `
 
     const args: Record<string, string> = { user_id: userId }
@@ -526,6 +583,60 @@ export async function getUpcommingAppointments(date_from: string): Promise<{ app
   }
 }
 
+export async function getUpcommingAppointmentsPatient(date_from: string): Promise<{ appointments: AppointmentCardWithPatient[] | undefined, error?: Error }> {
+  console.log('get upcomming appointments patient')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { appointments: undefined, error: new Error('No estas autorizado') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT
+          app.id,
+          app.psychologist_id,
+          app.patient_id,
+          app.state,
+          app.session_type,
+          psy.avatar,
+          psy.first_name || ' ' || psy.last_name AS name,
+          psy.email,
+          psy.phone,
+          psy.nationality,
+          app.date_from,
+          app.date_to
+        FROM
+          psicobooking_appointment app
+        LEFT JOIN 
+          psicobooking_user pa ON pa.id = app.patient_id
+        LEFT JOIN 
+          psicobooking_user psy ON psy.id = app.psychologist_id
+        WHERE
+          pa.clerk_id = :user_id
+        AND
+          DATE(app.date_from) = DATE(:date_from)
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { appointments: undefined }
+    }
+
+    const appointments = appointmentCardWithPatientDTO(rows)
+    return { appointments }
+  } catch (error) {
+    console.error(error)
+    return { appointments: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
 export async function getUpcomingAppointmentsData(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
   console.log('get upcoming appointment data')
   const { userId } = auth()
@@ -554,6 +665,67 @@ export async function getUpcomingAppointmentsData(date_from: string): Promise<{ 
         psicobooking_appointment app
       LEFT JOIN
         psicobooking_user user ON user.id = app.psychologist_id
+      CROSS JOIN
+        date_parts
+      WHERE
+        user.clerk_id = :user_id
+      AND
+        strftime('%Y', app.date_from) = CAST(date_parts.year AS TEXT)
+      AND
+        strftime('%m', app.date_from) = CASE 
+          WHEN date_parts.month < 10 THEN '0' || date_parts.month 
+          ELSE CAST(date_parts.month AS TEXT) 
+        END
+      GROUP BY
+        DATE(app.date_from)
+      ORDER BY
+        DATE(app.date_from);
+      `,
+      args: {
+        user_id: userId,
+        date_from: date_from
+      }
+    })
+
+    if (rows.length === 0 || !rows) {
+      return { data: undefined }
+    }
+
+    return { data: upcomingAppointmentDTO(rows) }
+  } catch (error) {
+    console.error(error)
+    return { data: undefined, error: error instanceof Error ? error : new Error('Error inesperado') }
+  }
+}
+
+export async function getUpcomingAppointmentsDataPatient(date_from: string): Promise<{ data: { date: string, quant: number }[] | undefined, error?: Error }> {
+  console.log('get upcoming appointment data patient')
+  const { userId } = auth()
+
+  if (!userId) {
+    console.log('No estas autorizado')
+    return { data: undefined, error: new Error('No estas autorizado') }
+  }
+
+  if (!date_from) {
+    return { data: undefined, error: new Error('No se proporcionó la fecha de inicio') }
+  }
+
+  try {
+    const { rows } = await turso.execute({
+      sql: `
+      WITH date_parts AS (
+        SELECT 
+          CAST(strftime('%Y', DATE(:date_from)) AS INTEGER) as year,
+          CAST(strftime('%m', DATE(:date_from)) AS INTEGER) as month
+      )
+      SELECT
+        DATE(app.date_from) AS date,
+        COUNT(*) AS quant
+      FROM
+        psicobooking_appointment app
+      LEFT JOIN
+        psicobooking_user user ON user.id = app.patient_id
       CROSS JOIN
         date_parts
       WHERE

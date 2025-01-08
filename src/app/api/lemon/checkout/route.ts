@@ -6,8 +6,7 @@ import { newAppointment } from "@/server/db/users";
 import { cancelSuscription, savePayment, saveSubscription } from "@/server/db/payments";
 
 export async function POST(request: Request) {
-  console.log('env', LEMONSQUEEZY_WEBHOOK_SECRET)
-  console.log('request del lemonrequest del lemonrequest del lemonrequest del lemon')
+  console.log('LEMONSQUEEZY')
 
   if (!LEMONSQUEEZY_WEBHOOK_SECRET) {
     return new Response("Lemon Squeezy Webhook Secret not set in .env", {

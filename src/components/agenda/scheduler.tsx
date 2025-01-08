@@ -12,17 +12,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
-import { useUpcomingAppointmentData } from '@/server/queries/queries'
+import { useUpcomingAppointmentData, useUpcomingAppointmentsDataPatient } from '@/server/queries/queries'
 import { DAYS, MONTHS } from '@/lib/consts'
 import { SchedulerAppointmentsSheet } from './schedulerAppointmentsSheet'
 
 interface SchedulerProps {
-  text: 'Agenda rápida' | 'Ver disponibilidad'
-  mode: 'base' | 'availability'
-  onAvailabilityDateClick?: (date: Date) => void
+  text: 'Agenda rápida' | 'Ver disponibilidad',
+  mode: 'base' | 'availability',
+  onAvailabilityDateClick?: (date: Date) => void,
+  isPatient?: boolean
 }
 
-export function Scheduler({ text = 'Agenda rápida', mode = 'base', onAvailabilityDateClick }: SchedulerProps) {
+export function Scheduler({ text = 'Agenda rápida', mode = 'base', onAvailabilityDateClick, isPatient = false }: SchedulerProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -30,7 +31,9 @@ export function Scheduler({ text = 'Agenda rápida', mode = 'base', onAvailabili
   const daysInMonth = getDaysInMonth(currentDate)
   const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
 
-  const { data: APPOINTMENTS } = useUpcomingAppointmentData(format(currentDate, 'yyyy-MM-dd'))
+  console.log('isPatient', isPatient)
+  const getAppointments = isPatient ? useUpcomingAppointmentsDataPatient : useUpcomingAppointmentData
+  const { data: APPOINTMENTS } = getAppointments(format(currentDate, 'yyyy-MM-dd'))
 
   const prevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1))
@@ -143,6 +146,7 @@ export function Scheduler({ text = 'Agenda rápida', mode = 'base', onAvailabili
           setIsOpen={setIsOpen}
           selectedDate={selectedDate}
           currentDate={currentDate}
+          isPatient={isPatient}
         />
       </DialogContent>
     </Dialog>

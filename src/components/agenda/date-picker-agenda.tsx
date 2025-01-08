@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import { Calendar03Icon as CalendarIcon } from "@/components/icons"
-import { addDays, format, formatISO } from "date-fns"
-import { DateRange } from "react-day-picker"
+import { addDays, format } from "date-fns"
 import { es } from "date-fns/locale"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 
@@ -20,13 +19,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
-  FormItem,
-  FormMessage,
+  FormItem
 } from "@/components/ui/form"
 import { Spinner } from "../Loader"
-import { getAppointmentsByDate } from "@/server/actions/users"
+import { getAppointmentsByDatePatient } from "@/server/actions/users"
 import { AppointmentCard } from "@/types/entities"
 import { toast } from "sonner"
 
@@ -61,7 +58,7 @@ export function DatePicker({
     const fromDate = format(data.dateRange.from, "yyyy-MM-dd")
     const toDate = format(data.dateRange.to, "yyyy-MM-dd")
 
-    const res = await getAppointmentsByDate(fromDate, toDate)
+    const res = await getAppointmentsByDatePatient(fromDate, toDate)
 
     const response = JSON.parse(res)
     const { appointments, error } = response

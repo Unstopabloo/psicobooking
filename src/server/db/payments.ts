@@ -251,7 +251,7 @@ export async function saveSubscription({ psychologistId, subscription, suscripti
     // Verificar si la suscripción ya existe
     const { rows: existingSuscription } = await turso.execute({
       sql: `
-        SELECT id FROM psicobooking_suscription WHERE psychologist_id = :psychologist_id
+        SELECT id FROM psicobooking_suscription WHERE psychologist_id = :psychologist_id AND status <> 'cancelled'
       `,
       args: { psychologist_id: psychologist_id }
     })
@@ -341,7 +341,7 @@ export async function cancelSuscription(suscriptionId: string, userId: string) {
 
     const { rowsAffected } = await turso.execute({
       sql: `
-        UPDATE psicobooking_suscription SET status = 'cancelled' WHERE suscription_id = :suscription_id AND psychologist_id = :psychologist_id
+        DELETE FROM psicobooking_suscription WHERE suscription_id = :suscription_id AND psychologist_id = :psychologist_id
       `,
       args: { suscription_id: suscriptionId, psychologist_id: psychologist_id }
     })
