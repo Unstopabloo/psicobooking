@@ -15,13 +15,11 @@ import { cn } from "@/lib/utils";
 import { es } from "date-fns/locale";
 import { AvailabilityInterval } from "@/types/entities";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { createCheckoutSession } from "@/server/actions/stripe";
 import { Skeleton } from "../ui/skeleton";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { countryPhoneCodes } from "@/lib/consts";
-import { useRouter } from 'next/navigation'
-import { appointmentMercadoPago } from "@/server/actions/appointments";
+import { appointmentLemonSqueezy } from "@/server/actions/appointments";
 
 export function PsychologistAppointmentSheet({
   selectedPsychologist,
@@ -135,6 +133,7 @@ export function PsychologistAppointmentSheet({
             />
             <PsychologistAppointmentSchedulerDay
               appointments={data?.appointments || []}
+              hoursAvailable={data?.availability || []}
               psychologistId={selectedPsychologist!}
               psychologistName={data?.first_name + ' ' + data?.last_name}
               psychologistImage={data?.avatar || ''}
@@ -241,6 +240,7 @@ export function PsychologistAppointmentSheet({
               />
               <PsychologistAppointmentSchedulerDay
                 appointments={data?.appointments || []}
+                hoursAvailable={data?.availability || []}
                 psychologistId={selectedPsychologist!}
                 psychologistName={data?.first_name + ' ' + data?.last_name}
                 psychologistImage={data?.avatar || ''}
@@ -264,6 +264,7 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
   psychologistImage,
   date,
   price,
+  hoursAvailable,
   setIsSheetOpen,
   setSelectedPsychologist
 }: {
@@ -273,21 +274,50 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
   psychologistImage: string,
   date: Date,
   price: number | undefined,
+  hoursAvailable: Omit<AvailabilityInterval, "id" | "clinic_id" | "psychologist_id">[],
   setIsSheetOpen: (open: boolean) => void,
   setSelectedPsychologist: (psychologist: number | null) => void
 }) {
   if (!date) return null;
-  const router = useRouter()
 
-  // Generamos slots desde 8:00 UTC hasta 20:30 UTC
-  const UTC_TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 8; // Comenzamos desde 8:00 UTC
-    const minutes = i % 2 === 0 ? '00' : '30';
-    return `${hour.toString().padStart(2, '0')}:${minutes}`;
-  }).filter(time => {
-    const [hour, minutes] = time.split(':').map(Number);
-    // Filtramos para terminar en 20:30
-    return hour! < 21 && !(hour! === 20 && minutes! > 30);
+  const dayOfWeek = date.getDay() === 0 ? 7 : date.getDay();
+  console.log('Día de la semana:', dayOfWeek); // Debug
+  console.log('Disponibilidad completa:', hoursAvailable); // Debug
+  // Encontrar la disponibilidad para el día seleccionado
+  const availabilityForDay = hoursAvailable.filter(
+    interval => interval.day_of_week === dayOfWeek
+  );
+  console.log('Disponibilidad para este día:', availabilityForDay);
+
+  // Generar slots basados en la disponibilidad del psicólogo
+  const UTC_TIME_SLOTS = availabilityForDay.flatMap(interval => {
+    const slots: string[] = [];
+    const [startHour, startMinute] = interval.hour_from.split(':').map(Number);
+    const [endHour, endMinute] = interval.hour_to.split(':').map(Number);
+
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+
+    while (
+      currentHour !== undefined && endHour !== undefined && currentMinute !== undefined && endMinute !== undefined && (
+        currentHour < endHour ||
+        (currentHour === endHour && currentMinute < endMinute)
+      )
+    ) {
+      slots.push(
+        `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`
+      );
+
+      // Avanzar 30 minutos
+      if (currentMinute === 30) {
+        currentHour++;
+        currentMinute = 0;
+      } else {
+        currentMinute = 30;
+      }
+    }
+
+    return slots;
   });
 
   const handleClick = async (time: string, isPayedInmediately: boolean) => {
@@ -295,10 +325,10 @@ const PsychologistAppointmentSchedulerDay = memo(function PsychologistAppointmen
     const fullDate = new Date(date);
     fullDate.setUTCHours(hours!, minutes!, 0, 0);
     const utcTimestamp = fullDate.toISOString();
-    console.log(`Hora seleccionada (UTC): ${time}`);
-    console.log(`ISO timestamp: ${utcTimestamp}`);
+    // console.log(`Hora seleccionada (UTC): ${time}`);
+    // console.log(`ISO timestamp: ${utcTimestamp}`);
 
-    await appointmentMercadoPago(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!, isPayedInmediately, 'online')
+    await appointmentLemonSqueezy(psychologistId, psychologistName, psychologistImage, utcTimestamp, price!, isPayedInmediately, 'online')
 
     if (!isPayedInmediately) {
       console.log('Refreshing...')

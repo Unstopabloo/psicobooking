@@ -7,14 +7,10 @@ import { cn } from "@/lib/utils";
 import { getActivityById } from "@/server/db/activity";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ChevronLeft, Send } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CommentActivity } from "@/types/entities";
-import { Textarea } from "@/components/ui/textarea";
-import { addActivityComment } from "@/server/actions/activity";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { type CommentActivity } from "@/types/entities";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddActivityForm } from "@/components/actividades/add-activity-form";
 

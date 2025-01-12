@@ -25,8 +25,6 @@ export async function getPsychologists({ search }: GetPsychologistsParams) {
       args: []
     })
 
-    console.log('defaultRes', defaultRes)
-
     let rows
     if (search) {
       console.log('search', search)

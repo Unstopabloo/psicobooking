@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
 import { Container } from "@/app/dashboard/_layout-components/container"
 import H1 from "@/components/H1"
 import { GoldIcon, BronceIcon, PlataIcon } from "@/components/icons"

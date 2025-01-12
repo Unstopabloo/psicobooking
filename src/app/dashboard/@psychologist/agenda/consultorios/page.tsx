@@ -1,4 +1,4 @@
-import { Metadata } from "next"
+import { type Metadata } from "next"
 import { Container } from "@/app/dashboard/_layout-components/container"
 import H1 from "@/components/H1"
 // import { Consultorios } from "@/components/agenda/Consultorios"
@@ -14,7 +14,6 @@ import {
 
 import { ScrollFade } from "@/components/scroll-fade"
 import { NewClinic } from "@/components/agenda/new-clinic"
-import { headers } from "next/headers"
 
 export const metadata: Metadata = {
   title: "Consultorios | Psicobooking",

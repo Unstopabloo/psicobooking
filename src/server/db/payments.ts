@@ -2,8 +2,8 @@
 
 import { turso } from "@/server/db";
 import { auth } from "@clerk/nextjs/server";
-import { paymentsDTO, paymentsStateDTO } from "../dtos";
-import { PaymentState, Row } from "@/types/entities";
+import { paymentsDTO } from "../dtos";
+import { Row } from "@/types/entities";
 
 interface SavePaymentProps {
   psychologist_id: number
@@ -226,84 +226,51 @@ export async function getPaymentsState(): Promise<{ state: string, count: number
   }
 }
 
-export async function saveSubscriptionPending(subscription: string, suscriptionDate: string) {
-  console.log('saveSubscription', subscription)
+export async function saveSubscription({ psychologistId, subscription, suscriptionDate, status, renewalDate }: { psychologistId: string, subscription: string, suscriptionDate: string, status: string, renewalDate: string }) {
+  console.log('saveSubscription', psychologistId, subscription, suscriptionDate, status, renewalDate)
 
-  if (!subscription || !suscriptionDate) {
+  if (!psychologistId || !subscription || !suscriptionDate || !status || !renewalDate) {
     console.error('No se proporcionaron los datos necesarios')
     throw new Error('No se proporcionaron los datos necesarios')
   }
 
-  const { userId } = auth()
-  if (!userId) {
-    console.error('No estás autorizado')
-    throw new Error('No estás autorizado')
-  }
-
   try {
     const { rows } = await turso.execute({
-      sql: `SELECT id FROM psicobooking_suscription WHERE suscription_id = :subscription`,
-      args: { subscription: subscription }
+      sql: `
+        SELECT id FROM psicobooking_user WHERE clerk_id = :psychologist_id
+      `,
+      args: { psychologist_id: psychologistId }
     })
-    if (rows[0]?.length! > 0) {
+    if (rows[0]?.length! === 0 || !rows[0]) {
+      console.error('No se encontró el psicoterapeuta')
+      throw new Error('No se encontró el psicoterapeuta')
+    }
+    const psychologist_id = rows[0].id as number
+
+
+    // Verificar si la suscripción ya existe
+    const { rows: existingSuscription } = await turso.execute({
+      sql: `
+        SELECT id FROM psicobooking_suscription WHERE psychologist_id = :psychologist_id AND status <> 'cancelled'
+      `,
+      args: { psychologist_id: psychologist_id }
+    })
+    if (existingSuscription[0]?.length! > 0 && existingSuscription[0]) {
       console.error('La suscripción ya existe')
       throw new Error('La suscripción ya existe')
     }
 
-    const { rows: psychologistRows } = await turso.execute({
-      sql: `SELECT id FROM psicobooking_user WHERE clerk_id = :user_id`,
-      args: { user_id: userId }
-    })
-    const psychologistId = psychologistRows[0]?.id as number
-
-    const { lastInsertRowid } = await turso.execute({
-      sql: `
-        INSERT INTO psicobooking_suscription (psychologist_id, suscription_id, status) VALUES (:psychologist_id, :suscription_id, :status)
-      `,
-      args: {
-        psychologist_id: psychologistId,
-        suscription_id: subscription,
-        status: 'pending'
-      }
-    })
-
-    const subscriptionId = Number(lastInsertRowid)
-    console.log('subscriptionId', subscriptionId)
-
-    return subscriptionId
-  } catch (error) {
-    console.error('Error al guardar la suscripción', error)
-    throw new Error('Error al guardar la suscripción')
-  }
-
-}
-
-export async function saveSubscriptionAuthorized(subscription: string, suscriptionDate: string) {
-  console.log('saveSubscriptionAuthorized', subscription)
-
-  if (!subscription || !suscriptionDate) {
-    console.error('No se proporcionaron los datos necesarios')
-    throw new Error('No se proporcionaron los datos necesarios')
-  }
-
-  try {
-    const { rows } = await turso.execute({
-      sql: `SELECT id FROM psicobooking_suscription WHERE suscription_id = :subscription`,
-      args: { subscription: subscription }
-    })
-    if (rows[0]?.length! === 0 || !rows[0]) {
-      console.error('La suscripción no existe')
-      throw new Error('La suscripción no existe')
-    }
-
     const { rowsAffected } = await turso.execute({
       sql: `
-        UPDATE psicobooking_suscription SET status = :status, suscription_date = :suscription_date WHERE suscription_id = :suscription_id
+        INSERT INTO psicobooking_suscription (psychologist_id, suscription_id, status, suscription_date, renewal_date) 
+        VALUES (:psychologist_id, :suscription_id, :status, :suscription_date, :renewal_date)
       `,
       args: {
+        psychologist_id,
         suscription_id: subscription,
-        status: 'authorized',
-        suscription_date: suscriptionDate
+        status,
+        suscription_date: suscriptionDate,
+        renewal_date: renewalDate
       }
     })
 
@@ -330,7 +297,9 @@ export async function getSuscription(userId: string) {
         SELECT 
           suscription_id, 
           status,
-          psychologist_id
+          psychologist_id,
+          suscription_date,
+          renewal_date
         FROM psicobooking_suscription
         LEFT JOIN psicobooking_user ON psicobooking_suscription.psychologist_id = psicobooking_user.id
         WHERE psicobooking_user.clerk_id = :user_id
@@ -338,18 +307,50 @@ export async function getSuscription(userId: string) {
       args: { user_id: userId }
     })
 
-    console.log('rows suscripcion', rows)
-
     const suscription = {
       id: rows[0]?.suscription_id as string,
-      status: rows[0]?.status as string
+      status: rows[0]?.status as string,
+      psychologist_id: rows[0]?.psychologist_id as string,
+      suscription_date: rows[0]?.suscription_date as string,
+      renewal_date: rows[0]?.renewal_date as string
     }
-
-    console.log('suscription getSuscription', suscription)
 
     return suscription
   } catch (error) {
     console.error('Error al obtener la suscripción', error)
     throw new Error('Error al obtener la suscripción')
+  }
+}
+
+
+export async function cancelSuscription(suscriptionId: string, userId: string) {
+  console.log('cancelSuscriptiondb', suscriptionId)
+
+  try {
+    const { rows: user_id } = await turso.execute({
+      sql: `
+        SELECT id FROM psicobooking_user WHERE clerk_id = :user_id
+      `,
+      args: { user_id: userId }
+    })
+    if (user_id[0]?.length! === 0 || !user_id[0]) {
+      console.error('No se encontró el psicoterapeuta')
+      throw new Error('No se encontró el psicoterapeuta')
+    }
+    const psychologist_id = user_id[0].id as number
+
+    const { rowsAffected } = await turso.execute({
+      sql: `
+        DELETE FROM psicobooking_suscription WHERE suscription_id = :suscription_id AND psychologist_id = :psychologist_id
+      `,
+      args: { suscription_id: suscriptionId, psychologist_id: psychologist_id }
+    })
+
+    console.log('cancelled suscription', Number(rowsAffected))
+
+    return Number(rowsAffected)
+  } catch (error) {
+    console.error('Error al cancelar la suscripción', error)
+    throw new Error('Error al cancelar la suscripción')
   }
 }

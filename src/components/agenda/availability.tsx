@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CalendarRange, Plus, Trash } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { format, addMonths, subMonths, getDaysInMonth, startOfMonth, getDay } from 'date-fns'
+import { format } from 'date-fns'
 import {
   Dialog,
   DialogContent,
@@ -36,13 +36,26 @@ import {
 } from "@/components/ui/alert-dialog"
 
 
+// Modificar TIME_SLOTS para mostrar horas locales
 const TIME_SLOTS = Array.from({ length: 26 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 8
+  const localHour = Math.floor(i / 2) + 8 // Hora local desde 8am
   const minutes = i % 2 === 0 ? '00' : '30'
-  return `${hour.toString().padStart(2, '0')}:${minutes}`
+
+  // Crear fecha con hora local
+  const date = new Date()
+  date.setHours(localHour, parseInt(minutes), 0, 0)
+
+  // Obtener la hora UTC equivalente
+  const utcHour = date.getUTCHours()
+  const utcMinutes = date.getUTCMinutes()
+
+  return {
+    display: `${localHour.toString().padStart(2, '0')}:${minutes}`, // Para mostrar
+    value: `${utcHour.toString().padStart(2, '0')}:${utcMinutes.toString().padStart(2, '0')}` // Para guardar
+  }
 }).filter(time => {
-  const hour = parseInt(time.split(':')[0] || '0')
-  return hour < 21
+  const hour = parseInt(time.display.split(':')[0] || '0')
+  return hour < 21 // Filtrar hasta las 9pm local
 })
 
 export function Availability({ availability }: { availability: AvailabilityType[] }) {
@@ -54,12 +67,6 @@ export function Availability({ availability }: { availability: AvailabilityType[
   const [disabledEndTime, setDisabledEndTime] = useState<number[]>([0, 1, 2, 3, 4, 5, 6])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isOpenAvailabilityChange, setIsOpenAvailabilityChange] = useState(false)
-
-  const daysInMonth = getDaysInMonth(currentDate)
-  const firstDayOfMonth = (getDay(startOfMonth(currentDate)) + 6) % 7
-
-  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
-  const nextMonth = () => setCurrentDate(addMonths(currentDate, 1))
 
   const handleStartTimeChange = (time: string, dayIndex: number) => {
 
@@ -119,6 +126,7 @@ export function Availability({ availability }: { availability: AvailabilityType[
       return
     }
 
+    // Convertir horas locales a UTC para comparación
     const existingSlots = availability[dayIndex]?.availability_slots || []
     const newStart = recurringTimes[dayIndex]!.start
     const newEnd = recurringTimes[dayIndex]!.end
@@ -129,7 +137,9 @@ export function Availability({ availability }: { availability: AvailabilityType[
         (newEnd >= slot.hour_from && newEnd <= slot.hour_to) ||
         (newStart <= slot.hour_from && newEnd >= slot.hour_to)
       ) {
-        toast.error(`Ya tienes disponibilidad configurada entre ${slot.hour_from} y ${slot.hour_to}`)
+        toast.error(`Ya tienes disponibilidad configurada entre ${TIME_SLOTS.find(t => t.value === slot.hour_from)?.display
+          } y ${TIME_SLOTS.find(t => t.value === slot.hour_to)?.display
+          }`)
         return
       }
 
@@ -139,7 +149,7 @@ export function Availability({ availability }: { availability: AvailabilityType[
       }
     }
 
-    toast.promise(saveAvailability(adjustedDayIndex, recurringTimes[dayIndex]!.start, recurringTimes[dayIndex]!.end), {
+    toast.promise(saveAvailability(adjustedDayIndex, newStart, newEnd), {
       loading: 'Actualizando disponibilidad...',
       success: 'Disponibilidad actualizada',
       error: 'No se pudo actualizar la disponibilidad, por favor intenta nuevamente'
@@ -230,7 +240,9 @@ export function Availability({ availability }: { availability: AvailabilityType[
                                 </SelectTrigger>
                                 <SelectContent>
                                   {TIME_SLOTS.map(time => (
-                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                    <SelectItem key={time.value} value={time.value}>
+                                      {time.display}
+                                    </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -244,7 +256,9 @@ export function Availability({ availability }: { availability: AvailabilityType[
                                 </SelectTrigger>
                                 <SelectContent>
                                   {TIME_SLOTS.map(time => (
-                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                    <SelectItem key={time.value} value={time.value}>
+                                      {time.display}
+                                    </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
@@ -282,6 +296,9 @@ function InputTimeSlot({
     })
   }
 
+  const displayStart = TIME_SLOTS.find(t => t.value === startTime)?.display || startTime
+  const displayEnd = TIME_SLOTS.find(t => t.value === endTime)?.display || endTime
+
   return (
     <div className='w-full'>
       <div className="relative">
@@ -289,7 +306,7 @@ function InputTimeSlot({
           id="input-53"
           className="pe-9"
           type="text"
-          defaultValue={startTime + ' - ' + endTime}
+          defaultValue={displayStart + ' - ' + displayEnd}
           readOnly
         />
         <div className='absolute inset-y-0 end-2 h-full flex items-center'>

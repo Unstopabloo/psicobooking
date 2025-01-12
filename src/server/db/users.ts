@@ -582,7 +582,7 @@ export async function getPatientDashboardData() {
     }
 
     const user = patientDashboardDataDTO(rows[0])
-    console.log(user)
+
     return user
   } catch (error) {
     console.error(error)

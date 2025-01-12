@@ -1,6 +1,6 @@
 import H1 from "@/components/H1";
 import { Container } from "../../_layout-components/container";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { MainChart } from "@/components/charts/main-chart";
 import { getPayments } from "@/server/db/payments";
 import { PieChartLoader, PieChartSkeleton } from "@/components/charts/pie-chart.loader";

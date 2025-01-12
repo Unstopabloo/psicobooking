@@ -1,6 +1,6 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import { type WebhookEvent } from '@clerk/nextjs/server'
 import { createUser, userExists } from '@/server/db/users'
 import { redirect } from 'next/navigation'
 import { CLERK_WH_SECRET } from "@/lib/env"

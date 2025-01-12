@@ -1,10 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Button } from "../ui/button"
 import { DatePicker } from "./date-picker-agenda"
 import { AgendaItem } from "./AgendaItem"
-import { PlusSignIcon } from "../icons"
 import { AppointmentCard } from "@/types/entities"
 import { addDays, format } from "date-fns"
 import { es } from "date-fns/locale"

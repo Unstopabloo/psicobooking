@@ -26,8 +26,6 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function AgendaPage() {
-  const availability = await getAvailability()
-
   return (
     <Container className="px-2 lg:px-4 xl:px-32 2xl:px-40">
       <header className="flex items-center justify-between w-full">
@@ -35,16 +33,6 @@ export default async function AgendaPage() {
           <H1>Mi agenda</H1>
           <p className="text-sm text-muted-foreground">Explora tu agenda de citas y gestiona tus citas con facilidad.</p>
         </div>
-        <TooltipProvider>
-          <Tooltip delayDuration={200}>
-            <TooltipTrigger asChild>
-              <Availability availability={availability} />
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p>Modificar disponibilidad online</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </header>
 
       <AgendaList />

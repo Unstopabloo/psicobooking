@@ -71,7 +71,7 @@
     --primary: 216 100% 63%;
     --primary-foreground: 210 40.4% 98.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 260 65% 70%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 30% 4%;
@@ -139,6 +139,14 @@
     animation: reveal linear both;
     animation-timeline: view();
     animation-range: entry 5% cover 18%;
+  }
+
+  .post-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
   }
 
   @keyframes reveal {
