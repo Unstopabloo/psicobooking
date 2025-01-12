@@ -9,9 +9,8 @@ import { ClinicalHistorySchema, ClinicSchema, PatientSchema, TreatmentSchema } f
 import { revalidatePath } from "next/cache";
 import { OnBoadingData } from "@/app/onboarding/page";
 import { deleteDocument, uploadDocument } from "@/lib/upload-files";
-import { addHours, formatISO } from "date-fns";
-import { getCountryPhoneCode } from "@/lib/get-country-code";
 import { countryPhoneCodes } from "@/lib/consts";
+import { redirect } from "next/navigation";
 
 interface OnBoardingDataServer extends Omit<OnBoadingData, 'professional'> {
   professional: {
@@ -1095,13 +1094,13 @@ export async function enrollNewPsychologist(data: OnBoardingDataServer) {
       recommendation_letter_public_id = public_id
     }
 
+    console.log('aca deberia actualizar el usuario')
     const { rowsAffected } = await turso.execute({
       sql: `
           UPDATE psicobooking_user 
           SET role = :role, 
               first_name = :first_name,
               last_name = :last_name,
-              email = :email,
               focus = :focus,
               phone = :phone,
               country = :country,
@@ -1122,7 +1121,6 @@ export async function enrollNewPsychologist(data: OnBoardingDataServer) {
         user_id: userId,
         first_name: data.personal.name,
         last_name: data.personal.lastname,
-        email: data.personal.email,
         focus: data.professional.studyBranch,
         phone: data.personal.phone,
         country: data.personal.country,
@@ -1136,9 +1134,10 @@ export async function enrollNewPsychologist(data: OnBoardingDataServer) {
         consent: data.conduct.consent
       }
     })
+    console.log('rowsAffected', Number(rowsAffected))
 
-    if (rowsAffected === 0 || !rowsAffected) {
-      console.error('No se pudo actualizar el usuario')
+    if (Number(rowsAffected) === 0 || !rowsAffected) {
+      console.log('No se pudo actualizar el usuario')
       if (study_certificate_public_id) {
         await deleteDocument(study_certificate_public_id)
       }
@@ -1148,15 +1147,16 @@ export async function enrollNewPsychologist(data: OnBoardingDataServer) {
       throw new Error('No se pudo actualizar el usuario')
     }
 
+    console.log('aca deberia actualizar el usuario en clerk')
     await clerkClient().users.updateUser(userId, {
       publicMetadata: {
         onboardingComplete: true,
         role: data.firstStep.role,
       }
     })
+    console.log("usuario en clerk actualizado", (await clerkClient().users.getUser(userId)).publicMetadata)
 
     console.log('usuario actualizado', Number(rowsAffected))
-
     return { data: true }
   } catch (error) {
     console.error(error)

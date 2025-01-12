@@ -29,7 +29,6 @@ interface OnBoardingDataPersonal {
   lastname: string
   country: string
   phone: string
-  email: string
   dni: string
 }
 
@@ -65,7 +64,6 @@ export default function OnboardingComponent() {
     lastname: '',
     country: '',
     phone: '',
-    email: '',
     dni: ''
   })
   const [professionalData, setProfessionalData] = React.useState<OnBoardingDataProfessional>({
@@ -90,7 +88,6 @@ export default function OnboardingComponent() {
       lastname: '',
       country: '',
       phone: '',
-      email: '',
       dni: ''
     },
     professional: {
@@ -117,7 +114,7 @@ export default function OnboardingComponent() {
       const role = formData.get('role') as "psychologist" | "patient"
 
       if (role === 'patient' && acceptedPrivacyPolicy) {
-        console.log('eres un paciente patient')
+        console.log('eres un paciente')
         const res = await onBoarding(formData)
         if (res?.data?.message) {
           // Reloads the user's data from Clerk's API
@@ -158,6 +155,7 @@ export default function OnboardingComponent() {
     }
 
     if (step === 4) {
+      console.log("============= onboarding finished =============")
       console.log('data', data)
       const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -181,13 +179,15 @@ export default function OnboardingComponent() {
           recommendationLetter: recommendationBase64
         }
       }
-      const res = await enrollNewPsychologist(dataToSend)
-      if (res?.data) {
-        router.push('/dashboard')
-        toast.success("Registro completado!")
-      } else {
-        toast.error("Hubo un error al completar el proceso de registro. Por favor, inténtalo de nuevo más tarde.")
-      }
+
+      toast.promise(enrollNewPsychologist(dataToSend), {
+        loading: 'Registrando profesional...',
+        success: 'Profesional registrado correctamente! Redirigiendo...',
+        error: 'Hubo un error al registrar el profesional. Por favor, inténtalo de nuevo más tarde.'
+      })
+
+      console.log("proceso de enrollNewPsychologist terminado")
+      router.push('/dashboard')
     }
   }
 
@@ -433,19 +433,6 @@ function OnboardingStep2({
             </Select>
           </div>
           <div className="flex flex-col gap-2">
-            <Label className='after:content-["*"] after:text-red-500' htmlFor="email">Email</Label>
-            <Input
-              type="email"
-              name="email"
-              id="email"
-              placeholder='juanperez@gmail.com'
-              className="rounded-lg border border-input p-2"
-              required
-              value={personalData.email}
-              onChange={(e) => setPersonalData({ ...personalData, email: e.target.value })}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
             <Label className='after:content-["*"] after:text-red-500' htmlFor="phone">Teléfono</Label>
             <Input
               type="tel"
@@ -494,7 +481,6 @@ function OnboardingStep2({
             !personalData.lastname ||
             !personalData.country ||
             !personalData.phone ||
-            !personalData.email ||
             !personalData.dni
           }
         >

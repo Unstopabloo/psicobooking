@@ -141,6 +141,14 @@
     animation-range: entry 5% cover 18%;
   }
 
+  .post-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
   @keyframes reveal {
     0% {
       filter: blur(1.5px) opacity(0);
